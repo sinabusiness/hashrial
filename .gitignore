@@ -3,3 +3,5 @@ node_modules
 .DS_Store
 *.log
 dashboard-preview.html
+dashboard/build/
+dashboard/package-lock.json

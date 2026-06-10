@@ -1,78 +1,83 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../lib/api";
 
 const T = {
   en: {
-    title: "Next-Gen Bitcoin Mining Pool",
     subtitle: "High-performance stratum proxy with a transparent 2% fee model. 98% of your hashrate goes directly to your own Antpool sub-account.",
     startMining: "Start Mining Now",
     memberArea: "Member Area",
-    dashboard: "Go to Dashboard",
-    liveStats: "Live Pool Statistics",
     activeMiners: "Active Workers",
-    poolHashrate: "Pool Hashrate",
     btcPrice: "Bitcoin Price",
-    feeText: "Transparent 2% Fee",
-    configurator: "Interactive Stratum Configurator",
-    configDesc: "Enter your Hashrial username below to generate your personalized ASIC configuration commands.",
+    configDesc: "Enter your Hashrial username below to generate your personalized ASIC configuration.",
     usernameLabel: "Your Username",
     stratumUrl: "Stratum URL",
     stratumUser: "Worker Username",
     stratumPass: "Password",
     copy: "Copy",
     copied: "Copied!",
-    guideTitle: "Hardware Setup Guides",
-    whyUs: "Why Mine With Hashrial?",
-    feature1Title: "Antpool Direct Integration",
-    feature1Desc: "98% of your hashrate is routed directly to your personal Antpool sub-account. Fully transparent.",
-    feature2Title: "Share-Routing Fee",
-    feature2Desc: "Every 50th share is routed to the infrastructure fee account. Standard model, no hidden cuts.",
-    feature3Title: "Multilingual Panel",
-    feature3Desc: "Our dashboard supports English, Persian, Chinese, Russian, Spanish, and 5 more languages.",
-    testimonials: "Trusted by 2,000+ Miners",
+    whyUs: "Why Hashrial?",
+    whyUs1: "98% of your hashrate goes directly to your personal Antpool sub-account. Fully transparent, no hidden fees.",
+    whyUs2: "Standard 2% share-routing fee. Every 50th share goes to infrastructure. Same model as F2Pool, ViaBTC, Slushpool.",
+    whyUs3: "Multilingual dashboard with real-time charts, worker monitoring, earnings tracking, and instant notifications.",
+    testimonials: "Trusted by Miners Worldwide",
     faq: "Frequently Asked Questions",
-    footerText: "© 2026 Hashrial. Fully decentralized, high-performance stratum mining proxy.",
+    footerText: "Hashrial Mining Pool. Fully decentralized stratum proxy with direct Antpool integration.",
+    home: "Home",
+    features: "Features",
+    faqLink: "FAQ",
+    support: "Support",
+    login: "Login",
+    signUp: "Sign Up",
+    heroTag: "BITCOIN MINING POOL",
+    heroStats: "Live Pool Statistics",
+    poolHashrate: "Pool Hashrate",
+    onlineMiners: "Online Workers",
+    totalUsers: "Total Users",
+    feeText: "2% Fee",
+    liveStats: "Live Stats",
+    poolStats: "Pool Status",
+    statNote: "Available once backend is connected",
+    connecting: "Connecting...",
   },
   fa: {
-    title: "نسل جدید استخر ماینینگ بیت‌کوین",
-    subtitle: "پراکسی استراتوم با کارایی بالا و مدل کارمزد ۲٪ شفاف. ۹۸٪ از هش‌ریت شما مستقیماً به حساب کاربری شخصی شما در آنت‌پول واریز می‌شود.",
+    subtitle: "پراکسی استراتوم با کارایی بالا و مدل کارمزد ۲٪ شفاف. ۹۸٪ از هش‌ریت شما مستقیماً به حساب شخصی شما در آنت‌پول واریز می‌شود.",
     startMining: "شروع ماینینگ",
     memberArea: "ورود کاربران",
-    dashboard: "داشبورد من",
-    liveStats: "آمار زنده استخر",
     activeMiners: "کارگران فعال",
-    poolHashrate: "هش‌ریت استخر",
     btcPrice: "قیمت بیت‌کوین",
-    feeText: "کارمزد شفاف ۲٪",
-    configurator: "پیکربندی استراتوم تعاملی",
-    configDesc: "نام کاربری خود را وارد کنید تا دستورات پیکربندی ASIC شخصی‌سازی شده تولید شود.",
+    configDesc: "نام کاربری خود را وارد کنید تا دستورات پیکربندی ASIC تولید شود.",
     usernameLabel: "نام کاربری شما",
     stratumUrl: "آدرس Stratum",
     stratumUser: "نام کارگر",
     stratumPass: "رمز عبور",
     copy: "کپی",
     copied: "کپی شد!",
-    guideTitle: "راهنمای راه‌اندازی سخت‌افزار",
     whyUs: "چرا Hashrial؟",
-    feature1Title: "ادغام مستقیم با آنت‌پول",
-    feature1Desc: "۹۸٪ از هش‌ریت شما مستقیماً به حساب شخصی شما در آنت‌پول منتقل می‌شود.",
-    feature2Title: "هزینه مسیریابی سهام",
-    feature2Desc: "هر پنجاهمین سهم برای حساب کارمزد زیرساخت هدایت می‌شود.",
-    feature3Title: "پانل چندزبانه",
-    feature3Desc: "داشبورد ما از انگلیسی، فارسی، چینی، روسی، اسپانیایی و ۵ زبان دیگر پشتیبانی می‌کند.",
-    testimonials: "مورد اعتماد ۲۰۰۰+ ماینر",
+    whyUs1: "۹۸٪ از هش‌ریت شما مستقیماً به حساب شخصی شما در آنت‌پول منتقل می‌شود. کاملاً شفاف، بدون کارمزد پنهان.",
+    whyUs2: "کارمزد استاندارد ۲٪. هر پنجاهمین سهم به زیرساخت اختصاص می‌یابد.",
+    whyUs3: "داشبورد چندزبانه با نمودارهای زنده، مانیتورینگ کارگران، پیگیری درآمد و اعلان‌های فوری.",
+    testimonials: "مورد اعتماد ماینرها در سراسر جهان",
     faq: "سوالات متداول",
-    footerText: "© ۱۴۰۵ Hashrial. پراکسی ماینینگ استراتوم کاملاً غیرمتمرکز و با کارایی بالا.",
+    footerText: "استخر ماینینگ Hashrial. پراکسی استراتوم غیرمتمرکز با ادغام مستقیم آنت‌پول.",
+    home: "خانه",
+    features: "ویژگی‌ها",
+    faqLink: "سوالات",
+    support: "پشتیبانی",
+    login: "ورود",
+    signUp: "ثبت‌نام",
+    heroTag: "استخر ماینینگ بیت‌کوین",
+    heroStats: "آمار زنده استخر",
+    poolHashrate: "هش‌ریت استخر",
+    onlineMiners: "کارگران آنلاین",
+    totalUsers: "کاربران کل",
+    feeText: "کارمزد ۲٪",
+    liveStats: "آمار زنده",
+    poolStats: "وضعیت استخر",
+    statNote: "پس از اتصال Backend در دسترس خواهد بود",
+    connecting: "در حال اتصال...",
   },
 };
-
-const testimonialData = [
-  { text: "Switched from Antpool directly. Hashrial's transparency is unmatched. 2% fee is fair.", author: "miner_alex", rating: 5 },
-  { text: "Simple setup, excellent uptime. Mining continuously for 3 months with zero issues.", author: "bitcoin_enthusiast", rating: 5 },
-  { text: "API is solid and well-documented. Built my own monitoring dashboard on top.", author: "dev_team_42", rating: 5 },
-];
 
 const faqData = [
   { q: "How much is the pool fee?", a: "2% per share routed. Every 50th share goes to infrastructure. The remaining 98% of your hashrate is routed directly to your personal Antpool sub-account." },
@@ -83,78 +88,57 @@ const faqData = [
   { q: "What happens if the pool goes down?", a: "Your miners automatically fail over to Antpool if Hashrial disconnects. Your earnings are safe." },
 ];
 
-function StatCard({ label, value, sub, icon }) {
-  return (
-    <div style={{
-      background: "var(--bg2)",
-      border: "1px solid var(--border)",
-      borderRadius: "var(--r2)",
-      padding: "16px 18px",
-      flex: "1 1 160px",
-      minWidth: "140px",
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <span style={{ fontSize: "10px", color: "var(--text2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</span>
-        {icon && <span style={{ fontSize: "14px", opacity: 0.5 }}>{icon}</span>}
-      </div>
-      <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--accent)", letterSpacing: "-0.3px", marginBottom: 2, fontFamily: "var(--mono)" }}>{value}</div>
-      {sub && <div style={{ fontSize: "10px", color: "var(--text2)" }}>{sub}</div>}
-    </div>
-  );
-}
-
-function TestimonialCard({ text, author, rating }) {
-  return (
-    <div style={{
-      border: "1px solid var(--border)",
-      borderRadius: "var(--r2)",
-      padding: "18px",
-      background: "var(--bg2)",
-      minHeight: "140px",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-    }}>
-      <div style={{ marginBottom: 12 }}>
-        {Array(rating).fill(0).map((_, i) => <span key={i} style={{ color: "var(--accent)", marginRight: 2 }}>★</span>)}
-      </div>
-      <div style={{ fontSize: "12px", color: "var(--text)", marginBottom: 12, fontStyle: "italic", lineHeight: 1.5 }}>"{text}"</div>
-      <div style={{ fontSize: "11px", color: "var(--accent)", fontWeight: 600 }}>— {author}</div>
-    </div>
-  );
-}
-
 function FAQItem({ q, a, isOpen, onClick }) {
   return (
     <div style={{
-      border: "1px solid var(--border)",
-      borderRadius: "var(--r2)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: 12,
       marginBottom: 8,
       overflow: "hidden",
+      transition: "all 0.3s",
     }}>
       <button onClick={onClick} style={{
-        width: "100%",
-        padding: "14px 16px",
-        background: isOpen ? "rgba(247,147,26,0.08)" : "var(--bg2)",
-        border: "none",
-        textAlign: "left",
-        cursor: "pointer",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        fontSize: "13px",
-        fontWeight: 600,
-        color: "var(--text)",
+        width: "100%", padding: "16px 20px",
+        background: isOpen ? "rgba(247,147,26,0.06)" : "transparent",
+        border: "none", textAlign: "left", cursor: "pointer",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        fontSize: "14px", fontWeight: 500, color: "#e6edf3",
+        fontFamily: "inherit",
         transition: "all 0.2s",
       }}>
         <span>{q}</span>
-        <span style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", color: "var(--accent)" }}>▼</span>
+        <span style={{
+          transform: isOpen ? "rotate(180deg)" : "rotate(0)",
+          transition: "transform 0.3s", color: "#f7931a", fontSize: 12,
+        }}>▼</span>
       </button>
       {isOpen && (
-        <div style={{ padding: "12px 16px", background: "rgba(247,147,26,0.04)", borderTop: "1px solid var(--border)", fontSize: "12px", color: "var(--text2)", lineHeight: 1.6 }}>
+        <div style={{
+          padding: "4px 20px 16px",
+          fontSize: "13px", color: "#8b949e", lineHeight: 1.7,
+        }}>
           {a}
         </div>
       )}
+    </div>
+  );
+}
+
+function PulseStat({ label, value, sub, accent }) {
+  return (
+    <div style={{
+      background: "rgba(13,17,23,0.6)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: 16,
+      padding: "20px 24px",
+      textAlign: "center",
+      flex: "1 1 160px",
+      minWidth: 140,
+      backdropFilter: "blur(8px)",
+    }}>
+      <div style={{ fontSize: "10px", color: "#8b949e", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>{label}</div>
+      <div style={{ fontSize: "24px", fontWeight: 700, color: accent || "#f7931a", fontFamily: "'JetBrains Mono','Fira Code',monospace", letterSpacing: "-0.5px" }}>{value}</div>
+      {sub && <div style={{ fontSize: "11px", color: "#8b949e", marginTop: 4 }}>{sub}</div>}
     </div>
   );
 }
@@ -164,19 +148,18 @@ export default function Landing() {
   const [lang, setLang] = useState(() => localStorage.getItem("lang") || "en");
   const isRtl = lang === "fa";
   const t = T[lang];
-
   const [copied, setCopied] = useState(null);
   const [username, setUsername] = useState("");
   const [poolStats, setPoolStats] = useState(null);
   const [btcPrice, setBtcPrice] = useState(null);
-  const [error, setError] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -185,10 +168,11 @@ export default function Landing() {
 
   useEffect(() => {
     const loadStats = () => {
+      setStatsLoading(true);
       Promise.all([
-        api.poolStats().then(s => { setPoolStats(s); setError(null); }).catch(e => { setError("Failed to load pool stats"); }),
+        api.poolStats().then(s => { setPoolStats(s); }).catch(() => {}),
         api.btcPrice().then(p => setBtcPrice(p)).catch(() => {}),
-      ]);
+      ]).finally(() => setStatsLoading(false));
     };
     loadStats();
     const interval = setInterval(loadStats, 30000);
@@ -202,86 +186,171 @@ export default function Landing() {
     });
   };
 
+  const navLinkStyle = (isActive) => ({
+    fontSize: "13px",
+    fontWeight: 500,
+    color: isActive ? "#f7931a" : "#8b949e",
+    textDecoration: "none",
+    padding: "6px 14px",
+    borderRadius: 6,
+    transition: "all 0.2s",
+    cursor: "pointer",
+    background: isActive ? "rgba(247,147,26,0.08)" : "transparent",
+  });
+
   return (
     <div style={{
       minHeight: "100vh",
-      background: "var(--bg)",
-      color: "var(--text)",
-      fontFamily: isRtl ? "var(--font-fa)" : "var(--font)",
+      background: "#080b10",
+      color: "#e6edf3",
+      fontFamily: isRtl ? "'Vazirmatn','Tahoma',Arial,sans-serif" : "'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
       direction: isRtl ? "rtl" : "ltr",
       overflowX: "hidden",
     }}>
-      {/* Header */}
+      <style>{`
+        @keyframes float {
+          0%,100%{transform:translateY(0)}
+          50%{transform:translateY(-10px)}
+        }
+        @keyframes fadeUp {
+          from{opacity:0;transform:translateY(20px)}
+          to{opacity:1;transform:translateY(0)}
+        }
+        @keyframes pulse {
+          0%,100%{opacity:1}
+          50%{opacity:0.4}
+        }
+        @keyframes glow {
+          0%,100%{box-shadow:0 0 20px rgba(247,147,26,0.1)}
+          50%{box-shadow:0 0 40px rgba(247,147,26,0.25)}
+        }
+        .hero-glow{animation:glow 3s ease-in-out infinite}
+        .float-anim{animation:float 6s ease-in-out infinite}
+        .fade-up{animation:fadeUp 0.6s ease-out forwards}
+        .pulse-dot{animation:pulse 2s ease-in-out infinite}
+      `}</style>
+
+      {/* Navigation */}
       <header style={{
-        height: isMobile ? 56 : 64,
-        background: "rgba(13,17,23,0.75)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--border)",
-        position: "sticky",
-        top: 0,
+        height: 60,
+        background: scrolled ? "rgba(8,11,16,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
+        position: "fixed", top: 0, left: 0, right: 0,
         zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: isMobile ? "0 12px" : "0 24px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 28px",
+        transition: "all 0.3s",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{
-            width: isMobile ? 32 : 36,
-            height: isMobile ? 32 : 36,
-            borderRadius: 8,
-            background: "var(--accent)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 800,
-            fontSize: isMobile ? 16 : 20,
-            color: "#000"
-          }}>H</div>
-          {!isMobile && <span style={{ fontSize: 16, fontWeight: 700 }}>Hashrial</span>}
+        <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: "linear-gradient(135deg,#f7931a,#e8830d)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 800, fontSize: 16, color: "#000",
+            }}>H</div>
+            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.3px" }}>Hashrial</span>
+          </div>
+          <nav style={{ display: "flex", gap: 4 }}>
+            <a href="#" style={navLinkStyle(true)}>{t.home}</a>
+            <a href="#features" style={navLinkStyle(false)}>{t.features}</a>
+            <a href="#faq" style={navLinkStyle(false)}>{t.faqLink}</a>
+          </nav>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
-            padding: "6px 10px",
-            borderRadius: 6,
-            border: "1px solid var(--border)",
-            background: "var(--bg2)",
-            color: "var(--text)",
-            fontSize: 12,
-            cursor: "pointer",
+            padding: "6px 10px", borderRadius: 6,
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.04)",
+            color: "#e6edf3", fontSize: 12, cursor: "pointer", fontFamily: "inherit",
           }}>
-            <option value="en">English</option>
-            <option value="fa">فارسی</option>
+            <option value="en">EN</option>
+            <option value="fa">FA</option>
           </select>
-          <Link to="/login" style={{ fontSize: 12, padding: "6px 12px", color: "var(--text2)" }}>Login</Link>
+          <Link to="/login" style={{ fontSize: 13, padding: "7px 16px", color: "#8b949e", textDecoration: "none", fontWeight: 500 }}>{t.login}</Link>
           <Link to="/register" style={{
-            fontSize: 12,
-            padding: "6px 14px",
-            background: "var(--accent)",
-            color: "#000",
-            borderRadius: 6,
-            fontWeight: 600,
-          }}>Sign Up</Link>
+            fontSize: 13, padding: "7px 18px",
+            background: "#f7931a", color: "#000",
+            borderRadius: 8, fontWeight: 600, textDecoration: "none",
+          }}>{t.signUp}</Link>
         </div>
       </header>
 
-      <main style={{ padding: isMobile ? "20px 12px" : "40px 28px", maxWidth: 1280, margin: "0 auto" }}>
-        {/* Hero */}
-        <section style={{ marginBottom: isMobile ? 40 : 60, textAlign: "center" }}>
-          <h1 style={{ fontSize: isMobile ? 24 : 42, fontWeight: 700, marginBottom: 12, letterSpacing: "-1px" }}>{t.title}</h1>
-          <p style={{ fontSize: isMobile ? 13 : 16, color: "var(--text2)", maxWidth: 600, margin: "0 auto 20px", lineHeight: 1.6 }}>{t.subtitle}</p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+      <main>
+        {/* Hero Section */}
+        <section style={{
+          minHeight: "100vh",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          padding: "100px 28px 60px",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          {/* Background gradient */}
+          <div style={{
+            position: "absolute", top: "-50%", left: "50%", transform: "translateX(-50%)",
+            width: 800, height: 800,
+            background: "radial-gradient(circle at center, rgba(247,147,26,0.08) 0%, transparent 60%)",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute", bottom: "-30%", right: "-20%",
+            width: 600, height: 600,
+            background: "radial-gradient(circle at center, rgba(247,147,26,0.05) 0%, transparent 50%)",
+            pointerEvents: "none",
+          }} />
+
+          <div style={{
+            display: "flex", alignItems: "center", gap: 16,
+            marginBottom: 24,
+            padding: "6px 16px",
+            border: "1px solid rgba(247,147,26,0.15)",
+            borderRadius: 100,
+            background: "rgba(247,147,26,0.04)",
+            fontSize: 11, fontWeight: 600, color: "#f7931a",
+            letterSpacing: "1.5px",
+            textTransform: "uppercase",
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3fb950", display: "inline-block" }} />
+            {t.heroTag}
+          </div>
+
+          <h1 style={{
+            fontSize: 56, fontWeight: 800,
+            textAlign: "center",
+            lineHeight: 1.08,
+            marginBottom: 16,
+            letterSpacing: "-1.5px",
+            maxWidth: 700,
+          }}>
+            Mine Bitcoin With{" "}
+            <span style={{
+              background: "linear-gradient(135deg,#f7931a,#e8830d,#f7931a)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}>Full Transparency</span>
+          </h1>
+
+          <p style={{
+            fontSize: 16, color: "#8b949e",
+            maxWidth: 520, textAlign: "center",
+            lineHeight: 1.7, marginBottom: 36,
+          }}>
+            {t.subtitle}
+          </p>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
             <button onClick={() => navigate("/register")} style={{
-              padding: "10px 24px",
-              background: "var(--accent)",
-              color: "#000",
-              border: "none",
-              borderRadius: "var(--r2)",
-              fontSize: isMobile ? 12 : 14,
-              fontWeight: 600,
-              cursor: "pointer",
+              padding: "14px 32px",
+              background: "linear-gradient(135deg,#f7931a,#e8830d)",
+              color: "#000", border: "none", borderRadius: 12,
+              fontSize: 15, fontWeight: 700, cursor: "pointer",
               transition: "all 0.2s",
-            }} onMouseEnter={(e) => e.target.style.opacity = "0.85"} onMouseLeave={(e) => e.target.style.opacity = "1"}>
+              fontFamily: "inherit",
+            }}
+              onMouseEnter={e => e.target.style.transform = "translateY(-1px)"}
+              onMouseLeave={e => e.target.style.transform = "translateY(0)"}
+            >
               {t.startMining} →
             </button>
             <button onClick={() => {
@@ -289,85 +358,112 @@ export default function Landing() {
               if (token) navigate("/dashboard");
               else navigate("/login");
             }} style={{
-              padding: "10px 24px",
+              padding: "14px 28px",
               background: "transparent",
-              color: "var(--accent)",
-              border: "1px solid var(--accent)",
-              borderRadius: "var(--r2)",
-              fontSize: isMobile ? 12 : 14,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}>
+              color: "#e6edf3", border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: "pointer",
+              transition: "all 0.2s", fontFamily: "inherit",
+            }}
+              onMouseEnter={e => e.target.style.borderColor = "#f7931a"}
+              onMouseLeave={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"}
+            >
               {t.memberArea} →
             </button>
           </div>
+
+          {/* Stats */}
+          <div style={{
+            display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center",
+            marginTop: 60, width: "100%", maxWidth: 700,
+          }}>
+            <PulseStat label={t.activeMiners}
+              value={statsLoading ? "—" : `${poolStats?.activeWorkers || 0}`}
+              sub={statsLoading ? t.connecting : "Mining Now"}
+              accent="#3fb950" />
+            <PulseStat label={t.btcPrice}
+              value={btcPrice?.price ? `$${btcPrice.price.toLocaleString()}` : "—"}
+              sub={!statsLoading && btcPrice?.change ? `${btcPrice.change >= 0 ? "▲" : "▼"} ${Math.abs(btcPrice.change).toFixed(1)}%` : t.feeText}
+              accent="#f7931a" />
+            <PulseStat label={t.feeText}
+              value="2%"
+              sub="Share Routing"
+              accent="#e6edf3" />
+          </div>
         </section>
 
-        {/* Live Stats */}
-        {!error && poolStats && btcPrice && (
-          <section style={{ marginBottom: isMobile ? 40 : 60, display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-            <StatCard label={t.activeMiners} value={`${poolStats.activeWorkers || 0}`} icon="⚙" />
-            <StatCard label={t.liveStats} value={btcPrice?.price ? `$${btcPrice.price.toLocaleString()}` : "—"} sub={btcPrice?.change ? `${btcPrice.change >= 0 ? "▲" : "▼"} ${Math.abs(btcPrice.change).toFixed(1)}%` : ""} icon="₿" />
-          </section>
-        )}
+        {/* Why Hashrial */}
+        <section id="features" style={{
+          padding: "80px 28px",
+          maxWidth: 1100, margin: "0 auto",
+        }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{
+              fontSize: 11, fontWeight: 600, color: "#f7931a",
+              letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 12,
+            }}>{t.features}</div>
+            <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.5px" }}>{t.whyUs}</h2>
+          </div>
 
-        {error && <div style={{ color: "var(--red)", fontSize: 12, padding: "10px 12px", background: "rgba(232,64,64,0.1)", borderRadius: 6, marginBottom: 30, textAlign: "center" }}>⚠ {error}</div>}
-
-        {/* Features */}
-        <section style={{ marginBottom: isMobile ? 40 : 60 }}>
-          <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 20, textAlign: "center" }}>{t.whyUs}</h2>
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20,
+          }}>
             {[
-              { title: t.feature1Title, desc: t.feature1Desc, icon: "⛓" },
-              { title: t.feature2Title, desc: t.feature2Desc, icon: "💰" },
-              { title: t.feature3Title, desc: t.feature3Desc, icon: "🌐" },
+              { num: "01", title: "Direct Antpool Routing", desc: t.whyUs1, icon: "⛓" },
+              { num: "02", title: "Transparent 2% Fee", desc: t.whyUs2, icon: "💰" },
+              { num: "03", title: "Real-time Dashboard", desc: t.whyUs3, icon: "📊" },
             ].map((f, i) => (
-              <div key={i} style={{ border: "1px solid var(--border)", borderRadius: "var(--r2)", padding: isMobile ? 14 : 18, background: "var(--bg2)" }}>
-                <div style={{ fontSize: 24, marginBottom: 10 }}>{f.icon}</div>
-                <h3 style={{ fontSize: isMobile ? 13 : 15, fontWeight: 600, marginBottom: 8 }}>{f.title}</h3>
-                <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.5 }}>{f.desc}</p>
+              <div key={i} style={{
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 16, padding: 28,
+                background: "rgba(13,17,23,0.5)",
+                transition: "all 0.3s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(247,147,26,0.2)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(0)"; }}
+              >
+                <div style={{ fontSize: 28, marginBottom: 16 }}>{f.icon}</div>
+                <div style={{ fontSize: 11, color: "#8b949e", fontWeight: 600, marginBottom: 6 }}>{f.num}</div>
+                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{f.title}</h3>
+                <p style={{ fontSize: 13, color: "#8b949e", lineHeight: 1.7 }}>{f.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section style={{ marginBottom: isMobile ? 40 : 60 }}>
-          <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 20, textAlign: "center" }}>{t.testimonials}</h2>
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
-            {testimonialData.map((t, i) => <TestimonialCard key={i} {...t} />)}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section style={{ marginBottom: isMobile ? 40 : 60, maxWidth: 600, margin: "0 auto" }}>
-          <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 20, textAlign: "center" }}>{t.faq}</h2>
-          {faqData.map((item, i) => (
-            <FAQItem key={i} q={item.q} a={item.a} isOpen={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? -1 : i)} />
-          ))}
-        </section>
-
         {/* Configurator */}
-        <section style={{ marginBottom: isMobile ? 40 : 60 }}>
-          <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 8, textAlign: "center" }}>{t.configurator}</h2>
-          <p style={{ fontSize: 12, color: "var(--text2)", textAlign: "center", marginBottom: 20 }}>{t.configDesc}</p>
-          <div style={{ maxWidth: 500, margin: "0 auto" }}>
-            <input
-              type="text"
-              placeholder={t.usernameLabel}
+        <section style={{
+          padding: "60px 28px 80px",
+          maxWidth: 600, margin: "0 auto",
+        }}>
+          <div style={{
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 20,
+            padding: "36px 32px",
+            background: "rgba(13,17,23,0.5)",
+          }}>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>⚡</div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Stratum Configurator</h2>
+              <p style={{ fontSize: 13, color: "#8b949e", lineHeight: 1.6 }}>{t.configDesc}</p>
+            </div>
+
+            <input type="text" placeholder={t.usernameLabel}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={{
                 width: "100%",
-                padding: "10px 12px",
-                borderRadius: "var(--r)",
-                border: "1px solid var(--border)",
-                background: "var(--bg2)",
-                color: "var(--text)",
-                fontSize: 13,
-                marginBottom: 12,
+                padding: "12px 16px",
+                borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.03)",
+                color: "#e6edf3", fontSize: 14,
+                fontFamily: "'JetBrains Mono','Fira Code',monospace",
+                outline: "none", marginBottom: 16,
               }}
+              onFocus={e => e.target.style.borderColor = "#f7931a"}
+              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
             />
+
             {username && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
@@ -375,22 +471,25 @@ export default function Landing() {
                   { label: t.stratumUser, value: `${username}.worker1` },
                   { label: t.stratumPass, value: "x" },
                 ].map((item, i) => (
-                  <div key={i} style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: "var(--r)", padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div key={i} style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: 10, padding: "12px 16px",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                  }}>
                     <div>
-                      <div style={{ fontSize: 10, color: "var(--text2)", marginBottom: 2 }}>{item.label}</div>
-                      <div style={{ fontSize: 12, fontFamily: "var(--mono)", color: "var(--accent)" }}>{item.value}</div>
+                      <div style={{ fontSize: 10, color: "#8b949e", marginBottom: 3, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>{item.label}</div>
+                      <div style={{ fontSize: 13, fontFamily: "'JetBrains Mono','Fira Code',monospace", color: "#f7931a" }}>{item.value}</div>
                     </div>
                     <button onClick={() => handleCopy(item.value, i)} style={{
-                      padding: "4px 10px",
-                      background: copied === i ? "var(--green)" : "var(--accent)",
-                      color: copied === i ? "var(--bg)" : "#000",
-                      border: "none",
-                      borderRadius: 4,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      cursor: "pointer",
+                      padding: "6px 14px",
+                      background: copied === i ? "rgba(63,185,80,0.15)" : "rgba(247,147,26,0.1)",
+                      color: copied === i ? "#3fb950" : "#f7931a",
+                      border: `1px solid ${copied === i ? "rgba(63,185,80,0.2)" : "rgba(247,147,26,0.15)"}`,
+                      borderRadius: 6, fontSize: 11, fontWeight: 600,
+                      cursor: "pointer", fontFamily: "inherit",
                     }}>
-                      {copied === i ? t.copied : t.copy}
+                      {copied === i ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
                 ))}
@@ -398,11 +497,42 @@ export default function Landing() {
             )}
           </div>
         </section>
+
+        {/* FAQ */}
+        <section id="faq" style={{
+          padding: "0 28px 80px",
+          maxWidth: 640, margin: "0 auto",
+        }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.5px" }}>{t.faq}</h2>
+          </div>
+          {faqData.map((item, i) => (
+            <FAQItem key={i} q={item.q} a={item.a} isOpen={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? -1 : i)} />
+          ))}
+        </section>
       </main>
 
       {/* Footer */}
-      <footer style={{ borderTop: "1px solid var(--border)", padding: isMobile ? "20px 12px" : "30px 28px", fontSize: 12, color: "var(--text2)", textAlign: "center" }}>
-        {t.footerText}
+      <footer style={{
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        padding: "40px 28px",
+        textAlign: "center",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}>
+          <div style={{
+            width: 24, height: 24, borderRadius: 6,
+            background: "linear-gradient(135deg,#f7931a,#e8830d)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 800, fontSize: 12, color: "#000",
+          }}>H</div>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>Hashrial</span>
+        </div>
+        <div style={{ fontSize: 13, color: "#8b949e", maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+          {t.footerText}
+        </div>
+        <div style={{ marginTop: 24, fontSize: 12, color: "#484f58" }}>
+          © {new Date().getFullYear()} Hashrial. All rights reserved.
+        </div>
       </footer>
     </div>
   );

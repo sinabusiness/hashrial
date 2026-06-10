@@ -16,7 +16,7 @@ export default function Register() {
     try {
       const { token } = await api.register(form.username, form.email, form.password);
       localStorage.setItem("hashrial_token", token);
-      navigate("/connect");
+      navigate("/dashboard/connect");
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally { setLoading(false); }

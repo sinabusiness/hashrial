@@ -24,7 +24,7 @@ export default function Layout() {
   }
 
   const navItems = [
-    { to:"/",              label:"Dashboard",     icon:"⬡", end:true },
+    { to:"/dashboard",     label:"Dashboard",     icon:"⬡", end:true },
     { to:"/workers",       label:"Workers",       icon:"⚙" },
     { to:"/earnings",      label:"Earnings",      icon:"₿" },
     { to:"/connect",       label:"Connect Miners",icon:"⛓" },

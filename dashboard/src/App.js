@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Landing      from "./pages/Landing";
 import Login        from "./pages/Login";
 import Register     from "./pages/Register";
 import Dashboard    from "./pages/Dashboard";
@@ -20,9 +21,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/"         element={<Landing />} />
         <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+        <Route path="/dashboard" element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route index                    element={<Dashboard />} />
           <Route path="workers"           element={<Workers />} />
           <Route path="workers/:name"     element={<WorkerDetail />} />

@@ -14,7 +14,7 @@ export default function Login() {
     try {
       const { token } = await api.login(form.email, form.password);
       localStorage.setItem("hashrial_token", token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Login failed");
     } finally { setLoading(false); }

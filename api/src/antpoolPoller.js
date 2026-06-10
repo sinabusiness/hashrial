@@ -122,7 +122,7 @@ async function pollUser(pg, redis, user) {
         const overviewKey = `pool:overview:${user.username}`;
         await redis.set(overviewKey, JSON.stringify({
             earnings: { balance, earn24h, earnTotal, paidOut },
-            hashrate: { hs_10m: hs10m, hs_1h: hs1h, hs_1d: hs1d, active_workers: activeWorkers },
+            hashrate: { hs_10m: hs10m, hs_1h: hs1h, hs_1d: hs1d, active_workers: activeWorkers, accepted: 0, stale: 0 },
         }), "EX", Math.floor(POLL_INTERVAL_MS / 1000) + 30);
 
         // Invalidate workers cache so next request is fresh

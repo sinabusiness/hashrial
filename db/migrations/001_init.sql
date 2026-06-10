@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
   username          TEXT UNIQUE NOT NULL,
   email             TEXT UNIQUE NOT NULL,
   password_hash     TEXT NOT NULL,
-  antpool_subaccount TEXT UNIQUE NOT NULL, -- e.g. "hashrial_alice" on Antpool
+  bitcoin_address   TEXT,
+  antpool_subaccount TEXT UNIQUE,           -- set by admin after registration
   created_at        TIMESTAMPTZ DEFAULT NOW(),
   last_login        TIMESTAMPTZ,
   notify_offline    BOOLEAN DEFAULT TRUE,
@@ -93,3 +94,16 @@ CREATE TABLE IF NOT EXISTS fee_shares (
   UNIQUE(user_id, worker_name, session_id)
 );
 CREATE INDEX IF NOT EXISTS idx_fee_shares_user ON fee_shares(user_id, last_updated DESC);
+
+-- ── Payout Requests ────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS payout_requests (
+  id           BIGSERIAL PRIMARY KEY,
+  user_id      UUID REFERENCES users(id) ON DELETE CASCADE,
+  amount_btc   NUMERIC NOT NULL,
+  address      TEXT NOT NULL,
+  status       TEXT NOT NULL DEFAULT 'pending', -- pending | processing | completed | failed
+  txid         TEXT,
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  processed_at TIMESTAMPTZ
+);
+CREATE INDEX ON payout_requests(user_id, requested_at DESC);

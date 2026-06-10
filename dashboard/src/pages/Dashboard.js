@@ -109,7 +109,7 @@ export default function Dashboard() {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:14, marginBottom:22 }}>
-        <StatCard label="Hashrate (10m)" value={fmt(hr.last10m)} sub={`1h avg: ${fmt(hr.last1h)}`} accent="var(--accent)" icon="⚡" />
+        <StatCard label="Hashrate (10m)" value={fmt(hr.hs_10m)} sub={`1h avg: ${fmt(hr.hs_1h)}`} accent="var(--accent)" icon="⚡" />
         <StatCard label="Active Workers" value={online} sub={`${offline} offline`} accent={online>0?"var(--green)":"var(--red)"} icon="⚙" />
         <StatCard label="Balance" value={fmtBTC(earn.balance)} sub={usd(earn.balance)||"Available"} accent="var(--yellow)" icon="₿" />
         <StatCard label="Last 24h" value={fmtBTC(earn.earn24h)} sub={usd(earn.earn24h)||"Earnings"} icon="📈" />

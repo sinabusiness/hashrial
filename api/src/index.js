@@ -19,7 +19,6 @@ const rateLimit   = require("express-rate-limit");
 const { Pool }    = require("pg");
 const Redis       = require("ioredis");
 const https       = require("https");
-const qs          = require("querystring");
 const { startAntpoolPoller } = require("./antpoolPoller");
 const { startNotifier }      = require("./notifier");
 
@@ -208,7 +207,12 @@ app.get("/api/dashboard/overview", auth, async (req, res) => {
       "SELECT * FROM hashrate_history WHERE user_id=$1 AND worker_name IS NULL ORDER BY ts DESC LIMIT 1",
       [req.user.id]
     );
-    res.json({ earnings: earn.rows[0] || {}, hashrate: hr.rows[0] || {} });
+    const e = earn.rows[0] || {};
+    const h = hr.rows[0] || {};
+    res.json({
+      earnings: { balance: e.balance, earn24h: e.earn_24h, earnTotal: e.earn_total, paidOut: e.paid_out },
+      hashrate: { hs_10m: h.hs_10m, hs_1h: h.hs_1h, hs_1d: h.hs_1d, active_workers: h.active_workers, accepted: h.accepted, stale: h.stale },
+    });
   } catch (e) { console.error("dashboard/overview error:", e.message); res.status(500).json({ error: "Failed" }); }
 });
 

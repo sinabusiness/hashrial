@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 
@@ -827,6 +827,14 @@ export default function Landing() {
   }, [lang]);
 
   useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap";
+    document.head.appendChild(link);
+    return () => { if (link.parentNode) link.parentNode.removeChild(link); };
+  }, []);
+
+  useEffect(() => {
     const loadStats = () => {
       setStatsLoading(true);
       Promise.all([
@@ -930,8 +938,6 @@ export default function Landing() {
       overflowX: "hidden",
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap');
-
         *,*::before,*::after{box-sizing:border-box}
         html{scroll-behavior:smooth}
 
@@ -1037,7 +1043,7 @@ export default function Landing() {
       }}>
         <div className="marquee-container" style={{ flex: 1 }}>
           <div className="marquee-track" style={{ display: "flex", alignItems: "center", gap: 0 }}>
-            {[...Array(3)].flatMap(() => priceTickerItems).map((item, i) => (
+            {priceTickerItems.concat(priceTickerItems, priceTickerItems).map((item, i) => (
               <div key={i} style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "0 20px",

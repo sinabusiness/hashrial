@@ -533,6 +533,66 @@ function DonutChart({ percentage, size = 80, strokeWidth = 6, color = "#f7931a" 
   );
 }
 
+function BlockSchedule() {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const idx = calcBlocks() - 117890;
+  const rows = [];
+  for (let i = 1; i <= 10; i++) {
+    const blockNum = 117890 + idx + i;
+    const blockTime = BLOCK_SCHEDULE[idx + i];
+    if (!blockTime) break;
+    const diff = blockTime - now;
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const eta = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    const date = new Date(blockTime);
+    const dateStr = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const timeStr = date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    rows.push({ blockNum, dateStr, timeStr, eta, hours, minutes, diff });
+  }
+
+  return (
+    <div className="schedule-card" style={{
+      border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16,
+      overflow: "hidden", background: "rgba(13,17,23,0.4)",
+    }}>
+      <div style={{
+        display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+        padding: "10px 18px", fontSize: 10, fontWeight: 600, color: "var(--text2)",
+        textTransform: "uppercase", letterSpacing: "0.8px",
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+      }}>
+        <span>Block</span>
+        <span>Date</span>
+        <span style={{ textAlign: "right" }}>ETA</span>
+      </div>
+      {rows.map((r, i) => (
+        <div key={i} style={{
+          display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+          padding: "8px 18px", fontSize: 12,
+          color: i === 0 ? "#f7931a" : "var(--text)",
+          fontWeight: i === 0 ? 700 : 400,
+          fontFamily: i === 0 ? "'JetBrains Mono',monospace" : "inherit",
+          borderBottom: i < rows.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none",
+          background: i === 0 ? "rgba(247,147,26,0.04)" : "transparent",
+        }}>
+          <span>#{r.blockNum}</span>
+          <span style={{ color: "var(--text2)", fontSize: 11 }}>{r.dateStr} {r.timeStr}</span>
+          <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>
+            {r.hours > 0 ? `${r.hours}h ` : ""}{r.minutes}m
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function LiveHashrateGraph() {
   const [points, setPoints] = useState(() =>
     Array.from({ length: 30 }, () => Math.random() * 40 + 60)
@@ -586,6 +646,38 @@ function FAQItem({ q, a, isOpen, onClick, isRtl }) {
   );
 }
 
+const REF_EPOCH = new Date("2026-06-10T00:00:00Z").getTime();
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+function seededRand(seed) {
+  let s = seed | 0;
+  return () => { s = (s * 1664525 + 1013904223) | 0; return (s >>> 0) / 4294967296; };
+}
+
+const BLOCK_SCHEDULE = (() => {
+  const rng = seededRand(42);
+  const times = [REF_EPOCH];
+  for (let i = 0; i < 100000; i++) {
+    const interval = (Math.floor(rng() * 11) + 10) * 10 * 60 * 1000;
+    times.push(times[i] + interval);
+  }
+  return times;
+})();
+
+const calcBlocks = () => {
+  const now = Date.now();
+  let lo = 0, hi = BLOCK_SCHEDULE.length - 1;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (BLOCK_SCHEDULE[mid] <= now) lo = mid;
+    else hi = mid - 1;
+  }
+  return 117890 + lo;
+};
+const calcGrowth = () => Math.pow(1.01, (Date.now() - REF_EPOCH) / WEEK_MS);
+const calcWorkers = () => Math.round(5483 * calcGrowth());
+const calcHashrate = () => (732 * calcGrowth()).toFixed(1);
+
 export default function Landing() {
   const navigate = useNavigate();
   const [lang, setLang] = useState(() => localStorage.getItem("lang") || "en");
@@ -601,15 +693,6 @@ export default function Landing() {
   const heroRef = useRef(null);
   const [btcPriceState, setBtcPriceState] = useState(() => Math.floor(Math.random() * 5000 + 62000));
   const [theme, setTheme] = useState(() => localStorage.getItem("hashrial_theme") || "dark");
-
-  const REF_EPOCH = new Date("2026-06-10T00:00:00Z").getTime();
-  const AVG_BLOCK_MINUTES = 15;
-  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-  const calcBlocks = () => 117890 + Math.floor((Date.now() - REF_EPOCH) / (AVG_BLOCK_MINUTES * 60 * 1000));
-  const calcGrowth = () => Math.pow(1.01, (Date.now() - REF_EPOCH) / WEEK_MS);
-  const calcWorkers = () => Math.round(5483 * calcGrowth());
-  const calcHashrate = () => (732 * calcGrowth()).toFixed(1);
 
   const [blocksFound, setBlocksFound] = useState(calcBlocks);
   const [workers, setWorkers] = useState(calcWorkers);
@@ -825,6 +908,7 @@ export default function Landing() {
         [data-theme="light"] .mobile-menu-overlay a{color:var(--text)!important}
         [data-theme="light"] .scrolled-header{background:rgba(246,248,250,0.95)!important;border-color:var(--border)!important}
         [data-theme="light"] .btc-live{color:var(--text)!important}
+        [data-theme="light"] .schedule-card{background:rgba(255,255,255,0.5)!important;border-color:var(--border)!important}
         [data-theme="light"] ::-webkit-scrollbar-track{background:var(--bg)!important}
       `}</style>
 
@@ -1107,6 +1191,24 @@ export default function Landing() {
             </div>
           </Reveal>
         </div>
+      </section>
+
+      {/* ═══════ BLOCK SCHEDULE ═══════ */}
+      <section style={{ padding: "20px 28px 60px", maxWidth: 440, margin: "0 auto" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{
+              display: "inline-block",
+              fontSize: 10, fontWeight: 600, color: "#f7931a",
+              letterSpacing: "2px", textTransform: "uppercase",
+              padding: "4px 12px",
+              border: "1px solid rgba(247,147,26,0.12)", borderRadius: 100,
+              background: "rgba(247,147,26,0.04)",
+              marginBottom: 8,
+            }}>Next Blocks</div>
+          </div>
+          <BlockSchedule />
+        </Reveal>
       </section>
 
       {/* ═══════ HOW IT WORKS ═══════ */}

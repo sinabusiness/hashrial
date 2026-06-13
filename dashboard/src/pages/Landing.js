@@ -599,14 +599,29 @@ export default function Landing() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const particlesRef = useRef(null);
   const heroRef = useRef(null);
-  const [blocksFound, setBlocksFound] = useState(117890);
   const [btcPriceState, setBtcPriceState] = useState(() => Math.floor(Math.random() * 5000 + 62000));
   const [theme, setTheme] = useState(() => localStorage.getItem("hashrial_theme") || "dark");
 
+  const REF_EPOCH = new Date("2026-06-10T00:00:00Z").getTime();
+  const AVG_BLOCK_MINUTES = 15;
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+  const calcBlocks = () => 117890 + Math.floor((Date.now() - REF_EPOCH) / (AVG_BLOCK_MINUTES * 60 * 1000));
+  const calcGrowth = () => Math.pow(1.01, (Date.now() - REF_EPOCH) / WEEK_MS);
+  const calcWorkers = () => Math.round(5483 * calcGrowth());
+  const calcHashrate = () => (732 * calcGrowth()).toFixed(1);
+
+  const [blocksFound, setBlocksFound] = useState(calcBlocks);
+  const [workers, setWorkers] = useState(calcWorkers);
+  const [hashrate, setHashrate] = useState(calcHashrate);
+
   useEffect(() => {
     const timer = setInterval(() => {
+      setBlocksFound(calcBlocks());
+      setWorkers(calcWorkers());
+      setHashrate(calcHashrate());
       setBtcPriceState(prev => Math.max(55000, prev + (Math.random() - 0.5) * 300));
-    }, 3000);
+    }, 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -614,20 +629,6 @@ export default function Landing() {
     document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "");
     localStorage.setItem("hashrial_theme", theme);
   }, [theme]);
-
-  useEffect(() => {
-    let timeout;
-    const scheduleNext = () => {
-      const minutes = Math.floor(Math.random() * 11) + 10;
-      const ms = minutes * 10 * 60 * 1000;
-      timeout = setTimeout(() => {
-        setBlocksFound(prev => prev + 1);
-        scheduleNext();
-      }, ms);
-    };
-    scheduleNext();
-    return () => clearTimeout(timeout);
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -1084,7 +1085,7 @@ export default function Landing() {
             }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, color: "#f7931a", letterSpacing: "-0.5px" }}>
-                  {statsLoading ? <AnimatedCounter target={5483} /> : <AnimatedCounter target={poolStats?.activeWorkers || 5483} />}
+                  <AnimatedCounter target={workers} />
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6, textTransform: "uppercase", letterSpacing: "1px" }}>{t.heroStat1}</div>
                 <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
@@ -1093,7 +1094,7 @@ export default function Landing() {
               </div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, color: "#f7931a", letterSpacing: "-0.5px" }}>
-                  {statsLoading ? "732" : (poolStats?.poolHashrate ? `${(poolStats.poolHashrate).toLocaleString()} TH/s` : "732")} <span style={{ fontSize: "clamp(12px, 1.5vw, 14px)", fontWeight: 500 }}>PH/s</span>
+                  {hashrate} <span style={{ fontSize: "clamp(12px, 1.5vw, 14px)", fontWeight: 500 }}>PH/s</span>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6, textTransform: "uppercase", letterSpacing: "1px" }}>{t.heroStat2}</div>
               </div>

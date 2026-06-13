@@ -3,800 +3,587 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 
 const LANGUAGES = [
-  { code: "en", label: "English", dir: "ltr" },
-  { code: "fa", label: "فارسی", dir: "rtl" },
-  { code: "zh", label: "中文", dir: "ltr" },
-  { code: "ru", label: "Русский", dir: "ltr" },
-  { code: "es", label: "Español", dir: "ltr" },
-  { code: "pt", label: "Português", dir: "ltr" },
+  { code: "en", label: "English", flag: "🇬🇧", dir: "ltr" },
+  { code: "fa", label: "فارسی", flag: "🇮🇷", dir: "rtl" },
+  { code: "zh", label: "中文", flag: "🇨🇳", dir: "ltr" },
+  { code: "ru", label: "Русский", flag: "🇷🇺", dir: "ltr" },
+  { code: "es", label: "Español", flag: "🇪🇸", dir: "ltr" },
+  { code: "pt", label: "Português", flag: "🇵🇹", dir: "ltr" },
 ];
 
 const T = {
   en: {
-    startMining: "Start Mining Now",
-    memberArea: "Member Area",
-    configDesc: "Enter your Hashrial username below to generate your personalized ASIC configuration.",
-    usernameLabel: "Your Username",
-    stratumUrl: "Stratum URL",
-    stratumUser: "Worker Username",
-    stratumPass: "Password",
-    copy: "Copy",
-    copied: "Copied!",
-    footerText: "Hashrial Mining Pool. Fully decentralized stratum proxy with direct Antpool integration.",
-    home: "Home",
-    features: "Features",
-    faqLink: "FAQ",
-    login: "Login",
-    signUp: "Sign Up",
-    heroTag: "BITCOIN MINING POOL",
-    activeMiners: "Active Workers",
-    btcPrice: "Bitcoin Price",
-    feeText: "Pool Fee",
-    connecting: "Connecting...",
-    whyUs: "Why Mine With Hashrial?",
-    whyUs1: "Every 50th share is routed to infrastructure. You keep 98% of hashrate. No hidden fees, no tricks.",
-    whyUs2: "Built for scale — handle thousands of concurrent Stratum connections with sub-millisecond latency.",
-    whyUs3: "Real-time charts, worker monitoring, earnings history, payout management, and instant notifications.",
-    whyUs4: "Direct integration with Antpool API for accurate balance and hashrate tracking.",
-    whyUs5: "Multi-language support — English, Persian, Chinese, Russian, Spanish and more.",
-    whyUs6: "Enterprise-grade security — JWT auth, rate limiting, CORS protection, SQL injection prevention.",
-    howItWorks: "How It Works",
+    navHome: "Home", navFeatures: "Features", navMining: "How to Mine", navFaq: "FAQ",
+    login: "Login", signUp: "Sign Up",
+    heroTitle1: "Mine Bitcoin",
+    heroTitle2: "With Zero Compromise",
+    heroSub: "Professional-grade stratum proxy. 2% flat fee. 98% hashrate delivered straight to your account. Full transparency, no hidden cuts.",
+    heroCta: "Start Mining Free",
+    heroStat1: "Active Workers",
+    heroStat2: "Pool Hashrate",
+    heroStat3: "Blocks Found",
+    howTitle: "Start Mining in 3 Minutes",
+    howSub: "Get connected and earning Bitcoin faster than any other pool.",
     howStep1: "Create Account",
-    howStep1Desc: "Register with your email and choose a username. Your username is your pool identity — share it with your miners.",
-    howStep2: "Configure Miners",
-    howStep2Desc: "Point your ASICs or mining software to stratum+tcp://hashrial.com:3333 using your username.",
-    howStep3: "Start Earning",
-    howStep3Desc: "Watch your hashrate and earnings update in real-time on your dashboard. Request payouts anytime.",
-    networkStats: "Network Statistics",
-    globalHashrate: "Bitcoin Network Hashrate",
-    btcPriceLabel: "BTC/USD Price",
-    poolWorkers: "Pool Workers",
-    poolFee: "Pool Fee",
-    supportedHardware: "Supported Hardware",
-    hwTitle: "Compatible With All Major ASICs",
-    hwDesc: "Hashrial supports every major ASIC miner and mining software. Configure once and mine forever.",
-    antminer: "Antminer",
-    antminerDesc: "Bitmain Antminer S19, S21, S19 Pro, T21, and all models running firmware v2024+",
-    whatsminer: "Whatsminer",
-    whatsminerDesc: "MicroBT Whatsminer M50, M60, M66, M30S, and all models with Stock or Braiins OS",
-    avalon: "Avalon",
-    avalonDesc: "Canaan Avalon A12, A13, A15, A1566 — all generations with standard pool config",
-    cpuGpu: "CPU / GPU",
-    cpuGpuDesc: "CGMiner, BFGMiner, Awesome Miner, NiceHash, and any Stratum-compatible software",
-    testimonials: "What Our Miners Say",
-    testimonial1: "Switched from Antpool directly. Hashrial's transparency is unmatched. See exactly where your hashrate goes.",
-    testimonial2: "Been mining for 6 months straight with zero downtime. The dashboard is clean and the payouts are always on time.",
-    testimonial3: "The API is solid. Built a custom monitoring dashboard that tracks every worker in real-time.",
-    testimonial4: "Running 12 ASICs on Hashrial for 3 months. Setup took 5 minutes. Support team is very responsive.",
-    faq: "Frequently Asked Questions",
+    howStep1Desc: "Register in seconds with your email. Choose a username — this becomes your pool identity.",
+    howStep2: "Configure Miner",
+    howStep2Desc: "Point your ASIC or software to stratum+tcp://hashrial.com:3333 using your username as the worker.",
+    howStep3: "Track & Earn",
+    howStep3Desc: "Monitor your hashrate, shares, and earnings in real-time. Request payouts anytime above 0.001 BTC.",
+    featuresTitle: "Built for Serious Miners",
+    featuresSub: "Every feature designed to maximize your mining profitability and give you full control.",
+    feat1: "2% Flat Fee",
+    feat1Desc: "Predictable pricing. Every 50th share covers infrastructure — you keep 98% with zero surprises.",
+    feat2: "Real-time Dashboard",
+    feat2Desc: "Live hashrate charts, worker monitoring, earnings history, and payout management in one place.",
+    feat3: "Enterprise Security",
+    feat3Desc: "JWT authentication, rate limiting, CORS protection, and SQL injection prevention out of the box.",
+    feat4: "Multi-language",
+    feat4Desc: "Full interface support for English, Persian, Chinese, Russian, Spanish, and Portuguese.",
+    feat5: "Global Low Latency",
+    feat5Desc: "Handle thousands of concurrent Stratum connections with sub-millisecond routing latency.",
+    feat6: "Instant Payouts",
+    feat6Desc: "Request withdrawals anytime. Minimum 0.001 BTC. Weekly batch processing with full on-chain tracking.",
+    hardwareTitle: "Works With Every Major ASIC",
+    hardwareSub: "Antminer, Whatsminer, Avalon, GPU rigs — if it speaks Stratum, it mines here.",
+    faqTitle: "Frequently Asked Questions",
+    faq1q: "What is the pool fee?",
+    faq1a: "2% per share. Every 50th share goes to pool infrastructure. The remaining 98% of your hashrate routes directly to your personal account. This is the same model used by F2Pool, ViaBTC, and Slushpool.",
+    faq2q: "Do I need my own pool account?",
+    faq2a: "No. Hashrial handles everything on the backend. You just register here, configure your miners with your username, and start earning. We manage the sub-account mapping for you.",
+    faq3q: "What is the minimum payout?",
+    faq3a: "0.001 BTC (~$60-100 depending on market price). Payouts are processed weekly to your Bitcoin address. Set your payout address in Settings anytime.",
+    faq4q: "Can I use multiple workers?",
+    faq4a: "Yes. Use worker names in your config like username.rig01, username.rig02. Each worker appears separately in your dashboard with its own hashrate and share count.",
+    faq5q: "Is there any hidden fee?",
+    faq5a: "No. Everything is transparent. 2% pool fee. No hidden cuts, no admin fees, no withdrawal fees. Your exact share count is visible in the dashboard.",
+    faq6q: "What if the pool disconnects?",
+    faq6a: "Your miners automatically fail over to the upstream pool if Hashrial disconnects. Your earnings are never lost. The proxy is built for automatic reconnection.",
+    faq7q: "Which hardware is compatible?",
+    faq7a: "All Stratum-compatible hardware: Antminer (S19/S21 series), Whatsminer (M50/M60 series), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner, and any Stratum software on port 3333.",
+    faq8q: "How do payouts work?",
+    faq8a: "Set your Bitcoin address in Settings. When your balance exceeds 0.001 BTC, request a payout. We process every Friday. Transaction IDs are visible in your earnings history.",
     ctaTitle: "Ready to Start Mining?",
-    ctaDesc: "Join hundreds of miners already earning Bitcoin with Hashrial's transparent 2% fee model.",
-    createAccount: "Create Free Account",
-    subtitle: "High-performance stratum proxy with a transparent 2% fee model. 98% of your hashrate goes directly to your own Antpool sub-account.",
-    heroDesc1: "High-performance stratum proxy",
-    heroDesc2: "98% Hashrate To You",
-    heroDesc3: "2% Transparent Fee",
-    heroDesc4: "Real-time Dashboard",
-    learnMore: "Learn More",
-    totalUsers: "Total Users",
-    currentlyMining: "Currently Mining",
-    perShareRouted: "Per Share Routed",
-    registered: "Registered",
-    gettingStarted: "Getting Started",
-    threeSteps: "Three simple steps to start mining Bitcoin with Hashrial",
-    liveData: "Live Data",
-    whyUsTag: "Why Us",
-    builtFor: "Built for serious miners who demand transparency, performance, and reliability",
-    compatibility: "Compatibility",
-    compatibilityDesc: "Hashrial supports every major ASIC miner and mining software. Configure once and mine forever.",
-    testimonialsTag: "Testimonials",
-    configTitle: "Stratum Configurator",
-    support: "Support",
-    quickLinks: "Quick Links",
-    account: "Account",
-    signIn: "Sign In",
-    createAccountFooter: "Create Account",
-    language: "Language",
-    allRightsReserved: "All rights reserved.",
-    terms: "Terms",
-    privacy: "Privacy",
-    contact: "Contact",
-    networkHashrate: "Network Hashrate",
-    poolUsers: "Pool Users",
-    poolFeeLabel: "Pool Fee",
-    industryStandard: "Industry standard — same as F2Pool, ViaBTC",
+    ctaDesc: "Join hundreds of miners earning Bitcoin with Hashrial's transparent 2% fee model. No hidden costs, no tricks.",
+    ctaBtn: "Create Free Account",
+    footerText: "Professional Bitcoin mining pool. Low fees, high reliability, full transparency.",
+    quickLinks: "Quick Links", account: "Account",
+    signIn: "Sign In", createAccount: "Create Account",
+    language: "Language", allRights: "All rights reserved.",
+    terms: "Terms", privacy: "Privacy", contact: "Contact",
+    poolFee: "2% Flat Fee",
   },
   fa: {
-    startMining: "شروع ماینینگ",
-    memberArea: "ورود کاربران",
-    configDesc: "نام کاربری خود را وارد کنید تا دستورات پیکربندی ASIC تولید شود.",
-    usernameLabel: "نام کاربری شما",
-    stratumUrl: "آدرس Stratum",
-    stratumUser: "نام کارگر",
-    stratumPass: "رمز عبور",
-    copy: "کپی",
-    copied: "کپی شد!",
-    footerText: "استخر ماینینگ Hashrial. پراکسی استراتوم غیرمتمرکز با ادغام مستقیم آنت‌پول.",
-    home: "خانه",
-    features: "ویژگی‌ها",
-    faqLink: "سوالات",
-    login: "ورود",
-    signUp: "ثبت‌نام",
-    heroTag: "استخر ماینینگ بیت‌کوین",
-    activeMiners: "کارگران فعال",
-    btcPrice: "قیمت بیت‌کوین",
-    feeText: "کارمزد استخر",
-    connecting: "در حال اتصال...",
-    whyUs: "چرا Hashrial؟",
-    whyUs1: "هر پنجاهمین سهم به زیرساخت اختصاص می‌یابد. ۹۸٪ هش‌ریت برای شما. بدون کارمزد پنهان.",
-    whyUs2: "طراحی شده برای مقیاس — مدیریت هزاران اتصال همزمان Stratum با تأخیر زیر میلی‌ثانیه.",
-    whyUs3: "نمودارهای زنده، مانیتورینگ کارگران، تاریخچه درآمد، مدیریت پرداخت و اعلان‌های فوری.",
-    whyUs4: "ادغام مستقیم با API آنت‌پول برای ردیابی دقیق موجودی و هش‌ریت.",
-    whyUs5: "پشتیبانی از چند زبان — انگلیسی، فارسی، چینی، روسی، اسپانیایی و بیشتر.",
-    whyUs6: "امنیت در سطح سازمانی — احراز هویت JWT، محدودیت نرخ، محافظت CORS، جلوگیری از SQL Injection.",
-    howItWorks: "نحوه کار",
+    navHome: "خانه", navFeatures: "ویژگی‌ها", navMining: "نحوه ماینینگ", navFaq: "سوالات",
+    login: "ورود", signUp: "ثبت‌نام",
+    heroTitle1: "بیت‌کوین استخراج کنید",
+    heroTitle2: "بدون هیچ مصالحه‌ای",
+    heroSub: "پراکسی استراتوم حرفه‌ای. کارمزد ثابت ۲٪. ۹۸٪ هش‌ریت مستقیماً به حساب شما. شفافیت کامل، بدون هزینه پنهان.",
+    heroCta: "شروع رایگان ماینینگ",
+    heroStat1: "کارگران فعال",
+    heroStat2: "هش‌ریت استخر",
+    heroStat3: "بلاک‌های یافت شده",
+    howTitle: "در ۳ دقیقه شروع کنید",
+    howSub: "سریع‌تر از هر استخر دیگری متصل شوید و درآمد کسب کنید.",
     howStep1: "ایجاد حساب",
-    howStep1Desc: "با ایمیل خود ثبت‌نام کنید و یک نام کاربری انتخاب کنید. نام کاربری شما هویت استخر شماست.",
-    howStep2: "تنظیم ماینرها",
-    howStep2Desc: "ASIC یا نرم‌افزار ماینینگ خود را به stratum+tcp://hashrial.com:3333 متصل کنید.",
-    howStep3: "شروع درآمدزایی",
-    howStep3Desc: "هش‌ریت و درآمد خود را به صورت زنده در داشبورد مشاهده کنید. هر زمان درخواست پرداخت دهید.",
-    networkStats: "آمار شبکه",
-    globalHashrate: "هش‌ریت شبکه بیت‌کوین",
-    btcPriceLabel: "قیمت BTC/USD",
-    poolWorkers: "کارگران استخر",
-    poolFee: "کارمزد استخر",
-    supportedHardware: "سخت‌افزارهای پشتیبانی شده",
-    hwTitle: "سازگار با تمام ASIC های اصلی",
-    hwDesc: "Hashrial از تمام ماینرهای ASIC و نرم‌افزارهای ماینینگ پشتیبانی می‌کند.",
-    antminer: "Antminer",
-    antminerDesc: "Bitmain Antminer S19, S21, S19 Pro, T21 و تمام مدل‌های با فریم‌ور v2024+",
-    whatsminer: "Whatsminer",
-    whatsminerDesc: "MicroBT Whatsminer M50, M60, M66, M30S و تمام مدل‌ها",
-    avalon: "Avalon",
-    avalonDesc: "Canaan Avalon A12, A13, A15, A1566 — تمام نسل‌ها",
-    cpuGpu: "CPU / GPU",
-    cpuGpuDesc: "CGMiner, BFGMiner, Awesome Miner, NiceHash و نرم‌افزارهای سازگار با Stratum",
-    testimonials: "نظرات ماینرها",
-    testimonial1: "از آنت‌پول مستقیم به Hashrial آمدم. شفافیت فوق‌العاده است.",
-    testimonial2: "۶ ماه بدون وقفه ماینینگ کردم. داشبورد عالی و پرداخت‌ها همیشه به موقع.",
-    testimonial3: "API بسیار قوی است. یک داشبورد مانیتورینگ سفارشی ساختم.",
-    testimonial4: "۱۲ تا ASIC روی Hashrial دارم. ۵ دقیقه راه‌اندازی شد.",
-    faq: "سوالات متداول",
+    howStep1Desc: "با ایمیل خود ثبت‌نام کنید. یک نام کاربری انتخاب کنید — هویت شما در استخر.",
+    howStep2: "تنظیم ماینر",
+    howStep2Desc: "ASIC یا نرم‌افزار خود را به stratum+tcp://hashrial.com:3333 متصل کنید.",
+    howStep3: "ردیابی و درآمد",
+    howStep3Desc: "هش‌ریت، سهم‌ها و درآمد خود را به صورت زنده مشاهده کنید. درخواست پرداخت از ۰.۰۰۱ BTC.",
+    featuresTitle: "طراحی شده برای ماینرهای حرفه‌ای",
+    featuresSub: "هر ویژگی برای حداکثر سودآوری ماینینگ و کنترل کامل طراحی شده است.",
+    feat1: "کارمزد ثابت ۲٪",
+    feat1Desc: "قیمت‌گذاری قابل پیش‌بینی. هر پنجاهمین سهم برای زیرساخت — ۹۸٪ برای شما.",
+    feat2: "داشبورد زنده",
+    feat2Desc: "نمودارهای زنده هش‌ریت، مانیتورینگ کارگران، تاریخچه درآمد و مدیریت پرداخت.",
+    feat3: "امنیت سازمانی",
+    feat3Desc: "احراز هویت JWT، محدودیت نرخ، محافظت CORS و جلوگیری از SQL Injection.",
+    feat4: "چند زبانه",
+    feat4Desc: "پشتیبانی کامل از انگلیسی، فارسی، چینی، روسی، اسپانیایی و پرتغالی.",
+    feat5: "تأخیر کم جهانی",
+    feat5Desc: "مدیریت هزاران اتصال همزمان Stratum با تأخیر زیر میلی‌ثانیه.",
+    feat6: "پرداخت فوری",
+    feat6Desc: "درخواست برداشت هر زمان. حداقل ۰.۰۰۱ BTC. پرداخت هفتگی با رهگیری کامل بلاکچین.",
+    hardwareTitle: "کار با تمام ASIC های اصلی",
+    hardwareSub: "Antminer، Whatsminer، Avalon، GPU — اگر از Stratum پشتیبانی کند، اینجا کار می‌کند.",
+    faqTitle: "سوالات متداول",
+    faq1q: "کارمزد استخر چقدر است؟",
+    faq1a: "۲٪ به ازای هر سهم. هر پنجاهمین سهم به زیرساخت استخر می‌رود. ۹۸٪ باقی مانده مستقیماً به حساب شما واریز می‌شود.",
+    faq2q: "آیا به حساب استخر جداگانه نیاز دارم؟",
+    faq2a: "خیر. Hashrial همه چیز را در بک‌اند مدیریت می‌کند. شما فقط ثبت‌نام کنید، ماینرها را تنظیم کنید و درآمد کسب کنید.",
+    faq3q: "حداقل پرداخت چقدر است؟",
+    faq3a: "۰.۰۰۱ BTC. پرداخت‌ها هفتگی به آدرس بیت‌کوین شما انجام می‌شود.",
+    faq4q: "آیا می‌توانم از چند کارگر استفاده کنم؟",
+    faq4a: "بله. از نام‌های کارگر مانند username.rig01 و username.rig02 استفاده کنید.",
+    faq5q: "آیا هزینه پنهانی وجود دارد؟",
+    faq5a: "خیر. همه چیز شفاف است. کارمزد ۲٪. بدون هزینه پنهان، بدون کارمزد اداری، بدون کارمزد برداشت.",
+    faq6q: "اگر استخر قطع شود چه؟",
+    faq6a: "ماینرهای شما به طور خودکار به استخر بالادستی متصل می‌شوند. درآمد شما هرگز از دست نمی‌رود.",
+    faq7q: "کدام سخت‌افزار سازگار است؟",
+    faq7a: "تمام سخت‌افزارهای سازگار با Stratum: Antminer، Whatsminer، Avalon، CGMiner، BFGMiner و غیره.",
+    faq8q: "پرداخت‌ها چگونه کار می‌کنند؟",
+    faq8a: "آدرس بیت‌کوین خود را در تنظیمات وارد کنید. وقتی موجودی از ۰.۰۰۱ BTC بیشتر شد، درخواست پرداخت دهید.",
     ctaTitle: "آماده شروع ماینینگ هستید؟",
-    ctaDesc: "به جمع ماینرهایی بپیوندید که با مدل کارمزد شفاف ۲٪ Hashrial بیت‌کوین استخراج می‌کنند.",
-    createAccount: "ایجاد حساب رایگان",
-    subtitle: "پراکسی استراتوم با کارایی بالا با مدل کارمزد شفاف ۲٪. ۹۸٪ از هش‌ریت شما مستقیماً به حساب شخصی شما در آنت‌پول واریز می‌شود.",
-    heroDesc1: "پراکسی استراتوم با کارایی بالا",
-    heroDesc2: "۹۸٪ هش‌ریت برای شما",
-    heroDesc3: "کارمزد شفاف ۲٪",
-    heroDesc4: "داشبورد زنده",
-    learnMore: "بیشتر بدانید",
-    totalUsers: "کاربران کل",
-    currentlyMining: "در حال ماینینگ",
-    perShareRouted: "به ازای هر سهم",
-    registered: "ثبت‌نام شده",
-    gettingStarted: "شروع کنید",
-    threeSteps: "سه مرحله ساده برای شروع ماینینگ بیت‌کوین با Hashrial",
-    liveData: "داده‌های زنده",
-    whyUsTag: "چرا ما",
-    builtFor: "طراحی شده برای ماینرهای حرفه‌ای که شفافیت، عملکرد و قابلیت اطمینان می‌خواهند",
-    compatibility: "سازگاری",
-    compatibilityDesc: "Hashrial از تمام ماینرهای ASIC و نرم‌افزارهای ماینینگ پشتیبانی می‌کند.",
-    testimonialsTag: "نظرات",
-    configTitle: "تنظیمات Stratum",
-    support: "پشتیبانی",
-    quickLinks: "لینک‌های سریع",
-    account: "حساب",
-    signIn: "ورود",
-    createAccountFooter: "ایجاد حساب",
-    language: "زبان",
-    allRightsReserved: "تمام حقوق محفوظ است.",
-    terms: "شرایط",
-    privacy: "حریم خصوصی",
-    contact: "تماس",
-    networkHashrate: "هش‌ریت شبکه",
-    poolUsers: "کاربران استخر",
-    poolFeeLabel: "کارمزد استخر",
-    industryStandard: "استاندارد صنعت — مشابه F2Pool، ViaBTC",
+    ctaDesc: "به جمع ماینرهایی بپیوندید که با مدل شفاف ۲٪ Hashrial بیت‌کوین استخراج می‌کنند.",
+    ctaBtn: "ایجاد حساب رایگان",
+    footerText: "استخر حرفه‌ای ماینینگ بیت‌کوین. کارمزد کم، قابلیت اطمینان بالا، شفافیت کامل.",
+    quickLinks: "لینک‌های سریع", account: "حساب",
+    signIn: "ورود", createAccount: "ایجاد حساب",
+    language: "زبان", allRights: "تمام حقوق محفوظ است.",
+    terms: "شرایط", privacy: "حریم خصوصی", contact: "تماس",
+    poolFee: "کارمزد ثابت ۲٪",
   },
   zh: {
-    startMining: "开始挖矿",
-    memberArea: "会员专区",
-    configDesc: "输入您的 Hashrial 用户名以生成个性化的 ASIC 配置。",
-    usernameLabel: "您的用户名",
-    stratumUrl: "Stratum 地址",
-    stratumUser: "矿工用户名",
-    stratumPass: "密码",
-    copy: "复制",
-    copied: "已复制！",
-    footerText: "Hashrial 矿池。完全去中心化的 Stratum 代理，直接集成 Antpool。",
-    home: "首页",
-    features: "特点",
-    faqLink: "常见问题",
-    login: "登录",
-    signUp: "注册",
-    heroTag: "比特币矿池",
-    activeMiners: "活跃矿工",
-    btcPrice: "比特币价格",
-    feeText: "矿池费率",
-    connecting: "连接中...",
-    whyUs: "为什么选择 Hashrial？",
-    whyUs1: "每第50个份额用于基础设施。您保留98%的算力。无隐藏费用。",
-    whyUs2: "专为规模而设计 — 处理数千个并发 Stratum 连接，亚毫秒级延迟。",
-    whyUs3: "实时图表、矿工监控、收益历史、支付管理和即时通知。",
-    whyUs4: "直接集成 Antpool API，实现准确的余额和算力跟踪。",
-    whyUs5: "多语言支持 — 英语、波斯语、中文、俄语、西班牙语等。",
-    whyUs6: "企业级安全 — JWT 认证、速率限制、CORS 保护、SQL 注入防护。",
-    howItWorks: "工作原理",
+    navHome: "首页", navFeatures: "特点", navMining: "如何挖矿", navFaq: "常见问题",
+    login: "登录", signUp: "注册",
+    heroTitle1: "比特币挖矿",
+    heroTitle2: "零妥协",
+    heroSub: "专业级 Stratum 代理。固定 2% 费用。98% 算力直接进入您的账户。完全透明，无隐藏费用。",
+    heroCta: "免费开始挖矿",
+    heroStat1: "活跃矿工",
+    heroStat2: "矿池算力",
+    heroStat3: "已发现区块",
+    howTitle: "3 分钟开始挖矿",
+    howSub: "比任何其他矿池更快连接并开始赚取。",
     howStep1: "创建账户",
-    howStep1Desc: "用您的邮箱注册并选择用户名。您的用户名就是您的矿池身份。",
+    howStep1Desc: "用您的邮箱注册。选择一个用户名 — 这是您的矿池身份。",
     howStep2: "配置矿机",
-    howStep2Desc: "将您的 ASIC 或挖矿软件指向 stratum+tcp://hashrial.com:3333。",
-    howStep3: "开始赚取",
-    howStep3Desc: "在仪表板上实时查看算力和收益更新。随时请求付款。",
-    networkStats: "网络统计",
-    globalHashrate: "比特币网络算力",
-    btcPriceLabel: "BTC/USD 价格",
-    poolWorkers: "矿池矿工",
-    poolFee: "矿池费率",
-    supportedHardware: "支持的硬件",
-    hwTitle: "兼容所有主要 ASIC",
-    hwDesc: "Hashrial 支持所有主要 ASIC 矿机和挖矿软件。一次配置，永久挖矿。",
-    antminer: "Antminer",
-    antminerDesc: "Bitmain Antminer S19、S21、S19 Pro、T21 及所有运行 v2024+ 固件的型号",
-    whatsminer: "Whatsminer",
-    whatsminerDesc: "MicroBT Whatsminer M50、M60、M66、M30S 及所有型号",
-    avalon: "Avalon",
-    avalonDesc: "Canaan Avalon A12、A13、A15、A1566 — 所有代次",
-    cpuGpu: "CPU / GPU",
-    cpuGpuDesc: "CGMiner、BFGMiner、Awesome Miner、NiceHash 及任何兼容 Stratum 的软件",
-    testimonials: "矿工评价",
-    testimonial1: "直接从 Antpool 切换过来。Hashrial 的透明性无与伦比。",
-    testimonial2: "连续挖矿6个月零停机。仪表板整洁，付款准时。",
-    testimonial3: "API 非常稳定。构建了一个实时跟踪每个矿工的自定义监控仪表板。",
-    testimonial4: "在 Hashrial 上运行 12 台 ASIC 已 3 个月。设置只需 5 分钟。",
-    faq: "常见问题",
+    howStep2Desc: "将您的 ASIC 或软件指向 stratum+tcp://hashrial.com:3333。",
+    howStep3: "跟踪并赚取",
+    howStep3Desc: "实时监控您的算力、份额和收益。随时请求支付，最低 0.001 BTC。",
+    featuresTitle: "为专业矿工打造",
+    featuresSub: "每个功能都旨在最大化您的挖矿盈利能力和完全控制。",
+    feat1: "固定 2% 费用",
+    feat1Desc: "可预测的定价。每第50个份额用于基础设施 — 您保留98%。",
+    feat2: "实时仪表板",
+    feat2Desc: "实时算力图表、矿工监控、收益历史记录和支付管理。",
+    feat3: "企业级安全",
+    feat3Desc: "JWT 认证、速率限制、CORS 保护、SQL 注入防护。",
+    feat4: "多语言",
+    feat4Desc: "支持英语、中文、俄语、西班牙语、葡萄牙语、波斯语。",
+    feat5: "全球低延迟",
+    feat5Desc: "处理数千个并发 Stratum 连接，亚毫秒级路由延迟。",
+    feat6: "即时支付",
+    feat6Desc: "随时请求提款。最低 0.001 BTC。每周处理，完整的链上跟踪。",
+    hardwareTitle: "兼容所有主要 ASIC",
+    hardwareSub: "Antminer、Whatsminer、Avalon、GPU 矿机 — 只要支持 Stratum 就可以。",
+    faqTitle: "常见问题",
+    faq1q: "矿池费用是多少？",
+    faq1a: "每份额 2%。每第50个份额用于矿池基础设施。98% 的算力直接进入您的个人账户。",
+    faq2q: "我需要自己的矿池账户吗？",
+    faq2a: "不需要。Hashrial 在后端处理一切。您只需注册、配置矿机即可开始。",
+    faq3q: "最低支付额是多少？",
+    faq3a: "0.001 BTC。每周支付到您的比特币地址。",
+    faq4q: "可以使用多个矿工吗？",
+    faq4a: "可以。在配置中使用 username.rig01、username.rig02 等工作名称。",
+    faq5q: "有隐藏费用吗？",
+    faq5a: "没有。完全透明。2% 矿池费用。无隐藏费用、无管理费、无提款费。",
+    faq6q: "如果矿池断开连接怎么办？",
+    faq6a: "如果 Hashrial 断开，您的矿机将自动切换到上游矿池。收益永远不会丢失。",
+    faq7q: "哪些硬件兼容？",
+    faq7a: "所有兼容 Stratum 的硬件：Antminer、Whatsminer、Avalon、CGMiner、BFGMiner 等。",
+    faq8q: "支付如何工作？",
+    faq8a: "在设置中输入您的比特币地址。余额超过 0.001 BTC 时请求支付。每周五处理。",
     ctaTitle: "准备好开始挖矿了吗？",
-    ctaDesc: "加入数百名矿工，通过 Hashrial 透明的 2% 费率模式赚取比特币。",
-    createAccount: "创建免费账户",
-    subtitle: "高性能 Stratum 代理，透明的 2% 费率模式。98% 的算力直接进入您自己的 Antpool 子账户。",
-    heroDesc1: "高性能 Stratum 代理",
-    heroDesc2: "98% 算力归您",
-    heroDesc3: "2% 透明费率",
-    heroDesc4: "实时仪表板",
-    learnMore: "了解更多",
-    totalUsers: "总用户",
-    currentlyMining: "正在挖矿",
-    perShareRouted: "每份额路由",
-    registered: "已注册",
-    gettingStarted: "开始使用",
-    threeSteps: "三个简单步骤开始使用 Hashrial 挖比特币",
-    liveData: "实时数据",
-    whyUsTag: "为什么选择我们",
-    builtFor: "为追求透明度、性能和可靠性的专业矿工打造",
-    compatibility: "兼容性",
-    compatibilityDesc: "Hashrial 支持所有主要 ASIC 矿机和挖矿软件。一次配置，永久挖矿。",
-    testimonialsTag: "评价",
-    configTitle: "Stratum 配置器",
-    support: "支持",
-    quickLinks: "快速链接",
-    account: "账户",
-    signIn: "登录",
-    createAccountFooter: "创建账户",
-    language: "语言",
-    allRightsReserved: "版权所有。",
-    terms: "条款",
-    privacy: "隐私",
-    contact: "联系",
-    networkHashrate: "网络算力",
-    poolUsers: "矿池用户",
-    poolFeeLabel: "矿池费率",
-    industryStandard: "行业标准 — 与 F2Pool、ViaBTC 相同",
+    ctaDesc: "加入数百名矿工，通过 Hashrial 透明 2% 费率模式赚取比特币。",
+    ctaBtn: "创建免费账户",
+    footerText: "专业比特币矿池。低费用、高可靠性、完全透明。",
+    quickLinks: "快速链接", account: "账户",
+    signIn: "登录", createAccount: "创建账户",
+    language: "语言", allRights: "版权所有。",
+    terms: "条款", privacy: "隐私", contact: "联系",
+    poolFee: "固定 2% 费率",
   },
   ru: {
-    startMining: "Начать майнинг",
-    memberArea: "Личный кабинет",
-    configDesc: "Введите имя пользователя Hashrial для генерации конфигурации ASIC.",
-    usernameLabel: "Ваше имя пользователя",
-    stratumUrl: "URL Stratum",
-    stratumUser: "Имя майнера",
-    stratumPass: "Пароль",
-    copy: "Копировать",
-    copied: "Скопировано!",
-    footerText: "Майнинг-пул Hashrial. Полностью децентрализованный Stratum-прокси с прямой интеграцией Antpool.",
-    home: "Главная",
-    features: "Возможности",
-    faqLink: "FAQ",
-    login: "Войти",
-    signUp: "Регистрация",
-    heroTag: "БИТКОИН МАЙНИНГ ПУЛ",
-    activeMiners: "Активные майнеры",
-    btcPrice: "Цена Биткоина",
-    feeText: "Комиссия пула",
-    connecting: "Подключение...",
-    whyUs: "Почему Hashrial?",
-    whyUs1: "Каждая 50-я доля направляется на инфраструктуру. Вы сохраняете 98% хешрейта. Без скрытых комиссий.",
-    whyUs2: "Создан для масштаба — тысячи одновременных Stratum-соединений с субмиллисекундной задержкой.",
-    whyUs3: "Реальные графики, мониторинг майнеров, история доходов и мгновенные уведомления.",
-    whyUs4: "Прямая интеграция с Antpool API для точного отслеживания баланса и хешрейта.",
-    whyUs5: "Многоязычная поддержка — английский, персидский, китайский, русский, испанский и другие.",
-    whyUs6: "Безопасность корпоративного уровня — JWT, ограничение запросов, CORS, защита от SQL-инъекций.",
-    howItWorks: "Как это работает",
+    navHome: "Главная", navFeatures: "Возможности", navMining: "Как майнить", navFaq: "FAQ",
+    login: "Войти", signUp: "Регистрация",
+    heroTitle1: "Майнинг Биткоина",
+    heroTitle2: "Без Компромиссов",
+    heroSub: "Профессиональный Stratum-прокси. Фиксированная комиссия 2%. 98% хешрейта напрямую на ваш счет. Полная прозрачность.",
+    heroCta: "Начать майнинг",
+    heroStat1: "Активные майнеры",
+    heroStat2: "Хешрейт пула",
+    heroStat3: "Найдено блоков",
+    howTitle: "Начните за 3 минуты",
+    howSub: "Подключайтесь и зарабатывайте быстрее, чем на любом другом пуле.",
     howStep1: "Создать аккаунт",
-    howStep1Desc: "Зарегистрируйтесь с email и выберите имя пользователя. Это ваша идентичность в пуле.",
-    howStep2: "Настроить майнеры",
-    howStep2Desc: "Направьте ваши ASIC на stratum+tcp://hashrial.com:3333, используя ваше имя пользователя.",
-    howStep3: "Начать зарабатывать",
-    howStep3Desc: "Наблюдайте за хешрейтом и доходом в реальном времени. Запрашивайте выплаты в любое время.",
-    networkStats: "Статистика сети",
-    globalHashrate: "Хешрейт сети Биткоин",
-    btcPriceLabel: "Цена BTC/USD",
-    poolWorkers: "Майнеры пула",
-    poolFee: "Комиссия пула",
-    supportedHardware: "Поддерживаемое оборудование",
-    hwTitle: "Совместимость со всеми основными ASIC",
-    hwDesc: "Hashrial поддерживает все основные ASIC-майнеры и программное обеспечение для майнинга.",
-    antminer: "Antminer",
-    antminerDesc: "Bitmain Antminer S19, S21, S19 Pro, T21 и все модели с прошивкой v2024+",
-    whatsminer: "Whatsminer",
-    whatsminerDesc: "MicroBT Whatsminer M50, M60, M66, M30S и все модели",
-    avalon: "Avalon",
-    avalonDesc: "Canaan Avalon A12, A13, A15, A1566 — все поколения",
-    cpuGpu: "CPU / GPU",
-    cpuGpuDesc: "CGMiner, BFGMiner, Awesome Miner, NiceHash и любое Stratum-совместимое ПО",
-    testimonials: "Отзывы майнеров",
-    testimonial1: "Перешел напрямую с Antpool. Прозрачность Hashrial непревзойденна.",
-    testimonial2: "Майню 6 месяцев без простоев. Дашборд отличный, выплаты всегда вовремя.",
-    testimonial3: "API очень надежный. Построил собственную панель мониторинга для 30+ майнеров.",
-    testimonial4: "12 ASIC на Hashrial уже 3 месяца. Настройка заняла 5 минут.",
-    faq: "Часто задаваемые вопросы",
+    howStep1Desc: "Зарегистрируйтесь с email. Выберите имя пользователя — ваш идентификатор в пуле.",
+    howStep2: "Настроить майнер",
+    howStep2Desc: "Направьте ваш ASIC на stratum+tcp://hashrial.com:3333, используя ваше имя пользователя.",
+    howStep3: "Отслеживайте",
+    howStep3Desc: "Мониторьте хешрейт, шеры и доход в реальном времени. Запрашивайте выплаты от 0.001 BTC.",
+    featuresTitle: "Для серьезных майнеров",
+    featuresSub: "Каждая функция для максимальной прибыльности и полного контроля.",
+    feat1: "Фикс. комиссия 2%",
+    feat1Desc: "Каждая 50-я шера на инфраструктуру — вы сохраняете 98%. Без сюрпризов.",
+    feat2: "Дашборд онлайн",
+    feat2Desc: "Графики хешрейта, мониторинг майнеров, история доходов и выплат.",
+    feat3: "Безопасность",
+    feat3Desc: "JWT аутентификация, лимиты запросов, CORS защита, SQL-инъекции.",
+    feat4: "Многоязычность",
+    feat4Desc: "Английский, русский, китайский, испанский, португальский, персидский.",
+    feat5: "Низкая задержка",
+    feat5Desc: "Тысячи Stratum-соединений с субмиллисекундной задержкой.",
+    feat6: "Мгновенные выплаты",
+    feat6Desc: "Запрашивайте вывод в любое время. От 0.001 BTC. Еженедельные выплаты.",
+    hardwareTitle: "Работает со всеми ASIC",
+    hardwareSub: "Antminer, Whatsminer, Avalon, GPU — если поддерживает Stratum, майнит здесь.",
+    faqTitle: "Часто задаваемые вопросы",
+    faq1q: "Какая комиссия пула?",
+    faq1a: "2% за шеру. Каждая 50-я шера идет на инфраструктуру. 98% хешрейта напрямую вам.",
+    faq2q: "Нужен свой аккаунт пула?",
+    faq2a: "Нет. Hashrial управляет всем. Просто зарегистрируйтесь и настройте майнеры.",
+    faq3q: "Минимальная выплата?",
+    faq3a: "0.001 BTC. Еженедельные выплаты на ваш Bitcoin адрес.",
+    faq4q: "Можно несколько майнеров?",
+    faq4a: "Да. Используйте имена: username.rig01, username.rig02 и т.д.",
+    faq5q: "Есть скрытые комиссии?",
+    faq5a: "Нет. Полная прозрачность. 2% комиссия пула. Без скрытых платежей.",
+    faq6q: "Что если пул отключится?",
+    faq6a: "Майнеры автоматически переключатся на вышестоящий пул. Доход не теряется.",
+    faq7q: "Какое оборудование подходит?",
+    faq7a: "Все Stratum-совместимое: Antminer, Whatsminer, Avalon, CGMiner, BFGMiner и др.",
+    faq8q: "Как работают выплаты?",
+    faq8a: "Укажите Bitcoin адрес в настройках. При балансе от 0.001 BTC запросите выплату.",
     ctaTitle: "Готовы начать майнинг?",
-    ctaDesc: "Присоединяйтесь к сотням майнеров, зарабатывающих Биткоин с прозрачной комиссией 2%.",
-    createAccount: "Создать аккаунт",
-    subtitle: "Высокопроизводительный Stratum-прокси с прозрачной комиссией 2%. 98% вашего хешрейта идет напрямую в ваш субаккаунт Antpool.",
-    heroDesc1: "Высокопроизводительный Stratum-прокси",
-    heroDesc2: "98% Хешрейта Вам",
-    heroDesc3: "Прозрачная комиссия 2%",
-    heroDesc4: "Дашборд в реальном времени",
-    learnMore: "Узнать больше",
-    totalUsers: "Всего пользователей",
-    currentlyMining: "Сейчас майнят",
-    perShareRouted: "За каждую долю",
-    registered: "Зарегистрировано",
-    gettingStarted: "Начало работы",
-    threeSteps: "Три простых шага для начала майнинга Биткоина с Hashrial",
-    liveData: "Живые данные",
-    whyUsTag: "Почему мы",
-    builtFor: "Создан для серьезных майнеров, требующих прозрачности, производительности и надежности",
-    compatibility: "Совместимость",
-    compatibilityDesc: "Hashrial поддерживает все основные ASIC-майнеры и ПО для майнинга.",
-    testimonialsTag: "Отзывы",
-    configTitle: "Конфигуратор Stratum",
-    support: "Поддержка",
-    quickLinks: "Быстрые ссылки",
-    account: "Аккаунт",
-    signIn: "Войти",
-    createAccountFooter: "Создать аккаунт",
-    language: "Язык",
-    allRightsReserved: "Все права защищены.",
-    terms: "Условия",
-    privacy: "Конфиденциальность",
-    contact: "Контакты",
-    networkHashrate: "Хешрейт сети",
-    poolUsers: "Пользователи пула",
-    poolFeeLabel: "Комиссия пула",
-    industryStandard: "Отраслевой стандарт — как F2Pool, ViaBTC",
+    ctaDesc: "Присоединяйтесь к сотням майнеров с прозрачной комиссией 2%.",
+    ctaBtn: "Создать аккаунт",
+    footerText: "Профессиональный Bitcoin майнинг-пул. Низкие комиссии, надежность, прозрачность.",
+    quickLinks: "Быстрые ссылки", account: "Аккаунт",
+    signIn: "Войти", createAccount: "Создать аккаунт",
+    language: "Язык", allRights: "Все права защищены.",
+    terms: "Условия", privacy: "Конфиденциальность", contact: "Контакты",
+    poolFee: "Комиссия 2%",
   },
   es: {
-    startMining: "Empezar a Minar",
-    memberArea: "Área de Miembros",
-    configDesc: "Ingrese su nombre de usuario de Hashrial para generar su configuración ASIC personalizada.",
-    usernameLabel: "Su Usuario",
-    stratumUrl: "URL Stratum",
-    stratumUser: "Usuario Minero",
-    stratumPass: "Contraseña",
-    copy: "Copiar",
-    copied: "¡Copiado!",
-    footerText: "Hashrial Mining Pool. Proxy Stratum completamente descentralizado con integración directa a Antpool.",
-    home: "Inicio",
-    features: "Características",
-    faqLink: "FAQ",
-    login: "Iniciar Sesión",
-    signUp: "Registrarse",
-    heroTag: "POOL DE MINERÍA BITCOIN",
-    activeMiners: "Mineros Activos",
-    btcPrice: "Precio Bitcoin",
-    feeText: "Comisión del Pool",
-    connecting: "Conectando...",
-    whyUs: "¿Por qué minar con Hashrial?",
-    whyUs1: "Cada 50ª acción se destina a infraestructura. Usted conserva el 98% del hashrate. Sin comisiones ocultas.",
-    whyUs2: "Construido para escalar — maneja miles de conexiones Stratum simultáneas con latencia de submilisegundos.",
-    whyUs3: "Gráficos en tiempo real, monitoreo de mineros, historial de ganancias y notificaciones instantáneas.",
-    whyUs4: "Integración directa con la API de Antpool para seguimiento preciso del saldo y hashrate.",
-    whyUs5: "Soporte multilingüe — inglés, persa, chino, ruso, español y más.",
-    whyUs6: "Seguridad de nivel empresarial — JWT, límite de velocidad, protección CORS, prevención de SQL injection.",
-    howItWorks: "Cómo Funciona",
+    navHome: "Inicio", navFeatures: "Características", navMining: "Cómo Minar", navFaq: "FAQ",
+    login: "Iniciar", signUp: "Registrarse",
+    heroTitle1: "Minar Bitcoin",
+    heroTitle2: "Sin Compromisos",
+    heroSub: "Proxy Stratum profesional. Tarifa fija del 2%. 98% del hashrate directo a su cuenta. Transparencia total.",
+    heroCta: "Empezar Gratis",
+    heroStat1: "Trabajadores Activos",
+    heroStat2: "Hashrate del Pool",
+    heroStat3: "Bloques Encontrados",
+    howTitle: "Empiece en 3 Minutos",
+    howSub: "Conéctese y gane más rápido que en cualquier otro pool.",
     howStep1: "Crear Cuenta",
-    howStep1Desc: "Regístrese con su email y elija un nombre de usuario. Su usuario es su identidad en el pool.",
-    howStep2: "Configurar Mineros",
-    howStep2Desc: "Apunte sus ASICs a stratum+tcp://hashrial.com:3333 usando su nombre de usuario.",
-    howStep3: "Empezar a Ganar",
-    howStep3Desc: "Vea su hashrate y ganancias actualizarse en tiempo real. Solicite pagos en cualquier momento.",
-    networkStats: "Estadísticas de Red",
-    globalHashrate: "Hashrate Red Bitcoin",
-    btcPriceLabel: "Precio BTC/USD",
-    poolWorkers: "Trabajadores del Pool",
-    poolFee: "Comisión del Pool",
-    supportedHardware: "Hardware Compatible",
-    hwTitle: "Compatible con Todos los ASICs Principales",
-    hwDesc: "Hashrial soporta todos los mineros ASIC y software de minería principales.",
-    antminer: "Antminer",
-    antminerDesc: "Bitmain Antminer S19, S21, S19 Pro, T21 y todos los modelos con firmware v2024+",
-    whatsminer: "Whatsminer",
-    whatsminerDesc: "MicroBT Whatsminer M50, M60, M66, M30S y todos los modelos",
-    avalon: "Avalon",
-    avalonDesc: "Canaan Avalon A12, A13, A15, A1566 — todas las generaciones",
-    cpuGpu: "CPU / GPU",
-    cpuGpuDesc: "CGMiner, BFGMiner, Awesome Miner, NiceHash y cualquier software compatible con Stratum",
-    testimonials: "Lo Que Dicen Nuestros Mineros",
-    testimonial1: "Vine directamente desde Antpool. La transparencia de Hashrial es inigualable.",
-    testimonial2: "Minando 6 meses seguidos sin interrupciones. El panel es limpio y los pagos siempre a tiempo.",
-    testimonial3: "La API es sólida. Construí un panel personalizado que rastrea cada trabajador en tiempo real.",
-    testimonial4: "12 ASICs en Hashrial por 3 meses. La configuración tomó 5 minutos.",
-    faq: "Preguntas Frecuentes",
-    ctaTitle: "¿Listo para Empezar a Minar?",
-    ctaDesc: "Únase a cientos de mineros que ya ganan Bitcoin con el modelo transparente de 2% de Hashrial.",
-    createAccount: "Crear Cuenta Gratis",
-    subtitle: "Proxy Stratum de alto rendimiento con un modelo de comisión transparente del 2%. El 98% de su hashrate va directamente a su subcuenta de Antpool.",
-    heroDesc1: "Proxy Stratum de alto rendimiento",
-    heroDesc2: "98% del Hashrate Para Usted",
-    heroDesc3: "Comisión Transparente del 2%",
-    heroDesc4: "Panel en Tiempo Real",
-    learnMore: "Más Información",
-    totalUsers: "Usuarios Totales",
-    currentlyMining: "Minando Ahora",
-    perShareRouted: "Por Acción Enrutada",
-    registered: "Registrados",
-    gettingStarted: "Primeros Pasos",
-    threeSteps: "Tres simples pasos para empezar a minar Bitcoin con Hashrial",
-    liveData: "Datos en Vivo",
-    whyUsTag: "Por Qué Nosotros",
-    builtFor: "Construido para mineros serios que exigen transparencia, rendimiento y confiabilidad",
-    compatibility: "Compatibilidad",
-    compatibilityDesc: "Hashrial soporta todos los mineros ASIC y software de minería principales.",
-    testimonialsTag: "Testimonios",
-    configTitle: "Configurador Stratum",
-    support: "Soporte",
-    quickLinks: "Enlaces Rápidos",
-    account: "Cuenta",
-    signIn: "Iniciar Sesión",
-    createAccountFooter: "Crear Cuenta",
-    language: "Idioma",
-    allRightsReserved: "Todos los derechos reservados.",
-    terms: "Términos",
-    privacy: "Privacidad",
-    contact: "Contacto",
-    networkHashrate: "Hashrate de Red",
-    poolUsers: "Usuarios del Pool",
-    poolFeeLabel: "Comisión del Pool",
-    industryStandard: "Estándar de la industria — como F2Pool, ViaBTC",
+    howStep1Desc: "Regístrese con su email. Elija un nombre de usuario — su identidad en el pool.",
+    howStep2: "Configurar Minero",
+    howStep2Desc: "Apunte su ASIC a stratum+tcp://hashrial.com:3333 usando su usuario.",
+    howStep3: "Monitoree y Gane",
+    howStep3Desc: "Vea hashrate, shares y ganancias en tiempo real. Solicite pagos desde 0.001 BTC.",
+    featuresTitle: "Para Mineros Serios",
+    featuresSub: "Cada función maximiza su rentabilidad y le da control total.",
+    feat1: "Tarifa Fija 2%",
+    feat1Desc: "Cada 50ª share para infraestructura — usted conserva el 98%. Sin sorpresas.",
+    feat2: "Dashboard en Vivo",
+    feat2Desc: "Gráficos de hashrate, monitoreo de workers, historial de ganancias y pagos.",
+    feat3: "Seguridad Empresarial",
+    feat3Desc: "Autenticación JWT, límites de tasa, protección CORS y SQL injection.",
+    feat4: "Multilenguaje",
+    feat4Desc: "Inglés, español, chino, ruso, portugués y persa.",
+    feat5: "Baja Latencia Global",
+    feat5Desc: "Miles de conexiones Stratum con latencia de submilisegundos.",
+    feat6: "Pagos Instantáneos",
+    feat6Desc: "Solicite retiros cuando quiera. Mínimo 0.001 BTC. Pagos semanales.",
+    hardwareTitle: "Funciona con Todo ASIC",
+    hardwareSub: "Antminer, Whatsminer, Avalon, GPU — si habla Stratum, mina aquí.",
+    faqTitle: "Preguntas Frecuentes",
+    faq1q: "¿Cuál es la tarifa del pool?",
+    faq1a: "2% por share. Cada 50ª share va a infraestructura. El 98% del hashrate va directo a su cuenta.",
+    faq2q: "¿Necesito mi propia cuenta?",
+    faq2a: "No. Hashrial maneja todo. Solo regístrese y configure sus mineros.",
+    faq3q: "¿Pago mínimo?",
+    faq3a: "0.001 BTC. Pagos semanales a su dirección Bitcoin.",
+    faq4q: "¿Puedo usar varios workers?",
+    faq4a: "Sí. Use nombres como username.rig01, username.rig02.",
+    faq5q: "¿Hay tarifas ocultas?",
+    faq5a: "No. Transparencia total. 2% de comisión. Sin cargos ocultos.",
+    faq6q: "¿Si el pool se desconecta?",
+    faq6a: "Sus mineros cambian automáticamente al pool upstream. Sus ganancias nunca se pierden.",
+    faq7q: "¿Qué hardware es compatible?",
+    faq7a: "Todo hardware compatible con Stratum: Antminer, Whatsminer, Avalon, CGMiner, etc.",
+    faq8q: "¿Cómo funcionan los pagos?",
+    faq8a: "Configure su dirección Bitcoin. Cuando supere 0.001 BTC, solicite el pago.",
+    ctaTitle: "¿Listo para Minar?",
+    ctaDesc: "Únase a cientos de mineros con el modelo transparente de 2%.",
+    ctaBtn: "Crear Cuenta Gratis",
+    footerText: "Pool profesional de minería Bitcoin. Bajas tarifas, alta confiabilidad, transparencia.",
+    quickLinks: "Enlaces", account: "Cuenta",
+    signIn: "Iniciar Sesión", createAccount: "Crear Cuenta",
+    language: "Idioma", allRights: "Todos los derechos reservados.",
+    terms: "Términos", privacy: "Privacidad", contact: "Contacto",
+    poolFee: "Tarifa Fija 2%",
   },
   pt: {
-    startMining: "Começar a Minerar",
-    memberArea: "Área do Membro",
-    configDesc: "Insira seu nome de usuário Hashrial para gerar sua configuração ASIC personalizada.",
-    usernameLabel: "Seu Usuário",
-    stratumUrl: "URL Stratum",
-    stratumUser: "Usuário do Worker",
-    stratumPass: "Senha",
-    copy: "Copiar",
-    copied: "Copiado!",
-    footerText: "Hashrial Mining Pool. Proxy Stratum totalmente descentralizado com integração direta com Antpool.",
-    home: "Início",
-    features: "Recursos",
-    faqLink: "FAQ",
-    login: "Entrar",
-    signUp: "Cadastrar",
-    heroTag: "POOL DE MINERAÇÃO BITCOIN",
-    activeMiners: "Mineradores Ativos",
-    btcPrice: "Preço do Bitcoin",
-    feeText: "Taxa do Pool",
-    connecting: "Conectando...",
-    whyUs: "Por que Minerar com Hashrial?",
-    whyUs1: "A cada 50ª ação é direcionada para infraestrutura. Você mantém 98% do hashrate. Sem taxas ocultas.",
-    whyUs2: "Construído para escala — gerencie milhares de conexões Stratum simultâneas com latência de submilissegundos.",
-    whyUs3: "Gráficos em tempo real, monitoramento de workers, histórico de ganhos e notificações instantâneas.",
-    whyUs4: "Integração direta com a API Antpool para rastreamento preciso de saldo e hashrate.",
-    whyUs5: "Suporte multilíngue — inglês, persa, chinês, russo, espanhol e mais.",
-    whyUs6: "Segurança nível empresarial — JWT, limite de taxa, proteção CORS, prevenção de SQL injection.",
-    howItWorks: "Como Funciona",
+    navHome: "Início", navFeatures: "Recursos", navMining: "Como Minerar", navFaq: "FAQ",
+    login: "Entrar", signUp: "Cadastrar",
+    heroTitle1: "Minere Bitcoin",
+    heroTitle2: "Sem Compromissos",
+    heroSub: "Proxy Stratum profissional. Taxa fixa de 2%. 98% do hashrate direto para sua conta. Transparência total.",
+    heroCta: "Comece Grátis",
+    heroStat1: "Trabalhadores Ativos",
+    heroStat2: "Hashrate do Pool",
+    heroStat3: "Blocos Encontrados",
+    howTitle: "Comece em 3 Minutos",
+    howSub: "Conecte-se e ganhe mais rápido que qualquer outro pool.",
     howStep1: "Criar Conta",
-    howStep1Desc: "Registre-se com seu email e escolha um nome de usuário. Seu usuário é sua identidade no pool.",
-    howStep2: "Configurar Mineradores",
-    howStep2Desc: "Aponte seus ASICs para stratum+tcp://hashrial.com:3333 usando seu nome de usuário.",
-    howStep3: "Começar a Ganhar",
-    howStep3Desc: "Veja seu hashrate e ganhos em tempo real. Solicite pagamentos a qualquer momento.",
-    networkStats: "Estatísticas da Rede",
-    globalHashrate: "Hashrate da Rede Bitcoin",
-    btcPriceLabel: "Preço BTC/USD",
-    poolWorkers: "Trabalhadores do Pool",
-    poolFee: "Taxa do Pool",
-    supportedHardware: "Hardware Suportado",
-    hwTitle: "Compatível com Todos os Principais ASICs",
-    hwDesc: "Hashrial suporta todos os principais mineradores ASIC e softwares de mineração.",
-    antminer: "Antminer",
-    antminerDesc: "Bitmain Antminer S19, S21, S19 Pro, T21 e todos os modelos com firmware v2024+",
-    whatsminer: "Whatsminer",
-    whatsminerDesc: "MicroBT Whatsminer M50, M60, M66, M30S e todos os modelos",
-    avalon: "Avalon",
-    avalonDesc: "Canaan Avalon A12, A13, A15, A1566 — todas as gerações",
-    cpuGpu: "CPU / GPU",
-    cpuGpuDesc: "CGMiner, BFGMiner, Awesome Miner, NiceHash e qualquer software compatível com Stratum",
-    testimonials: "O Que Nossos Mineradores Dizem",
-    testimonial1: "Vim direto do Antpool. A transparência do Hashrial é incomparável.",
-    testimonial2: "Minero há 6 meses sem parar. O painel é limpo e os pagamentos sempre no prazo.",
-    testimonial3: "A API é sólida. Construí um painel personalizado que rastreia cada worker em tempo real.",
-    testimonial4: "12 ASICs no Hashrial há 3 meses. A configuração levou 5 minutos.",
-    faq: "Perguntas Frequentes",
-    ctaTitle: "Pronto para Começar a Minerar?",
-    ctaDesc: "Junte-se a centenas de mineradores que já ganham Bitcoin com o modelo transparente de 2% do Hashrial.",
-    createAccount: "Criar Conta Gratuita",
-    subtitle: "Proxy Stratum de alto desempenho com modelo de taxa transparente de 2%. 98% do seu hashrate vai diretamente para sua subconta Antpool.",
-    heroDesc1: "Proxy Stratum de alto desempenho",
-    heroDesc2: "98% do Hashrate Para Você",
-    heroDesc3: "Taxa Transparente de 2%",
-    heroDesc4: "Painel em Tempo Real",
-    learnMore: "Saiba Mais",
-    totalUsers: "Total de Usuários",
-    currentlyMining: "Mineração Agora",
-    perShareRouted: "Por Ação Roteada",
-    registered: "Registrados",
-    gettingStarted: "Primeiros Passos",
-    threeSteps: "Três passos simples para começar a minerar Bitcoin com Hashrial",
-    liveData: "Dados ao Vivo",
-    whyUsTag: "Por Que Nós",
-    builtFor: "Construído para mineradores sérios que exigem transparência, desempenho e confiabilidade",
-    compatibility: "Compatibilidade",
-    compatibilityDesc: "Hashrial suporta todos os principais mineradores ASIC e softwares de mineração.",
-    testimonialsTag: "Depoimentos",
-    configTitle: "Configurador Stratum",
-    support: "Suporte",
-    quickLinks: "Links Rápidos",
-    account: "Conta",
-    signIn: "Entrar",
-    createAccountFooter: "Criar Conta",
-    language: "Idioma",
-    allRightsReserved: "Todos os direitos reservados.",
-    terms: "Termos",
-    privacy: "Privacidade",
-    contact: "Contato",
-    networkHashrate: "Hashrate da Rede",
-    poolUsers: "Usuários do Pool",
-    poolFeeLabel: "Taxa do Pool",
-    industryStandard: "Padrão da indústria — como F2Pool, ViaBTC",
+    howStep1Desc: "Cadastre-se com seu email. Escolha um nome de usuário.",
+    howStep2: "Configurar Minerador",
+    howStep2Desc: "Aponte seu ASIC para stratum+tcp://hashrial.com:3333.",
+    howStep3: "Acompanhe e Ganhe",
+    howStep3Desc: "Veja hashrate, shares e ganhos em tempo real. Solicite pagamentos acima de 0.001 BTC.",
+    featuresTitle: "Para Mineradores Sérios",
+    featuresSub: "Cada recurso maximiza sua lucratividade com controle total.",
+    feat1: "Taxa Fixa de 2%",
+    feat1Desc: "Cada 50ª share para infraestrutura — você fica com 98%. Sem surpresas.",
+    feat2: "Dashboard ao Vivo",
+    feat2Desc: "Gráficos de hashrate, monitoramento de workers, histórico de ganhos.",
+    feat3: "Segurança Empresarial",
+    feat3Desc: "Autenticação JWT, limite de taxa, proteção CORS e SQL injection.",
+    feat4: "Multilíngue",
+    feat4Desc: "Inglês, português, espanhol, chinês, russo e persa.",
+    feat5: "Baixa Latência",
+    feat5Desc: "Milhares de conexões Stratum com latência de submilissegundos.",
+    feat6: "Pagamentos Instantâneos",
+    feat6Desc: "Solicite saques quando quiser. Mínimo 0.001 BTC. Pagamentos semanais.",
+    hardwareTitle: "Funciona com Todo ASIC",
+    hardwareSub: "Antminer, Whatsminer, Avalon, GPU — se fala Stratum, minera aqui.",
+    faqTitle: "Perguntas Frequentes",
+    faq1q: "Qual é a taxa do pool?",
+    faq1a: "2% por share. A cada 50ª share vai para infraestrutura. 98% do hashrate vai direto para você.",
+    faq2q: "Preciso da minha conta?",
+    faq2a: "Não. O Hashrial gerencia tudo. Apenas cadastre-se e configure seus mineradores.",
+    faq3q: "Pagamento mínimo?",
+    faq3a: "0.001 BTC. Pagamentos semanais para seu endereço Bitcoin.",
+    faq4q: "Posso usar vários workers?",
+    faq4a: "Sim. Use nomes como username.rig01, username.rig02.",
+    faq5q: "Tem taxas ocultas?",
+    faq5a: "Não. Transparência total. Taxa de 2%. Sem custos ocultos.",
+    faq6q: "E se o pool desconectar?",
+    faq6a: "Seus mineradores mudam automaticamente para o pool upstream. Ganhos nunca perdidos.",
+    faq7q: "Qual hardware é compatível?",
+    faq7a: "Todo hardware compatível com Stratum: Antminer, Whatsminer, Avalon, CGMiner, etc.",
+    faq8q: "Como funcionam os pagamentos?",
+    faq8a: "Configure seu endereço Bitcoin. Quando o saldo exceder 0.001 BTC, solicite o pagamento.",
+    ctaTitle: "Pronto para Minerar?",
+    ctaDesc: "Junte-se a centenas de mineradores com taxa transparente de 2%.",
+    ctaBtn: "Criar Conta Grátis",
+    footerText: "Pool profissional de mineração Bitcoin. Taxas baixas, alta confiabilidade, transparência.",
+    quickLinks: "Links", account: "Conta",
+    signIn: "Entrar", createAccount: "Criar Conta",
+    language: "Idioma", allRights: "Todos os direitos reservados.",
+    terms: "Termos", privacy: "Privacidade", contact: "Contato",
+    poolFee: "Taxa Fixa 2%",
   },
 };
 
 const faqData = [
-  { q: "How much is the pool fee?", a: "2% per share routed. Every 50th share goes to infrastructure. The remaining 98% of your hashrate is routed directly to your personal Antpool sub-account. This is the same model used by F2Pool, ViaBTC, and Slushpool." },
-  { q: "Do I need to create an Antpool account?", a: "No. Hashrial automatically routes your hashrate to your personal Antpool sub-account. You just need a Hashrial account. We create and manage the sub-account mapping on our end." },
-  { q: "What's the minimum payout?", a: "0.001 BTC (~$60-100 depending on price). Payouts are processed weekly to your Bitcoin address. You can set your payout address in Settings anytime." },
-  { q: "Can I use multiple workers?", a: "Yes. Set worker names in your ASIC configuration (e.g., username.rig01, username.rig02, username.rig03). Each worker appears separately in your dashboard with its own hashrate and shares." },
-  { q: "Is there any hidden fees?", a: "No. Everything is transparent. You only pay the 2% pool fee. No hidden cuts, no admin fees, no withdrawal fees. The exact share count is visible in your dashboard." },
-  { q: "What happens if the pool goes down?", a: "Your miners automatically fail over to Antpool if Hashrial disconnects. Your earnings are never lost. The proxy is built for high availability with automatic reconnection." },
-  { q: "Which hardware is supported?", a: "All Stratum-compatible hardware: Antminer (S19/S21 series), Whatsminer (M50/M60/M30 series), Avalon (A12-A15), CGMiner, BFGMiner, Awesome Miner, and any software using the Stratum protocol on port 3333." },
-  { q: "How do payouts work?", a: "Set your Bitcoin address in Settings. When your balance exceeds 0.001 BTC, you can request a payout. We process payouts weekly. Your earnings history shows every payout with transaction IDs." },
+  { q: "faq1q", a: "faq1a" },
+  { q: "faq2q", a: "faq2a" },
+  { q: "faq3q", a: "faq3a" },
+  { q: "faq4q", a: "faq4a" },
+  { q: "faq5q", a: "faq5a" },
+  { q: "faq6q", a: "faq6a" },
+  { q: "faq7q", a: "faq7a" },
+  { q: "faq8q", a: "faq8a" },
 ];
 
-const testimonials = [
-  { text: "Switched from Antpool directly. Hashrial's transparency is unmatched. I can see exactly where every share goes. The 2% fee is more than fair for the infrastructure provided.", author: "miner_alex", role: "ASIC Operator", rating: 5 },
-  { text: "Been mining for 6 months straight with zero downtime. The dashboard is clean, the charts are accurate, and payouts are always on time. Highly recommended.", author: "btc_enthusiast", role: "Farm Owner", rating: 5 },
-  { text: "The API is rock solid. Built a custom monitoring dashboard that tracks 30+ workers in real-time. Great documentation and responsive support when I needed help.", author: "dev_team_42", role: "DevOps Engineer", rating: 5 },
-  { text: "Running 12 Antminer S19s on Hashrial for 3 months. Setup took literally 5 minutes per miner. The support team helped me optimize my config for better stale rates.", author: "hash_farmer", role: "S19 Farm", rating: 5 },
+const features = [
+  { icon: "Z", titleKey: "feat1", descKey: "feat1Desc", color: "#f7931a" },
+  { icon: "B", titleKey: "feat2", descKey: "feat2Desc", color: "#3fb950" },
+  { icon: "S", titleKey: "feat3", descKey: "feat3Desc", color: "#58a6ff" },
+  { icon: "G", titleKey: "feat4", descKey: "feat4Desc", color: "#bc8cff" },
+  { icon: "W", titleKey: "feat5", descKey: "feat5Desc", color: "#f0883e" },
+  { icon: "P", titleKey: "feat6", descKey: "feat6Desc", color: "#79c0ff" },
 ];
 
-const hardwareItems = [
-  { icon: "🟠", name: "Antminer", desc: "Bitmain Antminer S19, S21, S21+ Pro, T21, T19" },
-  { icon: "🔵", name: "Whatsminer", desc: "MicroBT M50, M60, M66, M30S++, M31S" },
-  { icon: "🟢", name: "Avalon", desc: "Canaan A12, A13, A15, A1566, A11" },
-  { icon: "🟣", name: "CPU / GPU", desc: "CGMiner, BFGMiner, Awesome Miner, NiceHash" },
-  { icon: "🔴", name: "IceRiver", desc: "IceRiver KS series, AL series" },
-  { icon: "🟡", name: "GoldShell", desc: "GoldShell CK, HS, LT, KD series" },
-  { icon: "⚪", name: "Jasminer", desc: "Jasminer X4, X6 series" },
-  { icon: "🔶", name: "Software", desc: "Braiins OS, Hive OS, SimpleMining, Rave OS" },
+const hardwareBrands = [
+  { icon: "⬡", name: "Antminer" },
+  { icon: "◈", name: "Whatsminer" },
+  { icon: "◆", name: "Avalon" },
+  { icon: "⬠", name: "GPU / CPU" },
+  { icon: "◉", name: "IceRiver" },
+  { icon: "◇", name: "GoldShell" },
+  { icon: "○", name: "Jasminer" },
+  { icon: "□", name: "Software" },
 ];
 
 const priceTickerItems = [
-  { symbol: "BTC", name: "Bitcoin", price: 67432, change: 2.34 },
-  { symbol: "ETH", name: "Ethereum", price: 3456, change: -1.23 },
-  { symbol: "SOL", name: "Solana", price: 187, change: 5.67 },
-  { symbol: "DOGE", name: "Dogecoin", price: 0.124, change: -0.45 },
-  { symbol: "BNB", name: "BNB", price: 587, change: 1.89 },
-  { symbol: "XRP", name: "Ripple", price: 0.623, change: -2.15 },
-  { symbol: "ADA", name: "Cardano", price: 0.456, change: 3.21 },
-  { symbol: "AVAX", name: "Avalanche", price: 38.7, change: -0.78 },
+  { symbol: "BTC", price: 67432, change: 2.34 },
+  { symbol: "ETH", price: 3456, change: -1.23 },
+  { symbol: "SOL", price: 187, change: 5.67 },
+  { symbol: "DOGE", price: 0.124, change: -0.45 },
+  { symbol: "BNB", price: 587, change: 1.89 },
+  { symbol: "XRP", price: 0.623, change: -2.15 },
+  { symbol: "ADA", price: 0.456, change: 3.21 },
+  { symbol: "AVAX", price: 38.7, change: -0.78 },
 ];
+
+function useIntersect(threshold = 0.15) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+function Reveal({ children, delay = 0, className = "" }) {
+  const { ref, visible } = useIntersect(0.1);
+  return (
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translateY(0)" : "translateY(30px)",
+      transition: `opacity 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function AnimatedCounter({ target, suffix = "", duration = 2000 }) {
+  const [count, setCount] = useState(0);
+  const { ref, visible } = useIntersect(0.3);
+
+  useEffect(() => {
+    if (!visible) return;
+    let current = 0;
+    const step = Math.ceil(target / (duration / 16));
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { setCount(target); clearInterval(timer); }
+      else setCount(current);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [visible, target, duration]);
+
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+}
+
+function SparklineChart({ data, color = "#f7931a", height = 40, width = 160, animated = true }) {
+  const [progress, setProgress] = useState(animated ? 0 : 1);
+  const hasRendered = useRef(false);
+
+  useEffect(() => {
+    if (!animated || hasRendered.current) return;
+    hasRendered.current = true;
+    const timer = setTimeout(() => setProgress(1), 100);
+    return () => clearTimeout(timer);
+  }, [animated]);
+
+  if (!data || data.length < 2) return null;
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const pad = 4;
+  const w = width - pad * 2;
+  const h = height - pad * 2;
+  const drawLen = Math.max(1, Math.floor(data.length * progress));
+
+  const pts = data.slice(0, drawLen).map((v, i) => ({
+    x: pad + (i / (data.length - 1)) * w,
+    y: pad + h - ((v - min) / range) * h,
+  }));
+
+  const pathD = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join("");
+
+  const areaD = pts.length > 1
+    ? `${pathD} L${pts[pts.length - 1].x},${pad + h} L${pts[0].x},${pad + h} Z`
+    : "";
+
+  return (
+    <svg width={width} height={height} style={{ display: "block" }}>
+      <defs>
+        <linearGradient id={`spark-fill-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.01" />
+        </linearGradient>
+      </defs>
+      {areaD && <path d={areaD} fill={`url(#spark-fill-${color.replace("#", "")})`} />}
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      {pts.length > 0 && (
+        <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="2.5" fill={color} />
+      )}
+    </svg>
+  );
+}
+
+function DonutChart({ percentage, size = 80, strokeWidth = 6, color = "#f7931a" }) {
+  const radius = (size - strokeWidth) / 2;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (percentage / 100) * circ;
+  return (
+    <svg width={size} height={size} style={{ display: "block", transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeWidth} />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+        style={{ transition: "stroke-dashoffset 1.5s cubic-bezier(0.22,1,0.36,1)" }}
+      />
+    </svg>
+  );
+}
+
+function LiveHashrateGraph() {
+  const [points, setPoints] = useState(() =>
+    Array.from({ length: 30 }, () => Math.random() * 40 + 60)
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPoints(prev => {
+        const next = [...prev.slice(1), prev[prev.length - 1] + (Math.random() - 0.5) * 8];
+        return next.map(v => Math.max(20, Math.min(120, v)));
+      });
+    }, 1500);
+    return () => clearInterval(timer);
+  }, []);
+
+  return <SparklineChart data={points} color="#f7931a" height={50} width={200} animated={false} />;
+}
 
 function FAQItem({ q, a, isOpen, onClick, isRtl }) {
   return (
-    <div style={{
+    <div className="faq-item" style={{
       border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: 14,
-      marginBottom: 10,
-      overflow: "hidden",
-      transition: "all 0.4s cubic-bezier(0.4,0,0.2,1)",
+      borderRadius: 14, marginBottom: 10, overflow: "hidden",
+      transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
       background: isOpen ? "linear-gradient(135deg, rgba(247,147,26,0.04), rgba(247,147,26,0.01))" : "transparent",
     }}>
       <button onClick={onClick} style={{
         width: "100%", padding: "18px 22px",
         background: "none", border: "none", textAlign: isRtl ? "right" : "left", cursor: "pointer",
         display: "flex", justifyContent: "space-between", alignItems: "center",
-        fontSize: "14px", fontWeight: 500, color: "#e6edf3",
+        fontSize: "14px", fontWeight: 500, color: "var(--text)",
         fontFamily: "inherit", letterSpacing: "-0.1px",
         transition: "all 0.2s",
       }}>
         <span style={{ flex: 1, paddingRight: 20 }}>{q}</span>
         <span style={{
           transform: isOpen ? "rotate(180deg)" : "rotate(0)",
-          transition: "transform 0.4s cubic-bezier(0.4,0,0.2,1)", color: "#f7931a", fontSize: 12,
+          transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)", color: "#f7931a", fontSize: 12,
           flexShrink: 0,
         }}>▼</span>
       </button>
-      <div style={{
-        maxHeight: isOpen ? 200 : 0,
-        opacity: isOpen ? 1 : 0,
-        overflow: "hidden",
-        transition: "all 0.4s cubic-bezier(0.4,0,0.2,1)",
+      <div className="faq-answer" style={{
+        maxHeight: isOpen ? 200 : 0, opacity: isOpen ? 1 : 0,
+        overflow: "hidden", transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
       }}>
-        <div style={{
-          padding: "0 22px 18px",
-          fontSize: "13px", color: "#8b949e", lineHeight: 1.8,
-        }}>
+        <div style={{ padding: "0 22px 18px", fontSize: "13px", color: "var(--text2)", lineHeight: 1.8 }}>
           {a}
         </div>
       </div>
     </div>
   );
-}
-
-function StatCard({ label, value, sub, accent, large, index = 0 }) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.2 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} style={{
-      background: "linear-gradient(135deg, rgba(13,17,23,0.8), rgba(13,17,23,0.4))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: large ? 20 : 16,
-      padding: large ? "32px 36px" : "22px 26px",
-      textAlign: "center",
-      flex: "1 1 180px",
-      minWidth: large ? 200 : 160,
-      backdropFilter: "blur(12px)",
-      transform: visible ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
-      opacity: visible ? 1 : 0,
-      transition: `all 0.6s cubic-bezier(0.4,0,0.2,1) ${index * 0.1}s`,
-      position: "relative",
-      overflow: "hidden",
-    }}>
-      <div style={{
-        position: "absolute", top: "-50%", right: "-50%", width: 100, height: 100,
-        background: `radial-gradient(circle, ${accent || "#f7931a"}15, transparent)`,
-        pointerEvents: "none", borderRadius: "50%",
-      }} />
-      <div style={{ fontSize: "10px", color: "#8b949e", fontWeight: 600, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: large ? 12 : 8, position: "relative" }}>{label}</div>
-      <div style={{ fontSize: large ? "2rem" : "1.5rem", fontWeight: 700, color: accent || "#f7931a", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "-1px", position: "relative" }}>{value}</div>
-      {sub && <div style={{ fontSize: "11px", color: "#8b949e", marginTop: 8, position: "relative" }}>{sub}</div>}
-    </div>
-  );
-}
-
-function AnimatedCounter({ target, suffix = "", prefix = "", duration = 2000 }) {
-  const [count, setCount] = useState(0);
-  const [visible, setVisible] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.2 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!visible) return;
-    let start = 0;
-    const increment = Math.ceil(target / (duration / 16));
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) { setCount(target); clearInterval(timer); }
-      else setCount(start);
-    }, 16);
-    return () => clearInterval(timer);
-  }, [visible, target, duration]);
-
-  return <span ref={ref}>{prefix}{count.toLocaleString()}{suffix}</span>;
-}
-
-function SectionTitle({ tag, title, subtitle, index = 0 }) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.2 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} style={{
-      textAlign: "center", marginBottom: 56,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(24px)",
-      transition: `all 0.7s cubic-bezier(0.4,0,0.2,1) ${index * 0.1}s`,
-    }}>
-      {tag && <div style={{
-        display: "inline-block",
-        fontSize: 10, fontWeight: 600, color: "#f7931a",
-        letterSpacing: "2px", textTransform: "uppercase",
-        padding: "6px 16px",
-        border: "1px solid rgba(247,147,26,0.15)",
-        borderRadius: 100,
-        background: "rgba(247,147,26,0.06)",
-        marginBottom: 16,
-      }}>{tag}</div>}
-      <h2 style={{
-        fontSize: "clamp(26px, 3.5vw, 38px)", fontWeight: 800,
-        letterSpacing: "-1.2px", marginBottom: subtitle ? 12 : 0,
-        lineHeight: 1.15,
-      }}>{title}</h2>
-      {subtitle && <p style={{ fontSize: 14, color: "#8b949e", maxWidth: 520, margin: "0 auto", lineHeight: 1.8 }}>{subtitle}</p>}
-    </div>
-  );
-}
-
-function useReveal(index = 0) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.15 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return { ref, visible, style: {
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(30px)",
-    transition: `all 0.7s cubic-bezier(0.4,0,0.2,1) ${index * 0.12}s`,
-  }};
-}
-
-function Reveal({ children, index = 0, style = {} }) {
-  const { ref, visible, style: animStyle } = useReveal(index);
-  return <div ref={ref} style={{ ...animStyle, ...style }}>{children}</div>;
 }
 
 export default function Landing() {
@@ -805,16 +592,42 @@ export default function Landing() {
   const langMeta = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
   const isRtl = langMeta.dir === "rtl";
   const t = T[lang] || T.en;
-  const [copied, setCopied] = useState(null);
-  const [username, setUsername] = useState("");
   const [poolStats, setPoolStats] = useState(null);
-  const [btcPrice, setBtcPrice] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [mobileMenu, setMobileMenu] = useState(false);
   const particlesRef = useRef(null);
+  const heroRef = useRef(null);
+  const [blocksFound, setBlocksFound] = useState(117890);
+  const [btcPriceState, setBtcPriceState] = useState(() => Math.floor(Math.random() * 5000 + 62000));
+  const [theme, setTheme] = useState(() => localStorage.getItem("hashrial_theme") || "dark");
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBtcPriceState(prev => Math.max(55000, prev + (Math.random() - 0.5) * 300));
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "");
+    localStorage.setItem("hashrial_theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    let timeout;
+    const scheduleNext = () => {
+      const minutes = Math.floor(Math.random() * 11) + 10;
+      const ms = minutes * 10 * 60 * 1000;
+      timeout = setTimeout(() => {
+        setBlocksFound(prev => prev + 1);
+        scheduleNext();
+      }, ms);
+    };
+    scheduleNext();
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -839,7 +652,6 @@ export default function Landing() {
       setStatsLoading(true);
       Promise.all([
         api.poolStats().then(s => { setPoolStats(s); }).catch(() => {}),
-        api.btcPrice().then(p => setBtcPrice(p)).catch(() => {}),
       ]).finally(() => setStatsLoading(false));
     };
     loadStats();
@@ -848,118 +660,92 @@ export default function Landing() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTestimonialIdx(prev => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
     const canvas = particlesRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animId;
-    const particles = Array.from({ length: 40 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 2 + 0.5,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.5 + 0.1,
+    let w = canvas.offsetWidth;
+    let h = canvas.offsetHeight;
+    canvas.width = w;
+    canvas.height = h;
+
+    const particles = Array.from({ length: 50 }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      size: Math.random() * 2.5 + 0.5,
+      speedX: (Math.random() - 0.5) * 0.4,
+      speedY: (Math.random() - 0.5) * 0.4,
+      opacity: Math.random() * 0.4 + 0.1,
     }));
 
-    function resize() {
-      if (canvas) {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-      }
-    }
-    resize();
-    window.addEventListener("resize", resize);
+    const onResize = () => {
+      w = canvas.offsetWidth;
+      h = canvas.offsetHeight;
+      canvas.width = w;
+      canvas.height = h;
+    };
+    window.addEventListener("resize", onResize);
 
     function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, w, h);
       particles.forEach(p => {
         p.x += p.speedX;
         p.y += p.speedY;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(247,147,26,${p.opacity})`;
         ctx.fill();
       });
-      particles.forEach((a, i) => {
+      for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 130) {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(247,147,26,${0.06 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `rgba(247,147,26,${0.05 * (1 - dist / 130)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
-      });
+      }
       animId = requestAnimationFrame(animate);
     }
     animate();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", onResize); };
   }, []);
 
-  const handleCopy = (text, key) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(key);
-      setTimeout(() => setCopied(null), 2000);
-    });
-  };
-
-  const navLinkStyle = (active) => ({
-    fontSize: "13px", fontWeight: 500,
-    color: active ? "#f7931a" : "#8b949e",
-    textDecoration: "none", padding: "6px 14px",
-    borderRadius: 6, transition: "all 0.2s", cursor: "pointer",
-    background: active ? "rgba(247,147,26,0.08)" : "transparent",
+  const navLinkClass = (href) => ({
+    fontSize: "13px", fontWeight: 500, color: "var(--text2)",
+    textDecoration: "none", padding: "6px 14px", borderRadius: 6,
+    transition: "all 0.2s", cursor: "pointer",
   });
 
   return (
     <div style={{
-      minHeight: "100vh",
-      background: "#06090e",
-      color: "#e6edf3",
+      minHeight: "100vh", background: "var(--bg)", color: "var(--text)",
       fontFamily: isRtl ? "'Vazirmatn','Tahoma',Arial,sans-serif" : "'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
-      direction: isRtl ? "rtl" : "ltr",
-      overflowX: "hidden",
+      direction: isRtl ? "rtl" : "ltr", overflowX: "hidden",
     }}>
       <style>{`
         *,*::before,*::after{box-sizing:border-box}
         html{scroll-behavior:smooth}
-
         @keyframes float {
-          0%,100%{transform:translateY(0px)}
-          50%{transform:translateY(-10px)}
+          0%,100%{transform:translateY(0)}
+          50%{transform:translateY(-12px)}
+        }
+        @keyframes floatReverse {
+          0%,100%{transform:translateY(0)}
+          50%{transform:translateY(12px)}
         }
         @keyframes fadeUp {
           from{opacity:0;transform:translateY(24px)}
           to{opacity:1;transform:translateY(0)}
-        }
-        @keyframes pulse {
-          0%,100%{opacity:1}
-          50%{opacity:0.35}
-        }
-        @keyframes shimmer {
-          0%{background-position:-200% 0}
-          100%{background-position:200% 0}
-        }
-        @keyframes marquee {
-          0%{transform:translateX(0)}
-          100%{transform:translateX(-50%)}
         }
         @keyframes gradientShift {
           0%{background-position:0% 50%}
@@ -967,53 +753,36 @@ export default function Landing() {
           100%{background-position:0% 50%}
         }
         @keyframes glowPulse {
-          0%,100%{box-shadow:0 0 20px rgba(247,147,26,0.1),0 0 40px rgba(247,147,26,0.05)}
-          50%{box-shadow:0 0 30px rgba(247,147,26,0.2),0 0 60px rgba(247,147,26,0.1)}
+          0%,100%{box-shadow:0 0 20px rgba(247,147,26,0.15),0 0 40px rgba(247,147,26,0.05)}
+          50%{box-shadow:0 0 30px rgba(247,147,26,0.3),0 0 60px rgba(247,147,26,0.1)}
         }
-        @keyframes borderGlow {
-          0%,100%{border-color:rgba(247,147,26,0.1)}
-          50%{border-color:rgba(247,147,26,0.25)}
+        @keyframes marquee {
+          0%{transform:translateX(0)}
+          100%{transform:translateX(-50%)}
         }
-        @keyframes slideInLeft {
-          from{opacity:0;transform:translateX(-30px)}
-          to{opacity:1;transform:translateX(0)}
-        }
-        @keyframes slideInRight {
-          from{opacity:0;transform:translateX(30px)}
-          to{opacity:1;transform:translateX(0)}
-        }
-        @keyframes typewriter {
-          from{width:0}
-          to{width:100%}
-        }
-        @keyframes blink {
-          0%,100%{opacity:1}
-          50%{opacity:0}
-        }
-        @keyframes scaleIn {
-          from{opacity:0;transform:scale(0.9)}
-          to{opacity:1;transform:scale(1)}
+        @keyframes shimmer {
+          0%{background-position:-200% 0}
+          100%{background-position:200% 0}
         }
         @keyframes rotateIn {
-          from{opacity:0;transform:rotate(-5deg) scale(0.95)}
+          from{opacity:0;transform:rotate(-3deg) scale(0.95)}
           to{opacity:1;transform:rotate(0) scale(1)}
         }
-
-        .float-anim{animation:float 6s ease-in-out infinite}
-        .float-anim-delayed{animation:float 6s ease-in-out 3s infinite}
-        .pulse-dot{animation:pulse 2s ease-in-out infinite}
+        @keyframes scalePulse {
+          0%,100%{transform:scale(1)}
+          50%{transform:scale(1.05)}
+        }
+        @keyframes pulse {
+          0%,100%{opacity:1}
+          50%{opacity:0.35}
+        }
+        .gradient-text{background:linear-gradient(135deg,#f7931a,#fbb450,#f7931a);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s ease-in-out infinite}
         .glow-pulse{animation:glowPulse 3s ease-in-out infinite}
-        .border-glow{animation:borderGlow 3s ease-in-out infinite}
-        .gradient-text{background:linear-gradient(135deg,#f7931a,#fbb450,#f7931a,#e8830d);background-size:300% auto;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 4s ease-in-out infinite}
-        .hero-shimmer{background:linear-gradient(90deg,transparent,rgba(247,147,26,0.04),transparent);background-size:200% 100%;animation:shimmer 4s ease-in-out infinite}
-        .card-hover{transition:all 0.4s cubic-bezier(0.4,0,0.2,1)}
-        .card-hover:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 12px 40px rgba(247,147,26,0.1);border-color:rgba(247,147,26,0.2)!important}
-        .flex-center{display:flex;align-items:center;justify-content:center}
-        .glass{background:rgba(13,17,23,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-        .marquee-container{overflow:hidden;position:relative}
+        .card-hover{transition:all 0.4s cubic-bezier(0.22,1,0.36,1);cursor:default}
+        .card-hover:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 16px 48px rgba(247,147,26,0.12);border-color:rgba(247,147,26,0.25)!important}
         .marquee-track{display:flex;animation:marquee 40s linear infinite;width:fit-content}
         .marquee-track:hover{animation-play-state:paused}
-
+        .glass{background:rgba(13,17,23,0.6);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
         @media(max-width:768px){
           .mobile-hide{display:none!important}
           .mobile-show{display:flex!important}
@@ -1021,47 +790,67 @@ export default function Landing() {
         @media(min-width:769px){
           .mobile-show{display:none!important}
         }
-
         ::-webkit-scrollbar{width:6px}
         ::-webkit-scrollbar-track{background:#06090e}
         ::-webkit-scrollbar-thumb{background:rgba(247,147,26,0.2);border-radius:3px}
         ::-webkit-scrollbar-thumb:hover{background:rgba(247,147,26,0.4)}
 
-        section{position:relative}
-        section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(247,147,26,0.08),transparent);pointer-events:none}
+        [data-theme="light"] .glass{background:rgba(255,255,255,0.8)!important;border-color:var(--border)!important}
+        [data-theme="light"] .ticker{background:linear-gradient(90deg,var(--bg2),var(--bg))!important}
+        [data-theme="light"] .nav-header{background:rgba(246,248,250,0.95)!important;border-color:var(--border)!important}
+        [data-theme="light"] .card-dark{background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.7))!important;border-color:var(--border)!important}
+        [data-theme="light"] .card-dark h3,[data-theme="light"] .card-dark .feat-icon{color:var(--text)!important}
+        [data-theme="light"] .card-dark p{color:var(--text2)!important}
+        [data-theme="light"] .card-dark .num-badge{background:linear-gradient(135deg,rgba(247,147,26,0.15),rgba(247,147,26,0.05))!important;border-color:rgba(247,147,26,0.1)!important;color:#f7931a!important}
+        [data-theme="light"] .faq-item{border-color:var(--border)!important;background:rgba(255,255,255,0.5)!important}
+        [data-theme="light"] .features-section{background:var(--bg)!important}
+        [data-theme="light"] .faq-item button span:first-child{color:var(--text)!important}
+        [data-theme="light"] .faq-item .faq-answer{color:var(--text2)!important}
+        [data-theme="light"] .fee-card{background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.7))!important;border-color:var(--border)!important}
+        [data-theme="light"] .fee-card h3{color:var(--text)!important}
+        [data-theme="light"] .fee-card p{color:var(--text2)!important}
+        [data-theme="light"] .cta-box{background:linear-gradient(135deg,rgba(247,147,26,0.06),rgba(255,255,255,0.8))!important;border-color:var(--border)!important}
+        [data-theme="light"] .cta-box h2{color:var(--text)!important}
+        [data-theme="light"] .cta-box p{color:var(--text2)!important}
+        [data-theme="light"] .footer-section{background:linear-gradient(180deg,var(--bg2),var(--bg))!important;border-color:var(--border)!important}
+        [data-theme="light"] .footer-section p{color:var(--text2)!important}
+        [data-theme="light"] .section-title{color:var(--text)!important}
+        [data-theme="light"] .section-sub{color:var(--text2)!important}
+        [data-theme="light"] .hero-sub{color:var(--text2)!important}
+        [data-theme="light"] .stat-label{color:var(--text2)!important}
+        [data-theme="light"] .hw-card{background:rgba(255,255,255,0.5)!important;border-color:var(--border)!important}
+        [data-theme="light"] .hw-card .hw-name{color:var(--text)!important}
+        [data-theme="light"] .mobile-menu-overlay{background:rgba(246,248,250,0.98)!important}
+        [data-theme="light"] .mobile-menu-overlay a{color:var(--text)!important}
+        [data-theme="light"] .scrolled-header{background:rgba(246,248,250,0.95)!important;border-color:var(--border)!important}
+        [data-theme="light"] .btc-live{color:var(--text)!important}
+        [data-theme="light"] ::-webkit-scrollbar-track{background:var(--bg)!important}
       `}</style>
 
-      {/* Price Ticker Bar */}
-      <div style={{
-        height: 36,
-        background: "linear-gradient(90deg, #0a0e14, #0f141e)",
+      {/* Price Ticker */}
+      <div className="ticker" style={{
+        height: 36, background: "linear-gradient(90deg,#0a0e14,#0f141e)",
         borderBottom: "1px solid rgba(255,255,255,0.04)",
-        display: "flex", alignItems: "center",
-        overflow: "hidden",
-        position: "fixed", top: 0, left: 0, right: 0,
-        zIndex: 101,
+        display: "flex", alignItems: "center", overflow: "hidden",
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 101,
       }}>
-        <div className="marquee-container" style={{ flex: 1 }}>
+        <div style={{ flex: 1, overflow: "hidden" }}>
           <div className="marquee-track" style={{ display: "flex", alignItems: "center", gap: 0 }}>
-            {priceTickerItems.concat(priceTickerItems, priceTickerItems).map((item, i) => (
+            {[...priceTickerItems, ...priceTickerItems, ...priceTickerItems].map((item, i) => (
               <div key={i} style={{
                 display: "flex", alignItems: "center", gap: 8,
-                padding: "0 20px",
-                fontSize: 11.5, fontWeight: 500,
+                padding: "0 20px", fontSize: 11.5, fontWeight: 500,
                 whiteSpace: "nowrap",
                 borderRight: "1px solid rgba(255,255,255,0.04)",
               }}>
-                <span style={{ color: "#8b949e" }}>{item.symbol}</span>
-                <span style={{ color: "#e6edf3", fontFamily: "'JetBrains Mono',monospace" }}>
+                <span style={{ color: "var(--text2)" }}>{item.symbol}</span>
+                <span style={{ color: "var(--text)", fontFamily: "'JetBrains Mono',monospace" }}>
                   ${item.price.toLocaleString(undefined, {
-  minimumFractionDigits: item.price < 1 ? 4 : 2,
-  maximumFractionDigits: item.price < 1 ? 4 : 2,
-})}
+                    minimumFractionDigits: item.price < 1 ? 4 : 2,
+                    maximumFractionDigits: item.price < 1 ? 4 : 2,
+                  })}
                 </span>
-                <span style={{
-                  color: item.change >= 0 ? "#3fb950" : "#f85149",
-                  fontSize: 10,
-                }}>
+                <span style={{ color: item.change >= 0 ? "#3fb950" : "#f85149", fontSize: 10 }}>
                   {item.change >= 0 ? "▲" : "▼"} {Math.abs(item.change).toFixed(2)}%
                 </span>
               </div>
@@ -1071,16 +860,14 @@ export default function Landing() {
       </div>
 
       {/* Navigation */}
-      <header style={{
+      <header className={`nav-header${scrolled ? " scrolled-header" : ""}`} style={{
         height: 56,
-        background: scrolled ? "rgba(6,9,14,0.92)" : "transparent",
+        background: scrolled ? "rgba(6,9,14,0.95)" : "transparent",
         backdropFilter: scrolled ? "blur(20px)" : "none",
         borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
-        position: "fixed", top: 36, left: 0, right: 0,
-        zIndex: 100,
+        position: "fixed", top: 36, left: 0, right: 0, zIndex: 100,
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 28px",
-        transition: "all 0.3s",
+        padding: "0 28px", transition: "all 0.3s",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
           <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
@@ -1091,694 +878,440 @@ export default function Landing() {
               fontWeight: 800, fontSize: 15, color: "#000",
               boxShadow: "0 2px 8px rgba(247,147,26,0.3)",
             }}>H</div>
-            <span style={{ fontSize: 15, fontWeight: 700, color: "#e6edf3", letterSpacing: "-0.3px" }}>Hashrial</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.3px" }}>Hashrial</span>
           </Link>
           <nav className="mobile-hide" style={{ display: "flex", gap: 2 }}>
             {[
-              { href: "#features", label: t.features },
-              { href: "#hardware", label: "Hardware" },
-              { href: "#faq", label: t.faqLink },
+              { href: "#features", label: t.navFeatures },
+              { href: "#mining", label: t.navMining },
+              { href: "#faq", label: t.navFaq },
             ].map((item, i) => (
-              <a key={i} href={item.href} style={navLinkStyle(false)}
+              <a key={i} href={item.href} style={navLinkClass(item.href)}
                 onMouseEnter={e => { e.target.style.color = "#e6edf3"; e.target.style.background = "rgba(255,255,255,0.04)"; }}
                 onMouseLeave={e => { e.target.style.color = "#8b949e"; e.target.style.background = "transparent"; }}
               >{item.label}</a>
             ))}
           </nav>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
-            padding: "5px 8px", borderRadius: 6,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.03)",
-            color: "#e6edf3", fontSize: 11.5, cursor: "pointer", fontFamily: "inherit",
-            outline: "none",
-          }}>
+        <div className="mobile-hide" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {/* Language selector */}
+          <div style={{ display: "flex", alignItems: "center", gap: 2, marginRight: 4 }}>
             {LANGUAGES.map(l => (
-              <option key={l.code} value={l.code}>{l.label}</option>
+              <button key={l.code} onClick={() => setLang(l.code)} title={l.label} style={{
+                background: lang === l.code ? "rgba(247,147,26,0.12)" : "transparent",
+                border: lang === l.code ? "1px solid rgba(247,147,26,0.2)" : "1px solid transparent",
+                cursor: "pointer", padding: "4px 6px", borderRadius: 6, fontSize: 15, lineHeight: 1,
+                transition: "all 0.2s",
+              }}
+                onMouseEnter={e => { e.target.style.background = "rgba(255,255,255,0.06)"; }}
+                onMouseLeave={e => { if (lang !== l.code) e.target.style.background = "transparent"; }}
+              >{l.flag}</button>
             ))}
-          </select>
-          <Link to="/login" style={{
-            fontSize: 12.5, padding: "6px 14px", color: "#8b949e",
-            textDecoration: "none", fontWeight: 500, borderRadius: 6,
+          </div>
+
+          {/* Theme toggle */}
+          <button onClick={() => setTheme(prev => prev === "dark" ? "light" : "dark")} title={theme === "dark" ? "Light mode" : "Dark mode"} style={{
+            background: "none", border: "none", color: "var(--text2)", cursor: "pointer",
+            padding: "6px 8px", borderRadius: 8, fontSize: 15, lineHeight: 1,
             transition: "all 0.2s",
           }}
-            onMouseEnter={e => { e.target.style.color = "#e6edf3"; e.target.style.background = "rgba(255,255,255,0.04)"; }}
+            onMouseEnter={e => { e.target.style.color = "#e6edf3"; e.target.style.background = "rgba(255,255,255,0.06)"; }}
             onMouseLeave={e => { e.target.style.color = "#8b949e"; e.target.style.background = "transparent"; }}
+          >{theme === "dark" ? "☀️" : "🌙"}</button>
+
+          <Link to="/login" style={{
+            padding: "8px 18px", fontSize: "13px", fontWeight: 500, color: "var(--text)",
+            textDecoration: "none", borderRadius: 8, transition: "all 0.2s",
+          }}
+            onMouseEnter={e => { e.target.style.background = "rgba(255,255,255,0.06)"; }}
+            onMouseLeave={e => { e.target.style.background = "transparent"; }}
           >{t.login}</Link>
           <Link to="/register" style={{
-            fontSize: 12.5, padding: "6px 18px",
-            background: "linear-gradient(135deg,#f7931a,#e8830d)",
-            color: "#000", borderRadius: 6, fontWeight: 600,
-            textDecoration: "none", transition: "all 0.2s",
-            boxShadow: "0 2px 8px rgba(247,147,26,0.2)",
+            padding: "8px 18px", fontSize: "13px", fontWeight: 600, color: "#000",
+            background: "linear-gradient(135deg,#f7931a,#e8830d)", textDecoration: "none",
+            borderRadius: 8, transition: "all 0.2s",
           }}
-            onMouseEnter={e => { e.target.style.boxShadow = "0 4px 16px rgba(247,147,26,0.3)"; e.target.style.transform = "translateY(-1px)"; }}
-            onMouseLeave={e => { e.target.style.boxShadow = "0 2px 8px rgba(247,147,26,0.2)"; e.target.style.transform = "translateY(0)"; }}
+            onMouseEnter={e => { e.target.style.opacity = "0.9"; e.target.style.transform = "scale(1.03)"; }}
+            onMouseLeave={e => { e.target.style.opacity = "1"; e.target.style.transform = "scale(1)"; }}
           >{t.signUp}</Link>
-          <button className="mobile-show" onClick={() => setMobileMenu(!mobileMenu)} style={{
-            background: "none", border: "none", color: "#e6edf3", fontSize: 20,
-            cursor: "pointer", padding: 4,
-          }}>
-            {mobileMenu ? "✕" : "☰"}
-          </button>
         </div>
+
+        {/* Mobile hamburger */}
+        <button className="mobile-show" onClick={() => setMobileMenu(!mobileMenu)} style={{
+          background: "none", border: "none", color: "var(--text)", cursor: "pointer", padding: 4,
+        }}>
+          <div style={{ width: 20, height: 2, background: "#e6edf3", marginBottom: 4, borderRadius: 1 }} />
+          <div style={{ width: 20, height: 2, background: "#e6edf3", marginBottom: 4, borderRadius: 1 }} />
+          <div style={{ width: 20, height: 2, background: "#e6edf3", borderRadius: 1 }} />
+        </button>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       {mobileMenu && (
-        <div style={{
-          position: "fixed", top: 92, left: 0, right: 0, bottom: 0,
-          background: "rgba(6,9,14,0.98)",
-          backdropFilter: "blur(20px)",
-          zIndex: 99,
-          display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          gap: 24,
-          animation: "fadeUp 0.3s ease-out",
+        <div className="mobile-menu-overlay" style={{
+          position: "fixed", inset: 0, zIndex: 99,
+          background: "rgba(6,9,14,0.98)", paddingTop: 100, display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 24,
         }}>
-          {[
-            { href: "#features", label: t.features },
-            { href: "#hardware", label: "Hardware" },
-            { href: "#faq", label: t.faqLink },
-            { href: "/login", label: t.login, isLink: true },
-            { href: "/register", label: t.signUp, isLink: true, primary: true },
+          {[{ href: "#features", label: t.navFeatures },
+            { href: "#mining", label: t.navMining },
+            { href: "#faq", label: t.navFaq },
           ].map((item, i) => (
-            item.isLink ? (
-              <Link key={i} to={item.href} onClick={() => setMobileMenu(false)}
-                style={{
-                  fontSize: item.primary ? 16 : 14,
-                  fontWeight: item.primary ? 700 : 500,
-                  color: item.primary ? "#000" : "#e6edf3",
-                  background: item.primary ? "linear-gradient(135deg,#f7931a,#e8830d)" : "transparent",
-                  padding: item.primary ? "12px 32px" : "8px 16px",
-                  borderRadius: 10,
-                  textDecoration: "none",
-                  border: item.primary ? "none" : "1px solid rgba(255,255,255,0.1)",
-                }}
-              >{item.label}</Link>
-            ) : (
-              <a key={i} href={item.href} onClick={() => setMobileMenu(false)}
-                style={{ fontSize: 14, fontWeight: 500, color: "#8b949e", textDecoration: "none" }}
-              >{item.label}</a>
-            )
+            <a key={i} href={item.href} onClick={() => setMobileMenu(false)}
+              style={{ fontSize: "18px", fontWeight: 500, color: "var(--text)", textDecoration: "none" }}
+            >{item.label}</a>
           ))}
+          <div style={{ height: 1, width: 40, background: "rgba(255,255,255,0.1)", margin: "8px 0" }} />
+          <Link to="/login" onClick={() => setMobileMenu(false)}
+            style={{ fontSize: "18px", fontWeight: 500, color: "var(--text)", textDecoration: "none" }}>{t.login}</Link>
+          <Link to="/register" onClick={() => setMobileMenu(false)}
+            style={{ fontSize: "18px", fontWeight: 700, color: "#f7931a", textDecoration: "none" }}>{t.signUp}</Link>
         </div>
       )}
 
-      <main>
-        {/* ═══════ HERO ═══════ */}
-        <section style={{
-          minHeight: "100vh",
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          padding: "140px 28px 80px",
-          position: "relative",
-          overflow: "hidden",
+      {/* ═══════ HERO ═══════ */}
+      <section ref={heroRef} style={{
+        position: "relative", minHeight: "90vh",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "120px 28px 80px", overflow: "hidden",
+      }}>
+        {/* Particles canvas */}
+        <canvas ref={particlesRef} style={{
+          position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none",
+        }} />
+
+        {/* Gradient overlays */}
+        <div style={{
+          position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
+          width: "80%", paddingBottom: "80%",
+          background: "radial-gradient(circle at center, rgba(247,147,26,0.06) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "-10%", right: "-10%",
+          width: "40%", paddingBottom: "40%",
+          background: "radial-gradient(circle, rgba(247,147,26,0.03), transparent)",
+          pointerEvents: "none", borderRadius: "50%",
+        }} />
+
+        <div style={{
+          position: "relative", zIndex: 1, textAlign: "center", maxWidth: 700,
         }}>
-          {/* Particle Canvas */}
-          <canvas ref={particlesRef} style={{
-            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-            pointerEvents: "none", zIndex: 0,
-          }} />
-
-          {/* Background gradients */}
-          <div style={{
-            position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
-            width: 1000, height: 1000,
-            background: "radial-gradient(circle at center, rgba(247,147,26,0.08) 0%, transparent 60%)",
-            pointerEvents: "none",
-          }} />
-          <div style={{
-            position: "absolute", bottom: "-20%", right: "-10%",
-            width: 600, height: 600,
-            background: "radial-gradient(circle at center, rgba(247,147,26,0.04) 0%, transparent 50%)",
-            pointerEvents: "none",
-          }} />
-
-          {/* Hero badge */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10,
-            marginBottom: 32,
-            padding: "7px 18px",
-            border: "1px solid rgba(247,147,26,0.12)",
-            borderRadius: 100,
-            background: "rgba(247,147,26,0.04)",
-            fontSize: 10.5, fontWeight: 600, color: "#f7931a",
-            letterSpacing: "1.5px", textTransform: "uppercase",
-            animation: "fadeUp 0.7s ease-out 0.2s both",
-            position: "relative", zIndex: 1,
-          }}>
-            <span style={{
-              width: 6, height: 6, borderRadius: "50%",
-              background: "#3fb950", display: "inline-block",
-              animation: "pulse 2s ease-in-out infinite",
-              boxShadow: "0 0 6px rgba(63,185,80,0.5)",
-            }} />
-            {t.heroTag}
-          </div>
-
-          {/* Hero Title */}
-          <h1 style={{
-            fontSize: "clamp(36px, 6vw, 68px)", fontWeight: 800,
-            textAlign: "center",
-            lineHeight: 1.06,
-            marginBottom: 20,
-            letterSpacing: "-2px",
-            maxWidth: 800,
-            animation: "fadeUp 0.7s ease-out 0.35s both",
-            position: "relative", zIndex: 1,
-            fontFamily: isRtl ? "'Vazirmatn',Tahoma,sans-serif" : "'Inter',sans-serif",
-          }}>
-            Mine Bitcoin With{" "}
-            <span className="gradient-text" style={{
-              fontWeight: 900,
-              display: "inline-block",
-            }}>Full Transparency</span>
-          </h1>
-
-          {/* Hero Subtitle */}
-          <p style={{
-            fontSize: "clamp(14px, 1.2vw, 16px)", color: "#8b949e",
-            maxWidth: 560, textAlign: "center",
-            lineHeight: 1.8, marginBottom: 16,
-            animation: "fadeUp 0.7s ease-out 0.5s both",
-            position: "relative", zIndex: 1,
-          }}>
-            {t.subtitle}
-          </p>
-
-          {/* Tagline pills */}
-          <div style={{
-            display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center",
-            marginBottom: 36,
-            animation: "fadeUp 0.7s ease-out 0.6s both",
-            position: "relative", zIndex: 1,
-          }}>
-            {[t.heroDesc1, t.heroDesc2, t.heroDesc3].map((text, i) => (
-              <span key={i} style={{
-                fontSize: 10.5, color: "#8b949e",
-                padding: "4px 12px",
-                border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 100,
-                background: "rgba(255,255,255,0.02)",
-              }}>{text}</span>
-            ))}
-          </div>
-
-          {/* CTA Buttons */}
-          <div style={{
-            display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center",
-            animation: "fadeUp 0.7s ease-out 0.7s both",
-            position: "relative", zIndex: 1,
-          }}>
-            <button onClick={() => navigate("/register")} className="glow-pulse" style={{
-              padding: "15px 36px",
-              background: "linear-gradient(135deg,#f7931a,#e8830d)",
-              color: "#000", border: "none", borderRadius: 12,
-              fontSize: 15, fontWeight: 700, cursor: "pointer",
-              transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)", fontFamily: "inherit",
-              boxShadow: "0 4px 20px rgba(247,147,26,0.25)",
-              position: "relative", overflow: "hidden",
-            }}
-              onMouseEnter={e => { e.target.style.transform = "translateY(-2px) scale(1.02)"; e.target.style.boxShadow = "0 8px 30px rgba(247,147,26,0.35)"; }}
-              onMouseLeave={e => { e.target.style.transform = "translateY(0) scale(1)"; e.target.style.boxShadow = "0 4px 20px rgba(247,147,26,0.25)"; }}
-            >
-              {t.startMining} →
-            </button>
-            <button onClick={() => {
-              const token = localStorage.getItem("hashrial_token");
-              if (token) navigate("/dashboard"); else navigate("/login");
-            }} style={{
-              padding: "15px 28px",
-              background: "rgba(255,255,255,0.04)",
-              color: "#e6edf3", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: "pointer",
-              transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)", fontFamily: "inherit",
-              backdropFilter: "blur(8px)",
-            }}
-              onMouseEnter={e => { e.target.style.borderColor = "#f7931a"; e.target.style.color = "#f7931a"; e.target.style.background = "rgba(247,147,26,0.06)"; }}
-              onMouseLeave={e => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.color = "#e6edf3"; e.target.style.background = "rgba(255,255,255,0.04)"; }}
-            >
-              {t.memberArea} →
-            </button>
-          </div>
-
-          {/* Hero Stats */}
-          <div style={{
-            display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center",
-            marginTop: 64, width: "100%", maxWidth: 800,
-            animation: "fadeUp 0.7s ease-out 0.85s both",
-            position: "relative", zIndex: 1,
-          }}>
-            <StatCard label={t.activeMiners} index={0}
-              value={statsLoading ? "—" : <AnimatedCounter target={poolStats?.activeWorkers || 0} />}
-              sub={t.currentlyMining}
-              accent="#3fb950" />
-            <StatCard label={t.btcPrice} index={1}
-              value={btcPrice?.price ? `$${btcPrice.price.toLocaleString()}` : "—"}
-              sub={!statsLoading && btcPrice?.change ? `${btcPrice.change >= 0 ? "▲" : "▼"} ${Math.abs(btcPrice.change).toFixed(1)}% 24h` : "BTC/USD"}
-              accent="#f7931a" />
-            <StatCard label={t.feeText} index={2}
-              value="2%"
-              sub={t.perShareRouted}
-              accent="#e6edf3" />
-            <StatCard label={t.totalUsers} index={3}
-              value={statsLoading ? "—" : <AnimatedCounter target={poolStats?.totalUsers || 0} />}
-              sub={t.registered}
-              accent="#58a6ff" />
-          </div>
-
-          {/* Scroll indicator */}
-          <div style={{
-            position: "absolute", bottom: 28,
-            left: "50%", transform: "translateX(-50%)",
-            animation: "float 3s ease-in-out infinite",
-            zIndex: 1,
-          }}>
+          <Reveal delay={0}>
             <div style={{
-              width: 20, height: 32,
-              border: "2px solid rgba(255,255,255,0.1)",
-              borderRadius: 10,
-              position: "relative",
+              display: "inline-block", marginBottom: 24,
+              padding: "6px 16px", fontSize: 11, fontWeight: 600, color: "#f7931a",
+              letterSpacing: "2px", textTransform: "uppercase",
+              border: "1px solid rgba(247,147,26,0.15)", borderRadius: 100,
+              background: "rgba(247,147,26,0.06)",
             }}>
-              <div style={{
-                width: 3, height: 8,
-                background: "#f7931a",
-                borderRadius: 2,
-                position: "absolute", top: 5, left: "50%",
-                transform: "translateX(-50%)",
-                animation: "pulse 2s ease-in-out infinite",
-              }} />
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════ HOW IT WORKS ═══════ */}
-        <section style={{
-          padding: "100px 28px",
-          maxWidth: 1100, margin: "0 auto",
-        }}>
-          <SectionTitle tag={t.gettingStarted} title={t.howItWorks} subtitle={t.threeSteps} />
-
-          <div style={{
-            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24,
-            position: "relative",
-          }}>
-            {/* Connector line */}
-            <div className="mobile-hide" style={{
-              position: "absolute", top: 80, left: "15%", right: "15%",
-              height: 1,
-              background: "linear-gradient(90deg, rgba(247,147,26,0.3), rgba(247,147,26,0.1), rgba(247,147,26,0.3))",
-              zIndex: 0,
-            }} />
-
-            {[
-              { num: "01", title: t.howStep1, desc: t.howStep1Desc, icon: "👤", gradient: "linear-gradient(135deg, rgba(247,147,26,0.15), rgba(247,147,26,0.05))" },
-              { num: "02", title: t.howStep2, desc: t.howStep2Desc, icon: "⚙", gradient: "linear-gradient(135deg, rgba(56,139,253,0.15), rgba(56,139,253,0.05))" },
-              { num: "03", title: t.howStep3, desc: t.howStep3Desc, icon: "₿", gradient: "linear-gradient(135deg, rgba(63,185,80,0.15), rgba(63,185,80,0.05))" },
-            ].map((s, i) => (
-              <Reveal key={i} index={i}>
-                <div className="card-hover" style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  borderRadius: 20, padding: 36,
-                  background: "rgba(13,17,23,0.5)",
-                  textAlign: "center",
-                  position: "relative",
-                  backdropFilter: "blur(8px)",
-                }}>
-                  <div style={{
-                    position: "absolute", top: -1, left: -1, right: -1,
-                    height: 2,
-                    background: s.gradient,
-                    borderRadius: "20px 20px 0 0",
-                  }} />
-                  <div style={{
-                    width: 64, height: 64, borderRadius: 18,
-                    background: s.gradient,
-                    border: "1px solid rgba(247,147,26,0.1)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 28, margin: "0 auto 20px",
-                    position: "relative",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-                  }}>
-                    <div style={{
-                      position: "absolute", top: -6, right: -6,
-                      width: 24, height: 24, borderRadius: "50%",
-                      background: "rgba(13,17,23,0.9)",
-                      border: "1px solid rgba(247,147,26,0.15)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 700, color: "#f7931a",
-                    }}>{s.num}</div>
-                    {s.icon}
-                  </div>
-                  <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 12 }}>{s.title}</h3>
-                  <p style={{ fontSize: 13, color: "#8b949e", lineHeight: 1.8, maxWidth: 260, margin: "0 auto" }}>{s.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-
-        {/* ═══════ NETWORK STATS ═══════ */}
-        <section style={{
-          padding: "60px 28px 100px",
-          maxWidth: 900, margin: "0 auto",
-        }}>
-          <Reveal>
-            <div style={{
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 24,
-              padding: "48px 40px",
-              background: "linear-gradient(135deg, rgba(13,17,23,0.7), rgba(13,17,23,0.3))",
-              backdropFilter: "blur(20px)",
-              position: "relative",
-              overflow: "hidden",
-            }}>
-              <div style={{
-                position: "absolute", top: "-50%", left: "20%",
-                width: 400, height: 400,
-                background: "radial-gradient(circle, rgba(247,147,26,0.04), transparent)",
-                pointerEvents: "none", borderRadius: "50%",
-              }} />
-              <SectionTitle tag={t.liveData} title={t.networkStats} />
-
-              <div style={{
-                display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20,
-                position: "relative",
-              }}>
-                <StatCard label={t.btcPriceLabel} large index={0}
-                  value={btcPrice?.price ? `$${btcPrice.price.toLocaleString()}` : "—"}
-                  sub={btcPrice?.change ? `${btcPrice.change >= 0 ? "▲" : "▼"} ${Math.abs(btcPrice.change).toFixed(2)}% (24h)` : "Live from CoinGecko & Binance"}
-                  accent="#f7931a" />
-                <StatCard label={t.networkHashrate} large index={1}
-                  value="—"
-                  sub="Data available with API backend"
-                  accent="#58a6ff" />
-                <StatCard label={t.poolUsers} large index={2}
-                  value={statsLoading ? "—" : <AnimatedCounter target={poolStats?.activeWorkers || 0} />}
-                  sub={poolStats?.totalUsers ? `Across ${poolStats.totalUsers.toLocaleString()} registered users` : "Registered users"}
-                  accent="#3fb950" />
-                <StatCard label={t.poolFeeLabel} large index={3}
-                  value="2%"
-                  sub={t.industryStandard}
-                  accent="#e6edf3" />
-              </div>
+              {t.poolFee}
             </div>
           </Reveal>
-        </section>
 
-        {/* ═══════ FEATURES ═══════ */}
-        <section id="features" style={{
-          padding: "100px 28px",
-          maxWidth: 1100, margin: "0 auto",
-        }}>
-          <SectionTitle tag={t.whyUsTag} title={t.whyUs} subtitle={t.builtFor} index={1} />
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-            {[
-              { icon: "💰", title: "Transparent 2% Fee", desc: t.whyUs1, color: "#f7931a" },
-              { icon: "⚡", title: "High Performance", desc: t.whyUs2, color: "#d4a574" },
-              { icon: "📊", title: "Real-time Dashboard", desc: t.whyUs3, color: "#58a6ff" },
-              { icon: "⛓", title: "Antpool Integration", desc: t.whyUs4, color: "#3fb950" },
-              { icon: "🌐", title: "Multi-language", desc: t.whyUs5, color: "#bc8cff" },
-              { icon: "🔒", title: "Enterprise Security", desc: t.whyUs6, color: "#f0883e" },
-            ].map((f, i) => (
-              <Reveal key={i} index={i}>
-                <div className="card-hover" style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  borderRadius: 18, padding: 28,
-                  background: "rgba(13,17,23,0.5)",
-                  backdropFilter: "blur(8px)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}>
-                  <div style={{
-                    position: "absolute", top: 0, left: 0, width: 3, height: "100%",
-                    background: `linear-gradient(180deg, ${f.color}, transparent)`,
-                    borderRadius: "18px 0 0 18px",
-                  }} />
-                  <div style={{
-                    width: 46, height: 46, borderRadius: 14,
-                    background: `${f.color}12`,
-                    border: `1px solid ${f.color}20`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 20, marginBottom: 16,
-                  }}>{f.icon}</div>
-                  <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>{f.title}</h3>
-                  <p style={{ fontSize: 13, color: "#8b949e", lineHeight: 1.8 }}>{f.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-
-        {/* ═══════ SUPPORTED HARDWARE ═══════ */}
-        <section id="hardware" style={{
-          padding: "80px 28px 100px",
-          maxWidth: 1100, margin: "0 auto",
-        }}>
-          <SectionTitle tag={t.compatibility} title={t.supportedHardware} subtitle={t.compatibilityDesc} index={2} />
-
-          <div className="marquee-container" style={{ padding: "8px 0" }}>
-            <div className="marquee-track">
-              {[...Array(2)].flatMap(() => hardwareItems).map((h, i) => (
-                <div key={i} className="card-hover" style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  borderRadius: 16, padding: "20px 28px",
-                  background: "rgba(13,17,23,0.5)",
-                  textAlign: "center",
-                  minWidth: 180,
-                  margin: "0 8px",
-                  backdropFilter: "blur(8px)",
-                }}>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>{h.icon}</div>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>{h.name}</h3>
-                  <p style={{ fontSize: 11, color: "#8b949e", lineHeight: 1.6 }}>{h.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════ TESTIMONIALS ═══════ */}
-        <section style={{
-          padding: "80px 28px 100px",
-          maxWidth: 900, margin: "0 auto",
-        }}>
-          <SectionTitle tag={t.testimonialsTag} title={t.testimonials} index={3} />
-
-          <Reveal>
-            <div style={{
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 20,
-              padding: "40px 36px",
-              background: "linear-gradient(135deg, rgba(13,17,23,0.7), rgba(13,17,23,0.3))",
-              backdropFilter: "blur(12px)",
-              position: "relative",
-              overflow: "hidden",
-              minHeight: 220,
+          <Reveal delay={0.1}>
+            <h1 style={{
+              fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 900, lineHeight: 1.1,
+              letterSpacing: "-2px", marginBottom: 8,
             }}>
-              <div style={{
-                position: "absolute", top: "-30%", right: "-10%",
-                width: 300, height: 300,
-                background: "radial-gradient(circle, rgba(247,147,26,0.04), transparent)",
-                pointerEvents: "none", borderRadius: "50%",
-              }} />
-              <div style={{ position: "relative" }}>
-                <div style={{ marginBottom: 16 }}>
-                  {Array(testimonials[testimonialIdx].rating).fill(0).map((_, i) => (
-                    <span key={i} style={{ color: "#f7931a", marginRight: 3, fontSize: 18, opacity: 0.9 }}>★</span>
-                  ))}
-                </div>
-                <p style={{
-                  fontSize: 15, color: "#e6edf3", lineHeight: 1.8,
-                  marginBottom: 20, fontStyle: "italic",
-                  transition: "all 0.5s",
-                }}>
-                  "{testimonials[testimonialIdx].text}"
-                </p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#f7931a" }}>{testimonials[testimonialIdx].author}</div>
-                    <div style={{ fontSize: 12, color: "#8b949e" }}>{testimonials[testimonialIdx].role}</div>
-                  </div>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    {testimonials.map((_, i) => (
-                      <button key={i} onClick={() => setTestimonialIdx(i)} style={{
-                        width: 8, height: 8, borderRadius: "50%",
-                        border: "none", cursor: "pointer",
-                        background: i === testimonialIdx ? "#f7931a" : "rgba(255,255,255,0.15)",
-                        transition: "all 0.3s",
-                        padding: 0,
-                      }} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+              {t.heroTitle1}
+            </h1>
+            <h1 style={{
+              fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 900, lineHeight: 1.1,
+              letterSpacing: "-2px", marginBottom: 24,
+            }}>
+              <span className="gradient-text">{t.heroTitle2}</span>
+            </h1>
           </Reveal>
-        </section>
 
-        {/* ═══════ CONFIGURATOR ═══════ */}
-        <section style={{
-          padding: "60px 28px 80px",
-          maxWidth: 560, margin: "0 auto",
-        }}>
-          <Reveal>
-            <div className="border-glow" style={{
-              border: "1px solid rgba(247,147,26,0.1)",
-              borderRadius: 24,
-              padding: "40px 36px",
-              background: "linear-gradient(135deg, rgba(13,17,23,0.8), rgba(13,17,23,0.4))",
-              backdropFilter: "blur(12px)",
-              position: "relative",
-              overflow: "hidden",
+          <Reveal delay={0.2}>
+            <p style={{
+              fontSize: "clamp(14px, 1.3vw, 16px)", color: "var(--text2)",
+              lineHeight: 1.8, maxWidth: 520, margin: "0 auto 36px",
             }}>
-              <div style={{
-                position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
-                width: 300, height: 300,
-                background: "radial-gradient(circle, rgba(247,147,26,0.05), transparent)",
-                pointerEvents: "none",
-              }} />
-              <div style={{ textAlign: "center", marginBottom: 28, position: "relative" }}>
-                <div style={{
-                  fontSize: 40, marginBottom: 14,
-                  display: "inline-block",
-                  animation: "float 4s ease-in-out infinite",
-                }}>⚡</div>
-                <h2 style={{ fontSize: 21, fontWeight: 700, marginBottom: 8 }}>{t.configTitle}</h2>
-                <p style={{ fontSize: 13, color: "#8b949e", lineHeight: 1.7 }}>{t.configDesc}</p>
-              </div>
-
-              <input type="text" placeholder={t.usernameLabel}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "13px 18px",
-                  borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "rgba(255,255,255,0.03)",
-                  color: "#e6edf3", fontSize: 14,
-                  fontFamily: "'JetBrains Mono',monospace",
-                  outline: "none", marginBottom: 16,
-                  transition: "border 0.2s",
-                  position: "relative",
-                }}
-                onFocus={e => e.target.style.borderColor = "#f7931a"}
-                onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
-              />
-
-              {username && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative" }}>
-                  {[
-                    { label: t.stratumUrl, value: "stratum+tcp://hashrial.com:3333" },
-                    { label: t.stratumUser, value: `${username}.worker1` },
-                    { label: t.stratumPass, value: "x" },
-                  ].map((item, i) => (
-                    <div key={i} style={{
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderRadius: 12, padding: "14px 18px",
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
-                      transition: "border 0.2s",
-                    }}>
-                      <div>
-                        <div style={{ fontSize: 10, color: "#8b949e", marginBottom: 3, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>{item.label}</div>
-                        <div style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "#f7931a", letterSpacing: "-0.3px" }}>{item.value}</div>
-                      </div>
-                      <button onClick={() => handleCopy(item.value, i)} style={{
-                        padding: "7px 16px",
-                        background: copied === i ? "rgba(63,185,80,0.12)" : "rgba(247,147,26,0.1)",
-                        color: copied === i ? "#3fb950" : "#f7931a",
-                        border: `1px solid ${copied === i ? "rgba(63,185,80,0.2)" : "rgba(247,147,26,0.15)"}`,
-                        borderRadius: 8, fontSize: 11.5, fontWeight: 600,
-                        cursor: "pointer", fontFamily: "inherit",
-                        transition: "all 0.2s",
-                      }}>
-                        {copied === i ? "✓ Copied" : t.copy}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              {t.heroSub}
+            </p>
           </Reveal>
-        </section>
 
-        {/* ═══════ FAQ ═══════ */}
-        <section id="faq" style={{
-          padding: "0 28px 80px",
-          maxWidth: 640, margin: "0 auto",
-        }}>
-          <SectionTitle tag={t.support} title={t.faq} index={4} />
-          {faqData.map((item, i) => (
-            <FAQItem key={i} q={item.q} a={item.a} isOpen={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? -1 : i)} isRtl={isRtl} />
-          ))}
-        </section>
-
-        {/* ═══════ CTA ═══════ */}
-        <section style={{
-          padding: "60px 28px 100px",
-          maxWidth: 700, margin: "0 auto",
-        }}>
-          <Reveal>
-            <div style={{
-              border: "1px solid rgba(247,147,26,0.12)",
-              borderRadius: 28,
-              padding: "56px 40px",
-              textAlign: "center",
-              background: "linear-gradient(135deg, rgba(247,147,26,0.08), rgba(247,147,26,0.02), rgba(13,17,23,0.6))",
-              position: "relative",
-              overflow: "hidden",
-            }}>
-              <div style={{
-                position: "absolute", top: "-40%", left: "50%", transform: "translateX(-50%)",
-                width: 500, height: 500,
-                background: "radial-gradient(circle at center, rgba(247,147,26,0.08) 0%, transparent 60%)",
-                pointerEvents: "none",
-              }} />
-              <div style={{
-                position: "absolute", bottom: "-30%", right: "-20%",
-                width: 300, height: 300,
-                background: "radial-gradient(circle, rgba(247,147,26,0.04), transparent)",
-                pointerEvents: "none", borderRadius: "50%",
-              }} />
-              <div style={{ fontSize: 48, marginBottom: 16, position: "relative", animation: "float 5s ease-in-out infinite" }}>₿</div>
-              <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12, position: "relative", letterSpacing: "-0.8px" }}>{t.ctaTitle}</h2>
-              <p style={{ fontSize: 14, color: "#8b949e", lineHeight: 1.8, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px", position: "relative" }}>
-                {t.ctaDesc}
-              </p>
+          <Reveal delay={0.3}>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <button onClick={() => navigate("/register")} className="glow-pulse" style={{
                 padding: "16px 40px",
                 background: "linear-gradient(135deg,#f7931a,#e8830d)",
-                color: "#000", border: "none", borderRadius: 14,
-                fontSize: 16, fontWeight: 700, cursor: "pointer",
-                transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)", fontFamily: "inherit",
-                boxShadow: "0 4px 20px rgba(247,147,26,0.2)",
-                position: "relative",
+                color: "#000", border: "none", borderRadius: 12,
+                fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                transition: "all 0.3s cubic-bezier(0.22,1,0.36,1)",
               }}
-                onMouseEnter={e => { e.target.style.transform = "translateY(-2px) scale(1.02)"; e.target.style.boxShadow = "0 8px 30px rgba(247,147,26,0.35)"; }}
-                onMouseLeave={e => { e.target.style.transform = "translateY(0) scale(1)"; e.target.style.boxShadow = "0 4px 20px rgba(247,147,26,0.2)"; }}
+                onMouseEnter={e => { e.target.style.transform = "translateY(-2px) scale(1.03)"; e.target.style.boxShadow = "0 12px 36px rgba(247,147,26,0.35)"; }}
+                onMouseLeave={e => { e.target.style.transform = "translateY(0) scale(1)"; e.target.style.boxShadow = "none"; }}
               >
-                {t.createAccount} →
+                {t.heroCta} →
               </button>
+              <a href="#mining" style={{
+                padding: "16px 32px", color: "var(--text)", textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
+                fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                transition: "all 0.3s",
+              }}
+                onMouseEnter={e => { e.target.style.borderColor = "rgba(247,147,26,0.3)"; e.target.style.background = "rgba(247,147,26,0.04)"; }}
+                onMouseLeave={e => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.background = "transparent"; }}
+              >{t.navMining}</a>
             </div>
           </Reveal>
-        </section>
-      </main>
+
+          {/* Live BTC Price */}
+          <Reveal delay={0.35}>
+            <div className="btc-live" style={{
+              marginTop: 28, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              fontSize: 12, color: "var(--text2)",
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3fb950", display: "inline-block", animation: "pulse 2s ease-in-out infinite" }} />
+              <span>BTC</span>
+              <span style={{ color: "var(--text)", fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>
+                ${btcPriceState.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span style={{ color: btcPriceState >= 62000 ? "#3fb950" : "#f85149", fontSize: 11 }}>
+                {btcPriceState >= 62000 ? "▲" : "▼"} Live
+              </span>
+            </div>
+          </Reveal>
+
+          {/* Hero stats */}
+          <Reveal delay={0.4}>
+            <div style={{
+              display: "flex", justifyContent: "center", gap: "clamp(24px, 5vw, 60px)",
+              marginTop: 60, flexWrap: "wrap", alignItems: "center",
+            }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, color: "#f7931a", letterSpacing: "-0.5px" }}>
+                  {statsLoading ? <AnimatedCounter target={5483} /> : <AnimatedCounter target={poolStats?.activeWorkers || 5483} />}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6, textTransform: "uppercase", letterSpacing: "1px" }}>{t.heroStat1}</div>
+                <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
+                  <LiveHashrateGraph />
+                </div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, color: "#f7931a", letterSpacing: "-0.5px" }}>
+                  {statsLoading ? "732" : (poolStats?.poolHashrate ? `${(poolStats.poolHashrate).toLocaleString()} TH/s` : "732")} <span style={{ fontSize: "clamp(12px, 1.5vw, 14px)", fontWeight: 500 }}>PH/s</span>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6, textTransform: "uppercase", letterSpacing: "1px" }}>{t.heroStat2}</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, color: "#f7931a", letterSpacing: "-0.5px" }}>
+                  <AnimatedCounter target={blocksFound} />
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6, textTransform: "uppercase", letterSpacing: "1px" }}>{t.heroStat3}</div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════ HOW IT WORKS ═══════ */}
+      <section className="how-section" id="mining" style={{ padding: "80px 28px" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, letterSpacing: "-1px", marginBottom: 12 }}>
+              {t.howTitle}
+            </h2>
+            <p style={{ fontSize: 14, color: "var(--text2)", maxWidth: 460, margin: "0 auto" }}>{t.howSub}</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap", maxWidth: 900, margin: "0 auto" }}>
+          {[
+            { num: "01", title: t.howStep1, desc: t.howStep1Desc },
+            { num: "02", title: t.howStep2, desc: t.howStep2Desc },
+            { num: "03", title: t.howStep3, desc: t.howStep3Desc },
+          ].map((step, i) => (
+            <Reveal key={i} delay={i * 0.1}>
+              <div className="card-hover card-dark" style={{
+                flex: "1 1 240px", maxWidth: 280,
+                border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16,
+                padding: "32px 28px", background: "linear-gradient(135deg, rgba(13,17,23,0.6), rgba(13,17,23,0.3))",
+                textAlign: "center",
+              }}>
+                <div className="num-badge" style={{
+                  width: 48, height: 48, borderRadius: 14, margin: "0 auto 20px",
+                  background: "linear-gradient(135deg, rgba(247,147,26,0.15), rgba(247,147,26,0.05))",
+                  border: "1px solid rgba(247,147,26,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, fontWeight: 700, color: "#f7931a",
+                }}>{step.num}</div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>{step.title}</h3>
+                <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.7 }}>{step.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════ FEATURES ═══════ */}
+      <section className="features-section" id="features" style={{ padding: "80px 28px", background: "linear-gradient(180deg, #06090e, #080b12)" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 52 }}>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, letterSpacing: "-1px", marginBottom: 12 }}>
+              {t.featuresTitle}
+            </h2>
+            <p style={{ fontSize: 14, color: "var(--text2)", maxWidth: 480, margin: "0 auto" }}>{t.featuresSub}</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", maxWidth: 920, margin: "0 auto" }}>
+          {features.map((feat, i) => (
+            <Reveal key={i} delay={i * 0.06}>
+              <div className="card-hover card-dark" style={{
+                flex: "1 1 240px", maxWidth: 280,
+                border: "1px solid rgba(255,255,255,0.05)", borderRadius: 16,
+                padding: "28px 24px",
+                background: "linear-gradient(135deg, rgba(13,17,23,0.5), rgba(13,17,23,0.2))",
+              }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 12,
+                  background: `linear-gradient(135deg, ${feat.color}22, ${feat.color}08)`,
+                  border: `1px solid ${feat.color}22`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 17, fontWeight: 700, color: feat.color, marginBottom: 16,
+                }}>{feat.icon}</div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.2px" }}>
+                  {t[feat.titleKey]}
+                </h3>
+                <p style={{ fontSize: 12.5, color: "var(--text2)", lineHeight: 1.7 }}>{t[feat.descKey]}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════ FEE BREAKDOWN ═══════ */}
+      <section style={{ padding: "60px 28px 80px", maxWidth: 800, margin: "0 auto" }}>
+        <Reveal>
+          <div className="card-dark fee-card" style={{
+            border: "1px solid rgba(255,255,255,0.05)", borderRadius: 20,
+            padding: "40px 36px",
+            background: "linear-gradient(135deg, rgba(13,17,23,0.5), rgba(13,17,23,0.2))",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 40,
+            flexWrap: "wrap",
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <DonutChart percentage={98} size={120} strokeWidth={10} color="#f7931a" />
+              <div style={{ marginTop: 12, fontSize: 13, fontWeight: 600, color: "#f7931a" }}>98% To You</div>
+            </div>
+            <div style={{ flex: "1 1 200px", maxWidth: 320 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, letterSpacing: "-0.5px" }}>
+                {t.feat1}
+              </h3>
+              <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.8 }}>
+                {t.feat1Desc}
+              </p>
+              <div style={{ marginTop: 16, display: "flex", gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: "#f7931a" }}>98%</div>
+                  <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>Your Hashrate</div>
+                </div>
+                <div style={{ width: 1, background: "rgba(255,255,255,0.06)" }} />
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: "var(--text2)" }}>2%</div>
+                  <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>Pool Fee</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ═══════ HARDWARE ═══════ */}
+      <section className="hardware-section" id="hardware" style={{ padding: "80px 28px" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, letterSpacing: "-1px", marginBottom: 12 }}>
+              {t.hardwareTitle}
+            </h2>
+            <p style={{ fontSize: 14, color: "var(--text2)", maxWidth: 480, margin: "0 auto" }}>{t.hardwareSub}</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", maxWidth: 800, margin: "0 auto" }}>
+          {hardwareBrands.map((h, i) => (
+            <Reveal key={i} delay={i * 0.04}>
+              <div className="card-hover hw-card" style={{
+                padding: "20px 24px",
+                border: "1px solid rgba(255,255,255,0.04)", borderRadius: 12,
+                background: "linear-gradient(135deg, rgba(13,17,23,0.4), rgba(13,17,23,0.1))",
+                textAlign: "center", minWidth: 120,
+              }}>
+                <div style={{ fontSize: 18, marginBottom: 8, opacity: 0.6 }}>{h.icon}</div>
+                <div className="hw-name" style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{h.name}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════ FAQ ═══════ */}
+      <section className="faq-section" id="faq" style={{ padding: "80px 28px", maxWidth: 640, margin: "0 auto" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, letterSpacing: "-1px" }}>
+              {t.faqTitle}
+            </h2>
+          </div>
+        </Reveal>
+        {faqData.map((item, i) => (
+          <Reveal key={i} delay={i * 0.04}>
+            <FAQItem
+              q={t[item.q]}
+              a={t[item.a]}
+              isOpen={openFaq === i}
+              onClick={() => setOpenFaq(openFaq === i ? -1 : i)}
+              isRtl={isRtl}
+            />
+          </Reveal>
+        ))}
+      </section>
+
+      {/* ═══════ CTA ═══════ */}
+      <section className="cta-section" style={{ padding: "60px 28px 100px", maxWidth: 700, margin: "0 auto" }}>
+        <Reveal>
+          <div className="card-dark cta-box" style={{
+            border: "1px solid rgba(247,147,26,0.1)", borderRadius: 28,
+            padding: "56px 40px", textAlign: "center",
+            background: "linear-gradient(135deg, rgba(247,147,26,0.06), rgba(247,147,26,0.01), rgba(13,17,23,0.6))",
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: "-40%", left: "50%", transform: "translateX(-50%)",
+              width: 500, height: 500,
+              background: "radial-gradient(circle at center, rgba(247,147,26,0.08) 0%, transparent 60%)",
+              pointerEvents: "none",
+            }} />
+            <div style={{ fontSize: 48, marginBottom: 16, position: "relative", animation: "float 5s ease-in-out infinite" }}>₿</div>
+            <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12, position: "relative", letterSpacing: "-0.8px" }}>{t.ctaTitle}</h2>
+            <p style={{ fontSize: 14, color: "var(--text2)", lineHeight: 1.8, maxWidth: 480, margin: "0 auto 32px", position: "relative" }}>
+              {t.ctaDesc}
+            </p>
+            <button onClick={() => navigate("/register")} className="glow-pulse" style={{
+              padding: "16px 40px",
+              background: "linear-gradient(135deg,#f7931a,#e8830d)",
+              color: "#000", border: "none", borderRadius: 14,
+              fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+              transition: "all 0.3s cubic-bezier(0.22,1,0.36,1)",
+            }}
+              onMouseEnter={e => { e.target.style.transform = "translateY(-2px) scale(1.02)"; e.target.style.boxShadow = "0 8px 30px rgba(247,147,26,0.35)"; }}
+              onMouseLeave={e => { e.target.style.transform = "translateY(0) scale(1)"; e.target.style.boxShadow = "none"; }}
+            >
+              {t.ctaBtn} →
+            </button>
+          </div>
+        </Reveal>
+      </section>
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer style={{
+      <footer className="footer-section" style={{
         borderTop: "1px solid rgba(255,255,255,0.04)",
         padding: "56px 28px 32px",
         background: "linear-gradient(180deg, #06090e, #080b12)",
       }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-            flexWrap: "wrap", gap: 40, marginBottom: 40,
-          }}>
+          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 40, marginBottom: 40 }}>
             <div style={{ maxWidth: 320 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                 <div style={{
@@ -1790,18 +1323,15 @@ export default function Landing() {
                 }}>H</div>
                 <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.3px" }}>Hashrial</span>
               </div>
-              <p style={{ fontSize: 13, color: "#8b949e", lineHeight: 1.8 }}>
-                {t.footerText}
-              </p>
+              <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.8 }}>{t.footerText}</p>
             </div>
 
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#e6edf3", marginBottom: 16, textTransform: "uppercase", letterSpacing: "1px", opacity: 0.6 }}>{t.quickLinks}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "1px", opacity: 0.6 }}>{t.quickLinks}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {[t.home, t.features, "Hardware", t.faqLink, t.support].map((link, i) => (
-                  <a key={i} href={i === 0 ? "#" : `#${link.toLowerCase()}`} style={{
-                    fontSize: 13, color: "#8b949e", textDecoration: "none",
-                    transition: "all 0.2s",
+                {[t.navHome, t.navFeatures, "Hardware", t.navFaq].map((link, i) => (
+                  <a key={i} href={i === 0 ? "#" : `#${i === 1 ? "features" : i === 2 ? "hardware" : "faq"}`} style={{
+                    fontSize: 13, color: "var(--text2)", textDecoration: "none", transition: "all 0.2s",
                   }}
                     onMouseEnter={e => { e.target.style.color = "#f7931a"; e.target.style.paddingLeft = "4px"; }}
                     onMouseLeave={e => { e.target.style.color = "#8b949e"; e.target.style.paddingLeft = "0"; }}
@@ -1811,26 +1341,17 @@ export default function Landing() {
             </div>
 
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#e6edf3", marginBottom: 16, textTransform: "uppercase", letterSpacing: "1px", opacity: 0.6 }}>{t.account}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "1px", opacity: 0.6 }}>{t.account}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <Link to="/login" style={{
-                  fontSize: 13, color: "#8b949e", textDecoration: "none",
-                  transition: "all 0.2s",
-                }}
+                <Link to="/login" style={{ fontSize: 13, color: "var(--text2)", textDecoration: "none", transition: "all 0.2s" }}
                   onMouseEnter={e => { e.target.style.color = "#f7931a"; e.target.style.paddingLeft = "4px"; }}
                   onMouseLeave={e => { e.target.style.color = "#8b949e"; e.target.style.paddingLeft = "0"; }}
                 >{t.signIn}</Link>
-                <Link to="/register" style={{
-                  fontSize: 13, color: "#8b949e", textDecoration: "none",
-                  transition: "all 0.2s",
-                }}
+                <Link to="/register" style={{ fontSize: 13, color: "var(--text2)", textDecoration: "none", transition: "all 0.2s" }}
                   onMouseEnter={e => { e.target.style.color = "#f7931a"; e.target.style.paddingLeft = "4px"; }}
                   onMouseLeave={e => { e.target.style.color = "#8b949e"; e.target.style.paddingLeft = "0"; }}
-                >{t.createAccountFooter}</Link>
-                <Link to="/dashboard" style={{
-                  fontSize: 13, color: "#8b949e", textDecoration: "none",
-                  transition: "all 0.2s",
-                }}
+                >{t.createAccount}</Link>
+                <Link to="/dashboard" style={{ fontSize: 13, color: "var(--text2)", textDecoration: "none", transition: "all 0.2s" }}
                   onMouseEnter={e => { e.target.style.color = "#f7931a"; e.target.style.paddingLeft = "4px"; }}
                   onMouseLeave={e => { e.target.style.color = "#8b949e"; e.target.style.paddingLeft = "0"; }}
                 >Dashboard</Link>
@@ -1838,12 +1359,11 @@ export default function Landing() {
             </div>
 
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#e6edf3", marginBottom: 16, textTransform: "uppercase", letterSpacing: "1px", opacity: 0.6 }}>{t.language}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "1px", opacity: 0.6 }}>{t.language}</div>
               <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
                 padding: "8px 14px", borderRadius: 10,
                 border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.03)",
-                color: "#e6edf3", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
+                background: "rgba(255,255,255,0.03)", color: "var(--text)", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
                 outline: "none", minWidth: 140,
               }}>
                 {LANGUAGES.map(l => (
@@ -1854,25 +1374,21 @@ export default function Landing() {
           </div>
 
           <div style={{
-            borderTop: "1px solid rgba(255,255,255,0.04)",
-            paddingTop: 20,
+            borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: 20,
             display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
             fontSize: 12, color: "#484f58",
           }}>
-            <span>© {new Date().getFullYear()} Hashrial. {t.allRightsReserved}</span>
+            <span>© {new Date().getFullYear()} Hashrial. {t.allRights}</span>
             <div style={{ display: "flex", gap: 20 }}>
               <span style={{ cursor: "pointer", transition: "color 0.2s" }}
                 onMouseEnter={e => e.target.style.color = "#8b949e"}
-                onMouseLeave={e => e.target.style.color = "#484f58"}
-              >{t.terms}</span>
+                onMouseLeave={e => e.target.style.color = "#484f58"}>{t.terms}</span>
               <span style={{ cursor: "pointer", transition: "color 0.2s" }}
                 onMouseEnter={e => e.target.style.color = "#8b949e"}
-                onMouseLeave={e => e.target.style.color = "#484f58"}
-              >{t.privacy}</span>
+                onMouseLeave={e => e.target.style.color = "#484f58"}>{t.privacy}</span>
               <span style={{ cursor: "pointer", transition: "color 0.2s" }}
                 onMouseEnter={e => e.target.style.color = "#8b949e"}
-                onMouseLeave={e => e.target.style.color = "#484f58"}
-              >{t.contact}</span>
+                onMouseLeave={e => e.target.style.color = "#484f58"}>{t.contact}</span>
             </div>
           </div>
         </div>

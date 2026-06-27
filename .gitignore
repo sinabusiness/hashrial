@@ -1,0 +1,5 @@
+# secrets / deploy scripts
+deploy.js
+generate-manifest.js
+api-worker/bundle.js
+dashboard/build/

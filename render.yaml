@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: hashrial-api
+    env: node
+    region: oregon
+    plan: free
+    rootDir: api
+    buildCommand: npm install
+    startCommand: node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: API_PORT
+        value: "4000"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SITE_URL
+        value: https://hashrial.com
+      - key: LOG_LEVEL
+        value: info
+      - key: POSTGRES_HOST
+        sync: false
+      - key: POSTGRES_PORT
+        value: "5432"
+      - key: POSTGRES_DB
+        sync: false
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PORT
+        value: "6379"
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: REDIS_TLS
+        value: "true"
+      - key: ANTPOOL_API_KEY
+        sync: false
+      - key: ANTPOOL_API_SECRET
+        sync: false
+      - key: FEE_SUBACCOUNT
+        value: hashrialfee
+      - key: MAIN_SUBACCOUNT
+        value: hashrial
+      - key: ANTPOOL_STRATUM
+        value: ss.antpool.com:3333
+      - key: MIN_PAYOUT_BTC
+        value: "0.001"
+      - key: POLL_INTERVAL_MS
+        value: "120000"

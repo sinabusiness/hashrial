@@ -1,0 +1,29 @@
+{
+  "short_name": "Hashrial",
+  "name": "Hashrial — Bitcoin Mining Pool",
+  "description": "Bitcoin mining pool proxy with 2% fees. Connect your ASIC miners and earn BTC with real-time monitoring, instant payouts, and low latency.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#f7931a",
+  "background_color": "#0f1117",
+  "categories": ["finance", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

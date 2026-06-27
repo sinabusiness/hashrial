@@ -1,5 +1,8 @@
-# secrets / deploy scripts
-deploy.js
-generate-manifest.js
-api-worker/bundle.js
-dashboard/build/
+node_modules/
+pwa/node_modules/
+mobile/node_modules/
+*.apk
+*.ipa
+.expo/
+dist/
+build/

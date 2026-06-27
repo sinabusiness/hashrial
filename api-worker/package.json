@@ -1,0 +1,19 @@
+{
+  "name": "hashrial-api-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "@tsndr/cloudflare-worker-jwt": "^2.5.4",
+    "@upstash/redis": "^1.38.0",
+    "bcryptjs": "^2.4.3",
+    "esbuild": "^0.28.1"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

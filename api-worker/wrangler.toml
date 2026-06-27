@@ -1,0 +1,10 @@
+name = "hashrial-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SITE_URL = "https://hashrial.com"
+STRATUM_HOST = "hashrial.com"
+MAIN_SUBACCOUNT = "hashrial"
+MIN_PAYOUT_BTC = "0.001"

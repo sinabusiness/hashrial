@@ -1,0 +1,122 @@
+import React, { useState, useEffect } from "react";
+import { api } from "../lib/api";
+import { useLang } from "../i18n";
+
+export default function Settings() {
+  const { t } = useLang();
+  const [settings, setSettings] = useState({ notify_offline:true, notify_hashrate:true, notify_threshold:20 });
+  const [btcAddress, setBtcAddress] = useState("");
+  const [user, setUser] = useState(null);
+  const [saved, setSaved] = useState(false);
+  const [addrSaved, setAddrSaved] = useState(false);
+  const [addrError, setAddrError] = useState("");
+
+  useEffect(() => {
+    api.me().then(u => { setUser(u); if (u.bitcoin_address) setBtcAddress(u.bitcoin_address); }).catch(() => {});
+    api.notifySettings().then(s => { if (s) setSettings(s); }).catch(() => {});
+  }, []);
+
+  function saveNotify() {
+    api.updateNotifySettings(settings)
+      .then(() => { setSaved(true); setTimeout(() => setSaved(false), 2000); })
+      .catch(console.error);
+  }
+
+  function saveAddress() {
+    setAddrError("");
+    if (!btcAddress.trim()) { setAddrError(t("bitcoinAddressHint")); return; }
+    if (!/^(1[a-km-zA-HJ-NP-Z1-9]{25,34}|3[a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{6,87})$/.test(btcAddress.trim())) {
+      setAddrError("Invalid Bitcoin address format");
+      return;
+    }
+    api.setPayoutAddress(btcAddress.trim())
+      .then(() => { setAddrSaved(true); setTimeout(() => setAddrSaved(false), 2000); })
+      .catch(e => setAddrError(e.message || "Failed to save address"));
+  }
+
+  const card = { background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"22px 24px", marginBottom:16 };
+  const row  = { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)" };
+
+  return (
+    <div style={{ padding:"24px 28px", maxWidth:640 }}>
+      <h1 style={{ fontSize:22, fontWeight:700, marginBottom:4 }}>{t('settingsTitle')}</h1>
+      <div style={{ color:"var(--text2)", fontSize:13, marginBottom:22 }}>{t('settingsSub')}</div>
+
+      {/* Payout address */}
+      <div style={card}>
+        <h2 style={{ fontSize:15, fontWeight:600, marginBottom:16 }}>{t('bitcoinAddress')}</h2>
+        <div style={{ fontSize:13, color:"var(--text2)", marginBottom:12, lineHeight:1.6 }}>
+          {t('bitcoinAddressLabel')}
+        </div>
+        <div style={{ display:"flex", gap:8 }}>
+          <input
+            value={btcAddress}
+            onChange={e => setBtcAddress(e.target.value)}
+            placeholder={t('bitcoinAddressHint')}
+            style={{ flex:1, padding:"10px 13px", borderRadius:"var(--r)", border:`1px solid ${addrError?"var(--red)":"var(--border2)"}`, background:"var(--bg3)", color:"var(--text)", fontSize:13, fontFamily:"var(--mono)", outline:"none" }}
+          />
+          <button onClick={saveAddress} style={{
+            padding:"10px 18px", borderRadius:"var(--r)", border:"none", cursor:"pointer",
+            background: addrSaved ? "var(--green)" : "var(--accent)", color:"#000", fontWeight:600, fontSize:13,
+          }}>
+            {addrSaved ? "✓ " + t('saved') : t('save')}
+          </button>
+        </div>
+        {addrError && <div style={{ color:"var(--red)", fontSize:12, marginTop:6 }}>{addrError}</div>}
+      </div>
+
+      {/* Notification prefs */}
+      <div style={card}>
+        <h2 style={{ fontSize:15, fontWeight:600, marginBottom:16 }}>{t('notifications')}</h2>
+        {[
+          { key:"notify_offline",  label:t('notifyOffline'),    desc:t('notifyOfflineDesc') },
+          { key:"notify_hashrate", label:t('notifyHashrate'),     desc:t('notifyHashrateDesc') },
+        ].map(s => (
+          <div key={s.key} style={{ ...row, gap:16 }}>
+            <div>
+              <div style={{ fontWeight:500, fontSize:13, marginBottom:2 }}>{s.label}</div>
+              <div style={{ fontSize:11.5, color:"var(--text2)" }}>{s.desc}</div>
+            </div>
+            <button onClick={() => setSettings(p => ({ ...p, [s.key]: !p[s.key] }))} style={{
+              width:40, height:22, borderRadius:11, border:"none", cursor:"pointer", position:"relative", flexShrink:0,
+              background: settings[s.key] ? "var(--accent)" : "var(--bg5)", transition:"background 0.2s",
+            }}>
+              <span style={{ position:"absolute", top:2, left:settings[s.key]?20:2, width:18, height:18, borderRadius:"50%", background:"#fff", transition:"left 0.2s", display:"block" }} />
+            </button>
+          </div>
+        ))}
+        <div style={{ ...row, borderBottom:"none", gap:16 }}>
+          <div>
+            <div style={{ fontWeight:500, fontSize:13, marginBottom:2 }}>{t('notifyThreshold')}: <strong style={{ color:"var(--accent)" }}>{settings.notify_threshold}%</strong></div>
+            <div style={{ fontSize:11.5, color:"var(--text2)" }}>{t('notifyThresholdDesc')}</div>
+          </div>
+          <input type="range" min="5" max="50" step="5" value={settings.notify_threshold}
+            onChange={e => setSettings(p => ({ ...p, notify_threshold: parseInt(e.target.value) }))}
+            style={{ width:120, cursor:"pointer" }} />
+        </div>
+        <button onClick={saveNotify} style={{
+          marginTop:14, padding:"10px 22px", borderRadius:"var(--r)", border:"none", cursor:"pointer",
+          background: saved ? "var(--green)" : "var(--accent)", color:"#000", fontWeight:600, fontSize:13,
+        }}>{saved ? "✓ " + t('saved') : t('save')}</button>
+      </div>
+
+      {/* Account info */}
+      {user && (
+        <div style={card}>
+          <h2 style={{ fontSize:15, fontWeight:600, marginBottom:14 }}>{t("accountInfo")}</h2>
+          {[
+            [t("registerUsername"), user.username],
+            [t("loginEmail"), user.email],
+            [t("poolFee"), "2%"],
+            [t("memberSince"), user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"],
+          ].map(([label, val]) => (
+            <div key={label} style={{ display:"flex", justifyContent:"space-between", padding:"8px 0", borderBottom:"1px solid var(--border)" }}>
+              <span style={{ color:"var(--text2)", fontSize:13 }}>{label}</span>
+              <span style={{ fontFamily:"var(--mono)", fontSize:12 }}>{val}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,7 @@
+{
+  "name": "hashrial-proxy",
+  "version": "1.0.0",
+  "main": "src/proxy.js",
+  "scripts": { "start": "node src/proxy.js" },
+  "dependencies": { "ioredis": "^5.3.2", "pg": "^8.11.3" }
+}

@@ -1565,7 +1565,7 @@ export default function Landing() {
         [data-theme="light"] .orb-dot{box-shadow:0 0 8px var(--accent),0 0 16px var(--accent-glow)}
 
         /* ═══════ GLASS CARDS ═══════ */
-        .glass-card{background:transparent;border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease}
+        .glass-card{background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.03) 0%,transparent 70%);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}
         .glass-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent 60%);pointer-events:none;opacity:0;transition:opacity 0.4s}
         .glass-card:hover{border-color:var(--border-accent)}
         .glass-card:hover::before{opacity:1}
@@ -1592,7 +1592,7 @@ export default function Landing() {
         .marquee-track:hover{animation-play-state:paused}
 
         /* ═══════ FAQ ═══════ */
-        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:transparent}
+        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.025) 0%,transparent 70%)}
         .faq-item:hover{border-color:var(--border-accent)}
         .faq-item.open{background:transparent;border-color:var(--border-accent)}
 

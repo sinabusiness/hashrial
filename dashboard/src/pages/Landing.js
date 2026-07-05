@@ -1360,6 +1360,7 @@ const calcHashrate = () => (732 * calcGrowth()).toFixed(1);
 export default function Landing() {
   const navigate = useNavigate();
   const [lang, setLang] = useState(() => localStorage.getItem("lang") || "en");
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const langMeta = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
   const isRtl = langMeta.dir === "rtl";
   const t = T[lang] || T.en;
@@ -1370,6 +1371,7 @@ export default function Landing() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const particlesRef = useRef(null);
   const heroRef = useRef(null);
+  const langMenuRef = useRef(null);
   const [btcPriceState, setBtcPriceState] = useState(() => Math.floor(Math.random() * 5000 + 62000));
   const [theme, setTheme] = useState(() => localStorage.getItem("hashrial_theme") || "dark");
   const [priceTickerItems, setPriceTickerItems] = useState(DEFAULT_TICKER);
@@ -1394,6 +1396,12 @@ export default function Landing() {
     document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "");
     localStorage.setItem("hashrial_theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    const handleClick = e => { if (langMenuRef.current && !langMenuRef.current.contains(e.target)) setShowLangMenu(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -1565,7 +1573,7 @@ export default function Landing() {
         [data-theme="light"] .orb-dot{box-shadow:0 0 8px var(--accent),0 0 16px var(--accent-glow)}
 
         /* ═══════ GLASS CARDS ═══════ */
-        .glass-card{background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}
+        .glass-card{background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.09) 0%,transparent 70%);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}
         .glass-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent 60%);pointer-events:none;opacity:0;transition:opacity 0.4s}
         .glass-card:hover{border-color:var(--border-accent)}
         .glass-card:hover::before{opacity:1}
@@ -1592,7 +1600,7 @@ export default function Landing() {
         .marquee-track:hover{animation-play-state:paused}
 
         /* ═══════ FAQ ═══════ */
-        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.05) 0%,transparent 70%)}
+        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.08) 0%,transparent 70%)}
         .faq-item:hover{border-color:var(--border-accent)}
         .faq-item.open{background:transparent;border-color:var(--border-accent)}
 
@@ -1702,19 +1710,36 @@ export default function Landing() {
           </nav>
         </div>
         <div className="mobile-hide" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          {/* Language selector */}
-          <div style={{ display: "flex", alignItems: "center", gap: 2, marginRight: 4 }}>
-            {LANGUAGES.map(l => (
-              <button key={l.code} onClick={() => setLang(l.code)} title={l.label} style={{
-                background: lang === l.code ? "var(--bg-card-hover)" : "transparent",
-                border: lang === l.code ? "1px solid var(--border)" : "1px solid transparent",
-                cursor: "pointer", padding: "4px 6px", borderRadius: 6, fontSize: 15, lineHeight: 1,
-                transition: "all 0.2s",
-              }}
-                onMouseEnter={e => { e.target.style.background = "var(--bg-card)"; }}
-                onMouseLeave={e => { if (lang !== l.code) e.target.style.background = "transparent"; }}
-              >{l.flag}</button>
-            ))}
+          {/* Language selector - popup */}
+          <div ref={langMenuRef} style={{ position: "relative", marginRight: 4 }}>
+            <button onClick={() => setShowLangMenu(!showLangMenu)} title={t.language || "Language"} style={{
+              background: showLangMenu ? "var(--bg-card)" : "transparent",
+              border: showLangMenu ? "1px solid var(--border)" : "1px solid transparent",
+              cursor: "pointer", padding: "4px 6px", borderRadius: 6, fontSize: 15, lineHeight: 1,
+              transition: "all 0.2s",
+            }}
+              onMouseEnter={e => { e.target.style.background = "var(--bg-card)"; }}
+              onMouseLeave={e => { if (!showLangMenu) e.target.style.background = "transparent"; }}
+            >{langMeta.flag}</button>
+            {showLangMenu && <div style={{
+              position: "absolute", top: "100%", right: 0, marginTop: 6,
+              background: "var(--bg-glass)", backdropFilter: "blur(20px)",
+              border: "1px solid var(--border)", borderRadius: 12,
+              padding: "6px", zIndex: 200, minWidth: 180,
+              display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2,
+            }}>
+              {LANGUAGES.map(l => (
+                <button key={l.code} onClick={() => { setLang(l.code); setShowLangMenu(false); }} title={l.label} style={{
+                  background: lang === l.code ? "var(--bg-card-hover)" : "transparent",
+                  border: "none", cursor: "pointer", padding: "6px 8px", borderRadius: 8,
+                  fontSize: 13, lineHeight: 1, color: "var(--text)", textAlign: "left",
+                  fontFamily: "inherit", transition: "all 0.15s", display: "flex", alignItems: "center", gap: 6,
+                }}
+                  onMouseEnter={e => { e.target.style.background = "var(--bg-card)"; }}
+                  onMouseLeave={e => { if (lang !== l.code) e.target.style.background = "transparent"; }}
+                ><span style={{ fontSize: 16 }}>{l.flag}</span> {l.label}</button>
+              ))}
+            </div>}
           </div>
 
           {/* Theme toggle */}
@@ -1893,11 +1918,13 @@ export default function Landing() {
               background: "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%)",
               border: "1px solid var(--border)",
               backdropFilter: "blur(12px)",
-              transition: "all 0.4s ease",
+              transition: "all 0.5s cubic-bezier(0.22,1,0.36,1)",
               cursor: "default",
+              transform: "translateY(0)",
+              boxShadow: "none",
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border-accent)"; e.currentTarget.style.background = "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.10) 0%,transparent 70%)"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 16px 48px var(--accent-glow)"; e.currentTarget.style.borderColor = "var(--border-accent)"; e.currentTarget.style.background = "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.10) 0%,transparent 70%)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%)"; }}
             >
               <div style={{ fontSize: "clamp(24px,3vw,34px)", fontWeight: 800, color: "var(--accent)", letterSpacing: "-0.5px", lineHeight: 1.2, textShadow: "0 0 20px var(--accent-glow)" }}>
                 {s.value}
@@ -2189,10 +2216,14 @@ export default function Landing() {
         <Reveal>
           <div className="cta-glow glass-card" style={{
             padding: "64px 48px", textAlign: "center",
-            background: "transparent",
             border: "1px solid var(--border)",
             borderRadius: 28, position: "relative", overflow: "hidden",
-          }}>
+            transition: "all 0.5s cubic-bezier(0.22,1,0.36,1)",
+            cursor: "default",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 20px 60px var(--accent-glow)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+          >
             {/* Background glow */}
             <div style={{
               position: "absolute", inset: 0,

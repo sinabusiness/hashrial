@@ -1566,7 +1566,7 @@ export default function Landing() {
         [data-theme="light"] .orb-dot{box-shadow:0 0 8px var(--accent),0 0 16px var(--accent-glow)}
 
         /* ═══════ GLASS CARDS ═══════ */
-        .glass-card{background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.03) 0%,transparent 70%);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}
+        .glass-card{background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}
         .glass-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent 60%);pointer-events:none;opacity:0;transition:opacity 0.4s}
         .glass-card:hover{border-color:var(--border-accent)}
         .glass-card:hover::before{opacity:1}
@@ -1593,7 +1593,7 @@ export default function Landing() {
         .marquee-track:hover{animation-play-state:paused}
 
         /* ═══════ FAQ ═══════ */
-        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.025) 0%,transparent 70%)}
+        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.05) 0%,transparent 70%)}
         .faq-item:hover{border-color:var(--border-accent)}
         .faq-item.open{background:transparent;border-color:var(--border-accent)}
 
@@ -1933,11 +1933,15 @@ export default function Landing() {
             <div key={i} style={{
               padding: "20px 32px", textAlign: "center", minWidth: 140,
               borderRadius: 16,
-              background: "transparent",
+              background: "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%)",
               border: "1px solid var(--border)",
               backdropFilter: "blur(12px)",
               transition: "all 0.4s ease",
-            }}>
+              cursor: "default",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border-accent)"; e.currentTarget.style.background = "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.10) 0%,transparent 70%)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.06) 0%,transparent 70%)"; }}
+            >
               <div style={{ fontSize: "clamp(24px,3vw,34px)", fontWeight: 800, color: "var(--accent)", letterSpacing: "-0.5px", lineHeight: 1.2, textShadow: "0 0 20px var(--accent-glow)" }}>
                 {s.value}
               </div>

@@ -1567,7 +1567,7 @@ export default function Landing() {
         .orb-ring-2{inset:15px;animation:orbSpinReverse 20s linear infinite;border-style:dashed}
         .orb-ring-3{inset:30px;animation:orbSpin 15s linear infinite;border-color:var(--accent);opacity:0.3}
         .orb-core{position:absolute;inset:60px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fcd34d,var(--accent) 30%,var(--accent2) 60%,#c46a08 100%);box-shadow:0 0 80px var(--accent-glow),0 0 160px var(--accent-glow),inset 0 0 60px rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;animation:heroGlow 4s ease-in-out infinite}
-        .orb-symbol{font-size:56px;color:#000;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,0.3)}
+        .orb-symbol{width:56px;height:56px;object-fit:contain;display:block}
         .orb-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 20px var(--accent-glow)}
         [data-theme="light"] .orb-core{box-shadow:0 0 60px var(--accent-glow),0 0 120px var(--accent-glow),inset 0 0 40px rgba(255,255,255,0.3)}
         [data-theme="light"] .orb-dot{box-shadow:0 0 8px var(--accent),0 0 16px var(--accent-glow)}
@@ -1624,7 +1624,7 @@ export default function Landing() {
           .mobile-show{display:flex!important}
           .orb-container{width:200px;height:200px}
           .orb-core{inset:36px}
-          .orb-symbol{font-size:36px}
+          .orb-symbol{width:36px;height:36px;object-fit:contain}
           .orb-ring-1{inset:0}
           .orb-ring-2{inset:10px}
           .orb-ring-3{inset:20px}
@@ -1897,7 +1897,7 @@ export default function Landing() {
               </div>
               <div className="orb-ring orb-ring-3" />
               <div className="orb-core">
-                <span className="orb-symbol">₿</span>
+                <img src="/hero-logo.png" className="orb-symbol" alt="Hashrial" />
               </div>
             </div>
           </div>
@@ -2230,12 +2230,11 @@ export default function Landing() {
               background: "radial-gradient(circle at 50% 30%, var(--accent-glow), transparent 60%)",
               opacity: 0.15, pointerEvents: "none",
             }} />
-            <div style={{
-              fontSize: 56, marginBottom: 20, position: "relative",
+            <img src="/hero-logo.png" style={{
+              width: 56, height: 56, marginBottom: 20, position: "relative",
               animation: "float 5s ease-in-out infinite",
-              textShadow: "0 0 30px var(--accent-glow), 0 0 60px var(--accent-glow)",
-              filter: "drop-shadow(0 0 20px var(--accent-glow))",
-            }}>₿</div>
+              filter: "drop-shadow(0 0 30px var(--accent-glow)) drop-shadow(0 0 60px var(--accent-glow))",
+            }} alt="Hashrial" />
             <h2 style={{ fontSize: 30, fontWeight: 900, marginBottom: 14, position: "relative", letterSpacing: "-0.8px", color: "var(--text-bright)" }}>{t.ctaTitle}</h2>
             <p style={{ fontSize: 15, color: "var(--text2)", lineHeight: 1.8, maxWidth: 480, margin: "0 auto 36px", position: "relative" }}>
               {t.ctaDesc}

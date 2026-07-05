@@ -1567,7 +1567,7 @@ export default function Landing() {
         .orb-ring-2{inset:15px;animation:orbSpinReverse 20s linear infinite;border-style:dashed}
         .orb-ring-3{inset:30px;animation:orbSpin 15s linear infinite;border-color:var(--accent);opacity:0.3}
         .orb-core{position:absolute;inset:60px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fcd34d,var(--accent) 30%,var(--accent2) 60%,#c46a08 100%);box-shadow:0 0 80px var(--accent-glow),0 0 160px var(--accent-glow),inset 0 0 60px rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;animation:heroGlow 4s ease-in-out infinite}
-        .orb-symbol{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+        .orb-symbol{width:106%;height:106%;object-fit:cover;border-radius:50%;display:block;flex-shrink:0}
         .orb-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 20px var(--accent-glow)}
         [data-theme="light"] .orb-core{box-shadow:0 0 60px var(--accent-glow),0 0 120px var(--accent-glow),inset 0 0 40px rgba(255,255,255,0.3)}
         [data-theme="light"] .orb-dot{box-shadow:0 0 8px var(--accent),0 0 16px var(--accent-glow)}
@@ -1624,7 +1624,7 @@ export default function Landing() {
           .mobile-show{display:flex!important}
           .orb-container{width:200px;height:200px}
           .orb-core{inset:36px}
-          .orb-symbol{width:100%;height:100%;object-fit:cover;border-radius:50%}
+          .orb-symbol{width:106%;height:106%;object-fit:cover;border-radius:50%;flex-shrink:0}
           .orb-ring-1{inset:0}
           .orb-ring-2{inset:10px}
           .orb-ring-3{inset:20px}

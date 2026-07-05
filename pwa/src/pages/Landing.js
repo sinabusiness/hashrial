@@ -1261,7 +1261,7 @@ function BlockSchedule() {
           color: "var(--text)",
           fontFamily: "'JetBrains Mono',monospace",
           borderBottom: i < rows.length - 1 ? "1px solid var(--border)" : "none",
-          background: i === 0 ? "var(--bg-card)" : "transparent",
+          background: "transparent",
         }}>
           <span>#{r.blockNum}</span>
           <span style={{ color: "var(--text2)", fontSize: 11, fontFamily: "inherit" }}>{r.dateStr} {r.timeStr}</span>
@@ -1296,7 +1296,7 @@ function FAQItem({ q, a, isOpen, onClick, isRtl }) {
       border: "1px solid var(--border)",
       borderRadius: 14, marginBottom: 10, overflow: "hidden",
       transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
-      background: isOpen ? "var(--bg-card)" : "transparent",
+      background: "transparent",
     }}>
       <button onClick={onClick} style={{
         width: "100%", padding: "18px 22px",
@@ -1566,9 +1566,9 @@ export default function Landing() {
         [data-theme="light"] .orb-dot{box-shadow:0 0 8px var(--accent),0 0 16px var(--accent-glow)}
 
         /* ═══════ GLASS CARDS ═══════ */
-        .glass-card{background:var(--bg-card);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease}
+        .glass-card{background:transparent;border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;position:relative;overflow:hidden;transition:all 0.4s ease}
         .glass-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent 60%);pointer-events:none;opacity:0;transition:opacity 0.4s}
-        .glass-card:hover{background:var(--bg-card-hover);border-color:var(--border-accent)}
+        .glass-card:hover{border-color:var(--border-accent)}
         .glass-card:hover::before{opacity:1}
         .glass-card::after{content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);pointer-events:none;opacity:0;transition:opacity 0.4s}
         .glass-card:hover::after{opacity:1}
@@ -1585,17 +1585,17 @@ export default function Landing() {
         .btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,0.25) 50%,transparent 70%);background-size:200% 100%;animation:shimmer 3s ease-in-out infinite;pointer-events:none}
         .btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px var(--accent-glow),0 0 0 1px var(--accent)}
 
-        .btn-ghost{background:var(--bg-card);color:var(--text);border:1px solid var(--border2);border-radius:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);backdrop-filter:blur(8px)}
-        .btn-ghost:hover{background:var(--bg-card-hover);border-color:var(--border-accent);transform:translateY(-2px)}
+        .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);backdrop-filter:blur(8px)}
+        .btn-ghost:hover{border-color:var(--border-accent);transform:translateY(-2px)}
 
         /* ═══════ MARQUEE ═══════ */
         .marquee-track{display:flex;animation:marquee 45s linear infinite;width:fit-content}
         .marquee-track:hover{animation-play-state:paused}
 
         /* ═══════ FAQ ═══════ */
-        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:var(--bg-card)}
-        .faq-item:hover{border-color:var(--border-accent);background:var(--bg-card-hover)}
-        .faq-item.open{background:var(--bg-glass);border-color:var(--border-accent)}
+        .faq-item{border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);background:transparent}
+        .faq-item:hover{border-color:var(--border-accent)}
+        .faq-item.open{background:transparent;border-color:var(--border-accent)}
 
         /* ═══════ LIVE DOT ═══════ */
         .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;position:relative}
@@ -1609,11 +1609,7 @@ export default function Landing() {
         .cta-glow::before{content:'';position:absolute;inset:-2px;border-radius:30px;background:linear-gradient(135deg,var(--accent-glow),transparent,var(--accent-glow));z-index:-1;filter:blur(20px);animation:glowPulse 4s ease-in-out infinite}
 
         /* ═══════ SECTION BACKGROUNDS ═══════ */
-        .section-hero{background:linear-gradient(180deg,var(--bg-hero) 0%,rgba(247,147,26,0.08) 50%,var(--bg-section) 100%);transition:background 0.5s ease}
-        .section-dark{background:var(--bg-section);transition:background 0.5s ease}
-        .section-darker{background:var(--bg);transition:background 0.5s ease}
-        .section-accent{background:linear-gradient(180deg,var(--bg-section),rgba(247,147,26,0.12) 50%,var(--bg-section));transition:background 0.5s ease}
-        .section-footer{background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 85%,var(--accent) 15%));transition:background 0.5s ease}
+        .section-hero,.section-dark,.section-darker,.section-accent,.section-footer{transition:background 0.5s ease}
 
         /* ═══════ RESPONSIVE ═══════ */
         @media(max-width:768px){
@@ -1854,7 +1850,7 @@ export default function Landing() {
               marginBottom: 28, padding: "8px 20px", fontSize: 12, fontWeight: 600,
               color: "var(--accent)", letterSpacing: "1.5px", textTransform: "uppercase",
               border: "1px solid var(--border)", borderRadius: 100,
-              background: "var(--bg-card)",
+              background: "transparent",
             }}>
               <span className="live-dot" />
               {t.poolFee}
@@ -1937,7 +1933,7 @@ export default function Landing() {
             <div key={i} style={{
               padding: "20px 32px", textAlign: "center", minWidth: 140,
               borderRadius: 16,
-              background: "var(--bg-card)",
+              background: "transparent",
               border: "1px solid var(--border)",
               backdropFilter: "blur(12px)",
               transition: "all 0.4s ease",
@@ -1965,7 +1961,7 @@ export default function Landing() {
               letterSpacing: "2px", textTransform: "uppercase",
               padding: "6px 16px",
               border: "1px solid var(--border)", borderRadius: 100,
-              background: "var(--bg-card)",
+              background: "transparent",
             }}>
               <span className="live-dot" /> Last Mined Blocks
             </div>
@@ -1983,7 +1979,7 @@ export default function Landing() {
               fontSize: 11, fontWeight: 600, color: "var(--accent)",
               letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid var(--border)", borderRadius: 100,
-              background: "var(--bg-card)",
+              background: "transparent",
             }}>How It Works</div>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, letterSpacing: "-1.5px", marginBottom: 14, color: "var(--text-bright)" }}>
               {t.howTitle}
@@ -2008,7 +2004,7 @@ export default function Landing() {
               >
                 <div style={{
                   width: 56, height: 56, borderRadius: 16, margin: "0 auto 22px",
-                  background: "var(--bg-card)",
+                  background: "transparent",
                   border: "1px solid var(--border)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 22,
@@ -2034,7 +2030,7 @@ export default function Landing() {
               fontSize: 11, fontWeight: 600, color: "var(--accent)",
               letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid var(--border)", borderRadius: 100,
-              background: "var(--bg-card)",
+              background: "transparent",
             }}>Features</div>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, letterSpacing: "-1.5px", marginBottom: 14, color: "var(--text-bright)" }}>
               {t.featuresTitle}
@@ -2051,7 +2047,7 @@ export default function Landing() {
               }}>
                 <div style={{
                   width: 48, height: 48, borderRadius: 14, marginBottom: 18,
-                  background: "var(--bg-card)",
+                  background: "transparent",
                   border: "1px solid var(--border)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 19, fontWeight: 700, color: "var(--accent)",
@@ -2095,14 +2091,14 @@ export default function Landing() {
               <div style={{ marginTop: 20, display: "flex", gap: 20 }}>
                 <div style={{
                   padding: "12px 20px", borderRadius: 12,
-                  background: "var(--bg-card)", border: "1px solid var(--border)",
+                  background: "transparent", border: "1px solid var(--border)",
                 }}>
                   <div style={{ fontSize: 22, fontWeight: 800, color: "var(--accent)" }}>98%</div>
                   <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>Your Hashrate</div>
                 </div>
                 <div style={{
                   padding: "12px 20px", borderRadius: 12,
-                  background: "var(--bg-card)", border: "1px solid var(--border)",
+                  background: "transparent", border: "1px solid var(--border)",
                 }}>
                   <div style={{ fontSize: 22, fontWeight: 800, color: "var(--text2)" }}>2%</div>
                   <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>Pool Fee</div>
@@ -2124,7 +2120,7 @@ export default function Landing() {
               fontSize: 11, fontWeight: 600, color: "var(--accent)",
               letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid var(--border)", borderRadius: 100,
-              background: "var(--bg-card)",
+              background: "transparent",
             }}>Hardware</div>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, letterSpacing: "-1.5px", marginBottom: 14, color: "var(--text-bright)" }}>
               {t.hardwareTitle}
@@ -2157,7 +2153,7 @@ export default function Landing() {
               fontSize: 11, fontWeight: 600, color: "var(--accent)",
               letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid var(--border)", borderRadius: 100,
-              background: "var(--bg-card)",
+              background: "transparent",
             }}>FAQ</div>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, letterSpacing: "-1.5px", color: "var(--text-bright)" }}>
               {t.faqTitle}
@@ -2179,7 +2175,7 @@ export default function Landing() {
                 <span style={{
                   width: 28, height: 28, borderRadius: 8, flexShrink: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: openFaq === i ? "var(--bg-card-hover)" : "var(--bg-card)",
+                  background: "transparent",
                   color: "var(--accent)", fontSize: 11, fontWeight: 700,
                   transform: openFaq === i ? "rotate(180deg)" : "rotate(0)",
                   transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
@@ -2232,7 +2228,7 @@ export default function Landing() {
         <Reveal>
           <div className="cta-glow glass-card" style={{
             padding: "64px 48px", textAlign: "center",
-            background: "var(--bg-card)",
+            background: "transparent",
             border: "1px solid var(--border)",
             borderRadius: 28, position: "relative", overflow: "hidden",
           }}>
@@ -2327,7 +2323,7 @@ export default function Landing() {
               <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
                 padding: "10px 16px", borderRadius: 12,
                 border: "1px solid var(--border)",
-                background: "var(--bg-card)", color: "var(--text)", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
+                background: "transparent", color: "var(--text)", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
                 outline: "none", minWidth: 150, transition: "border-color 0.2s",
               }}
                 onMouseEnter={e => e.target.style.borderColor = "var(--accent)"}

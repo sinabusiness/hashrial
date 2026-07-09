@@ -6,3 +6,7 @@ mobile/node_modules/
 .expo/
 dist/
 build/
+.DS_Store
+pwa/build/
+mobile/build/
+builds/

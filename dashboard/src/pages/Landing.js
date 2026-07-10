@@ -1768,6 +1768,7 @@ export default function Landing() {
         {/* Mobile hamburger */}
         <button className="mobile-show" onClick={() => setMobileMenu(!mobileMenu)} style={{
           background: "none", border: "none", color: "var(--text)", cursor: "pointer", padding: 4,
+          flexDirection: "column", alignItems: "center",
         }}>
           <div style={{ width: 20, height: 2, background: "var(--text)", marginBottom: 4, borderRadius: 1 }} />
           <div style={{ width: 20, height: 2, background: "var(--text)", marginBottom: 4, borderRadius: 1 }} />

@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing      from "./pages/Landing";
 import Login        from "./pages/Login";
 import Register     from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword  from "./pages/ResetPassword";
+import VerifyEmail    from "./pages/VerifyEmail";
 import Dashboard    from "./pages/Dashboard";
 import Workers      from "./pages/Workers";
 import WorkerDetail from "./pages/WorkerDetail";
@@ -75,6 +78,9 @@ export default function App() {
           <Route path="/"         element={<Landing />} />
           <Route path="/login"    element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password"  element={<ResetPassword />} />
+          <Route path="/verify-email"    element={<VerifyEmail />} />
           <Route path="/terms"    element={<Terms />} />
           <Route path="/privacy"  element={<Privacy />} />
           <Route path="/cookies"  element={<Cookies />} />

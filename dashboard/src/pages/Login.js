@@ -52,6 +52,9 @@ export default function Login() {
                 />
               </div>
             ))}
+            <div style={{ textAlign:"right", marginTop:-8, marginBottom:16 }}>
+              <Link to="/forgot-password" style={{ fontSize:12, color:"var(--text2)" }}>{t("loginForgotPassword")}</Link>
+            </div>
             <button type="submit" disabled={loading} style={{ width:"100%", padding:11, borderRadius:"var(--r)", border:"none", background:"var(--accent)", color:"#000", fontWeight:700, fontSize:14, cursor:loading?"not-allowed":"pointer", opacity:loading?0.7:1, marginTop:4 }}>
               {loading ? t("signingIn") : t("loginBtn")}
             </button>

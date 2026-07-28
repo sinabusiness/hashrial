@@ -4,11 +4,15 @@ const crypto = require("crypto");
 const { Pool }   = require("pg");
 const Redis      = require("ioredis");
 const { createUpstreamConnection } = require("./upstream");
+const { loadPoolConfig, buildUpstreamUsername, buildFeeUsername } = require("./poolConfig");
 const { sessionStore }             = require("./sessions");
 const { logger }                   = require("./logger");
 
 (function assertEnv() {
-    const required = ["POSTGRES_HOST", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD", "REDIS_HOST", "REDIS_PASSWORD", "ANTPOOL_STRATUM", "FEE_SUBACCOUNT", "MAIN_SUBACCOUNT", "JWT_SECRET"];
+    // Pool endpoint vars are validated by loadPoolConfig() below instead —
+    // ANTPOOL_STRATUM/MAIN_SUBACCOUNT/FEE_SUBACCOUNT are only required in
+    // legacy mode (no ACTIVE_POOL set), not when ACTIVE_POOL=braiins etc.
+    const required = ["POSTGRES_HOST", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD", "REDIS_HOST", "REDIS_PASSWORD", "JWT_SECRET"];
     const missing = required.filter(k => !process.env[k]);
     if (missing.length > 0) { console.error("FATAL: Missing env vars:", missing.join(", ")); process.exit(1); }
 })();
@@ -40,8 +44,16 @@ const redis = new Redis({
     lazyConnect: false, retryStrategy: (t) => Math.min(t * 200, 5000),
 });
 
-const ANTPOOL_HOST = (process.env.ANTPOOL_STRATUM || "ss.antpool.com:3333").split(":")[0];
-const ANTPOOL_PORT = parseInt((process.env.ANTPOOL_STRATUM || "ss.antpool.com:3333").split(":")[1] || "3333");
+// ── Upstream pool selection ───────────────────────────────────
+// Which pool this proxy forwards to. Set ACTIVE_POOL in .env
+// (braiins | antpool | custom). See proxy/src/poolConfig.js.
+let POOL;
+try {
+    POOL = loadPoolConfig();
+} catch (e) {
+    console.error("FATAL:", e.message);
+    process.exit(1);
+}
 
 const server = net.createServer((socket) => {
     if (totalConnections >= MAX_TOTAL_CONNS) {
@@ -102,7 +114,7 @@ const server = net.createServer((socket) => {
     function initUpstream(session) {
         if (session.upstream) return;
         session.upstream = createUpstreamConnection({
-            host: ANTPOOL_HOST, port: ANTPOOL_PORT, name: "main", sessionId: session.id,
+            host: POOL.host, port: POOL.port, name: POOL.name, sessionId: session.id,
             onNotify: (msg) => sendToMiner(session, msg),
             onSetDifficulty: (msg) => sendToMiner(session, msg),
             onSubscribe: (result) => {
@@ -170,11 +182,13 @@ const server = net.createServer((socket) => {
             }
         }
         if (session.upstream) {
-            // Antpool expects: hashrial{poolIndex}.username.workerName
-            const subAccount = `hashrial${session.poolIndex || 1}.${session.username}`;
-            const upstreamUser = `${subAccount}.${session.workerName}`;
+            // Username format depends on the active pool's model — a
+            // sharded pool (per-user sub-accounts, current Antpool setup)
+            // vs a single aggregate account (the Braiins model). See
+            // poolConfig.js for the full explanation of both.
+            const upstreamUser = buildUpstreamUsername(POOL, session);
             session.upstream.authorize(upstreamUser, "x");
-            logger.info("upstream_authorize", { user: upstreamUser, ip: session.remoteIp });
+            logger.info("upstream_authorize", { user: upstreamUser, pool: POOL.name, ip: session.remoteIp });
         }
         sendToMiner(session, { id: msg.id, result: true, error: null });
     }
@@ -210,10 +224,8 @@ const server = net.createServer((socket) => {
         const outgoing = { ...msg, params: msg.params ? [...msg.params] : [] };
 
         if (isFee) {
-            const feeSub = process.env.FEE_SUBACCOUNT || "hashrialfee";
-            // Antpool expects: FEE_SUBACCOUNT.workerName for fee shares
             if (outgoing.params && outgoing.params.length > 0) {
-                outgoing.params[0] = `${feeSub}.${session.workerName || "default"}`;
+                outgoing.params[0] = buildFeeUsername(POOL, session);
             }
             if (session.userId) {
                 pg.query(
@@ -235,6 +247,7 @@ const server = net.createServer((socket) => {
     }
 });
 
+logger.info("active_pool", { pool: POOL.name, host: POOL.host, port: POOL.port, sharded: POOL.sharded, account: POOL.accountName });
 server.listen(PROXY_PORT, () => logger.info(`Hashrial proxy v3.1 on :${PROXY_PORT}`));
 
 // ── Health check endpoint ────────────────────────────────────

@@ -9,6 +9,7 @@ export default function Register() {
   const [form, setForm] = useState({ username:"", email:"", password:"" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
@@ -18,10 +19,34 @@ export default function Register() {
     try {
       const { token } = await api.register(form.username, form.email, form.password);
       localStorage.setItem("hashrial_token", token);
-      navigate("/dashboard/connect");
+      // Show a check-your-email step rather than redirecting silently —
+      // a verification email is actually sent now, so the user should know
+      // to expect it instead of finding it in spam days later.
+      setRegistered(true);
     } catch (err) {
       setError(err.message || t("registerFailed"));
     } finally { setLoading(false); }
+  }
+
+  if (registered) {
+    return (
+      <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
+        <div style={{ width:"100%", maxWidth:420 }}>
+          <div style={{ textAlign:"center", marginBottom:32 }}>
+            <div style={{ width:48, height:48, borderRadius:12, background:"var(--accent)", display:"inline-flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:"#000", marginBottom:10 }}>H</div>
+            <div style={{ fontSize:22, fontWeight:700 }}>Hashrial</div>
+          </div>
+          <div style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"28px 32px", textAlign:"center" }}>
+            <div style={{ fontSize:28, marginBottom:14 }}>&#9993;</div>
+            <h1 style={{ fontSize:17, fontWeight:600, marginBottom:10 }}>{t("registerCheckEmailTitle")}</h1>
+            <div style={{ fontSize:13, color:"var(--text2)", marginBottom:22, lineHeight:1.6 }}>{t("registerCheckEmailSub")}</div>
+            <button onClick={() => navigate("/dashboard/connect")} style={{ width:"100%", padding:11, borderRadius:"var(--r)", border:"none", background:"var(--accent)", color:"#000", fontWeight:700, fontSize:14, cursor:"pointer" }}>
+              {t("registerContinueToDashboard")}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

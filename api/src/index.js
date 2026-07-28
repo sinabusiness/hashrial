@@ -279,20 +279,14 @@ app.post("/api/auth/register", registerLimiter, async (req, res) => {
       "INSERT INTO email_verification_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, NOW() + INTERVAL '24 hours')",
       [user.id, vHash]
     );
-    // FIX: this token was previously returned directly in the API response
-    // (`verificationToken: vToken`). That means anyone could "verify" their
-    // own email without ever receiving anything at that address — the check
-    // provided zero actual security value. It must only reach the user via
-    // an actual email to the address they registered with.
-    //
-    // TODO: wire up a real email send here, e.g.:
-    //   await sendEmail(email, "Verify your Hashrial account",
-    //     `Click to verify: ${process.env.SITE_URL}/verify-email?token=${vToken}`);
-    // Until that's implemented, verification tokens only exist in this log —
-    // registered users currently have no way to verify their email at all, and
-    // nothing in the API enforces email_verified=true anywhere yet, so this
-    // is a functional gap rather than an active vulnerability for now.
-    console.log(`[email] Verification token for ${email}: ${vToken}`);
+    // Verification token is emailed, never returned in the API response —
+    // returning it would let anyone self-verify without controlling the inbox.
+    const verifyUrl = `${process.env.SITE_URL}/verify-email?token=${vToken}`;
+    sendEmail({
+      to: email,
+      subject: "Verify your Hashrial account",
+      html: `<p>Welcome to Hashrial.</p><p><a href="${verifyUrl}">Click here to verify your email</a>. This link expires in 24 hours.</p><p>If you didn't create this account, you can ignore this email.</p>`,
+    }).then(sent => { if (!sent) console.log(`[email] Verification token for ${email} (send failed, fallback): ${vToken}`); });
     res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
   } catch (e) {
     if (e.code === "23505") return res.status(409).json({ error: "Registration failed" });
@@ -365,8 +359,12 @@ app.post("/api/auth/forgot-password", async (req, res) => {
         "INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, NOW() + INTERVAL '1 hour')",
         [r.rows[0].id, hash]
       );
-      console.log(`[email] Password reset token for ${email}: ${token}`);
-      // TODO: Send email with reset link
+      const resetUrl = `${process.env.SITE_URL}/reset-password?token=${token}`;
+      sendEmail({
+        to: email,
+        subject: "Reset your Hashrial password",
+        html: `<p>Someone requested a password reset for your Hashrial account.</p><p><a href="${resetUrl}">Click here to reset your password</a>. This link expires in 1 hour.</p><p>If you didn't request this, you can safely ignore this email — your password won't change.</p>`,
+      }).then(sent => { if (!sent) console.log(`[email] Reset token for ${email} (send failed, fallback): ${token}`); });
     }
     // Always return success to prevent email enumeration
     res.json({ ok: true, message: "If the email exists, a reset link has been sent." });
@@ -727,6 +725,43 @@ app.get("/api/connect", auth, async (req, res) => {
 const BTC_PRICE_REFRESH_MS = 30000;
 const BTC_PRICE_STALE_TTL  = 3600; // serve stale up to 1 hour
 const BTC_PRICE_FRESH_TTL  = 30;   // normal cache
+
+// ── Email sending (Resend) ────────────────────────────────────
+// Raw https.request rather than the Resend SDK, consistent with how this
+// file already talks to Antpool/CoinGecko — no extra dependency for one
+// REST call. Requires RESEND_API_KEY and EMAIL_FROM in .env; EMAIL_FROM's
+// domain must be verified in Resend's dashboard before it delivers to real
+// recipients. Failures are logged and swallowed, never thrown — a broken
+// email send must not fail the registration or reset request itself.
+function sendEmail({ to, subject, html }) {
+  return new Promise((resolve) => {
+    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+      console.warn(`[email] RESEND_API_KEY or EMAIL_FROM not set — skipping send to ${to}`);
+      return resolve(false);
+    }
+    const body = JSON.stringify({ from: process.env.EMAIL_FROM, to: [to], subject, html });
+    const req = https.request({
+      hostname: "api.resend.com", path: "/emails", method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+      },
+      timeout: 8000,
+    }, (res) => {
+      let data = "";
+      res.on("data", c => data += c);
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) return resolve(true);
+        console.error(`[email] Resend ${res.statusCode} sending to ${to}:`, data);
+        resolve(false);
+      });
+    });
+    req.on("error", (e) => { console.error(`[email] send failed to ${to}:`, e.message); resolve(false); });
+    req.on("timeout", () => { req.destroy(); console.error(`[email] send timed out to ${to}`); resolve(false); });
+    req.write(body); req.end();
+  });
+}
 
 async function fetchBtcPriceFromSources() {
   const sources = [

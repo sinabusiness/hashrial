@@ -12,6 +12,15 @@
   --bg-glass:   rgba(12,17,32,0.7);
   --bg-ticker:  rgba(6,9,14,0.95);
 
+  /* FIX: these 4 were missing entirely despite being referenced 50 times
+     across dashboard/'s own components (Layout sidebar, every card
+     background in Dashboard/Workers/Settings/Earnings). Each usage was
+     resolving to an undefined CSS custom property. Values match pwa/. */
+  --bg2:        #0d1117;
+  --bg3:        #161b22;
+  --bg4:        #1c2128;
+  --bg5:        #21262d;
+
   --border:     rgba(255,255,255,0.06);
   --border2:    rgba(255,255,255,0.12);
   --border-accent: rgba(247,147,26,0.15);
@@ -48,6 +57,11 @@
   --bg-card-hover: rgba(255,255,255,0.75);
   --bg-glass:   rgba(255,255,255,0.65);
   --bg-ticker:  rgba(255,255,255,0.92);
+
+  --bg2:        #d0d5dd;
+  --bg3:        #c5ccd6;
+  --bg4:        #b8c0cc;
+  --bg5:        #adb5c2;
 
   --border:     rgba(0,0,0,0.07);
   --border2:    rgba(0,0,0,0.12);

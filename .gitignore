@@ -1,6 +1,10 @@
 node_modules/
 pwa/node_modules/
 mobile/node_modules/
+.env
+.env.local
+*.env
+!.env.example
 *.apk
 *.ipa
 .expo/

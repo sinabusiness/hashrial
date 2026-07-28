@@ -48,6 +48,37 @@ function randomToken() {
   crypto.getRandomValues(arr);
   return Array.from(arr, b => b.toString(16).padStart(2, "0")).join("");
 }
+// ── Email sending (Resend) ────────────────────────────────────
+// Workers have native fetch, so no library needed. env.RESEND_API_KEY must
+// be set via `wrangler secret put RESEND_API_KEY` — never in wrangler.toml,
+// which is committed to git. EMAIL_FROM's domain must be verified in
+// Resend before it delivers to real recipients. Failures are logged and
+// swallowed, never thrown.
+async function sendEmail(env, { to, subject, html }) {
+  if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
+    console.warn(`[email] RESEND_API_KEY or EMAIL_FROM not set — skipping send to ${to}`);
+    return false;
+  }
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, html }),
+    });
+    if (!res.ok) {
+      console.error(`[email] Resend ${res.status} sending to ${to}:`, await res.text());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error(`[email] send failed to ${to}:`, e.message);
+    return false;
+  }
+}
+
 async function hashToken(t) {
   const enc = new TextEncoder();
   const data = enc.encode(t);
@@ -321,7 +352,15 @@ export default {
         await adminDb.from("email_verification_tokens").insert({
           user_id: u.id, token_hash: vHash, expires_at: new Date(Date.now() + 86400000).toISOString(),
         });
-        console.log(`[email] Verification token for ${email}: ${vToken}`);
+        const verifyUrl = `${env.SITE_URL}/verify-email?token=${vToken}`;
+        // ctx.waitUntil keeps this alive past the response — without it a
+        // Worker can freeze the execution context the instant json()
+        // returns, silently dropping the send.
+        ctx.waitUntil(sendEmail(env, {
+          to: email,
+          subject: "Verify your Hashrial account",
+          html: `<p>Welcome to Hashrial.</p><p><a href="${verifyUrl}">Click here to verify your email</a>. This link expires in 24 hours.</p><p>If you didn't create this account, you can ignore this email.</p>`,
+        }));
         // FIX: previously returned verificationToken directly here — same
         // issue as the Express API. Anyone could self-verify without the
         // token ever reaching the actual email address it's meant to
@@ -381,7 +420,12 @@ export default {
             user_id: users[0].id, token_hash: hash,
             expires_at: new Date(Date.now() + 3600000).toISOString(),
           });
-          console.log(`[email] Password reset token for ${email}: ${token}`);
+          const resetUrl = `${env.SITE_URL}/reset-password?token=${token}`;
+          ctx.waitUntil(sendEmail(env, {
+            to: email,
+            subject: "Reset your Hashrial password",
+            html: `<p>Someone requested a password reset for your Hashrial account.</p><p><a href="${resetUrl}">Click here to reset your password</a>. This link expires in 1 hour.</p><p>If you didn't request this, you can safely ignore this email — your password won't change.</p>`,
+          }));
         }
         return json({ ok: true, message: "If the email exists, a reset link has been sent." }, 200, env, request);
       } catch (e) { return err("Failed", 500, env, request); }
@@ -507,10 +551,24 @@ export default {
         const c = await redis.get(`pool:workers:${user.username}`);
         if (c) return json(typeof c === "string" ? JSON.parse(c) : c, 200, env, request);
         const { data: w } = await userSupabase.from("workers").select("worker_name,status,last_seen").eq("user_id", user.id).order("status", { ascending: false }).order("last_seen", { ascending: false });
-        const r = await Promise.all((w || []).map(async w2 => {
-          const { data: s } = await userSupabase.from("hashrate_history").select("hs_10m,hs_1h,hs_1d,accepted,stale").eq("user_id", user.id).eq("worker_name", w2.worker_name).order("ts", { ascending: false }).limit(1);
-          return { ...w2, ...(s?.[0] || {}) };
-        }));
+        // FIX: was N+1 — one hashrate_history query per worker inside
+        // Promise.all, so 50 workers = 50 concurrent Supabase queries on
+        // every cache miss. Express solves this with LEFT JOIN LATERAL,
+        // which Supabase's JS client can't express; this does one query
+        // over a 15min window (comfortably covers the ~2min poll) and
+        // groups to latest-per-worker in memory. Same result, 1 query.
+        const since = new Date(Date.now() - 900000).toISOString();
+        const { data: allStats } = await userSupabase
+          .from("hashrate_history")
+          .select("worker_name,hs_10m,hs_1h,hs_1d,accepted,stale,ts")
+          .eq("user_id", user.id)
+          .gte("ts", since)
+          .order("ts", { ascending: false });
+        const latestByWorker = {};
+        for (const row of (allStats || [])) {
+          if (!latestByWorker[row.worker_name]) latestByWorker[row.worker_name] = row;
+        }
+        const r = (w || []).map(w2 => ({ ...w2, ...(latestByWorker[w2.worker_name] || {}) }));
         return json(r, 200, env, request);
       }
 

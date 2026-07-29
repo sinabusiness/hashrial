@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Vazirmatn:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,6 +32,13 @@
   --green:      #3fb950;
   --red:        #f85149;
   --blue:       #58a6ff;
+
+  /* Status fills. Strong token = text/border, weak = surface. This pairing
+     survives both themes without per-theme component code. */
+  --amber:      #e3b341;
+  --green-weak: rgba(63,185,80,0.14);
+  --amber-weak: rgba(227,179,65,0.14);
+  --red-weak:   rgba(248,81,73,0.14);
   --yellow:     #e3b341;
 
   --r:  8px;
@@ -45,6 +52,17 @@
 
 /* ── Light Theme ── */
 [data-theme="light"] {
+  /* Status colours on the light surface. The dark-theme values were inherited
+     unchanged and failed contrast badly (yellow was 1.58:1). These are 5.2-5.8:1. */
+  --green:      #166534;
+  --red:        #b91c1c;
+  --yellow:     #854d0e;
+  --amber:      #854d0e;
+  --blue:       #1d4ed8;
+  --green-weak: rgba(22,101,52,0.10);
+  --amber-weak: rgba(133,77,14,0.10);
+  --red-weak:   rgba(185,28,28,0.10);
+
   --bg:         #e4e8ee;
   --bg2:        #d0d5dd;
   --bg3:        #c5ccd6;
@@ -148,3 +166,16 @@ input, select, textarea { font-family: var(--font); }
 
   input, select { font-size: 12px; }
 }
+
+/* Persian uses the Arabic-script face; Inter has no Arabic coverage, so
+   without this rule fa fell through to Tahoma. */
+[dir="rtl"] body, body[dir="rtl"] { font-family: var(--font-fa); }
+
+/* A numeric run inside RTL text gets its unit reordered by the bidi algorithm
+   ("2.25 TH/s" renders with the unit on the wrong side). Isolating each run
+   fixes it without forcing the whole layout LTR. */
+.num, .hr-num { direction: ltr; unicode-bidi: isolate; }
+
+/* Time runs left-to-right in every locale — mirroring a time axis is
+   disorienting rather than localized. Mirror the layout, not the timeline. */
+[dir="rtl"] .recharts-wrapper { direction: ltr; }

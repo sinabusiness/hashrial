@@ -263,7 +263,104 @@ async function isValidBtcAddress(addr) {
   } catch { return false; }
 }
 
+// ── Price bundle: BTC in USD + FX rates for local-currency display ──────────
+// Workers cannot run timers, so this is driven by a Cron Trigger (see
+// wrangler.toml [triggers]) and additionally self-heals on a cold cache.
+
+const PRICE_FRESH_TTL = 300;    // 5m — served directly
+const PRICE_STALE_TTL = 86400;  // 24h — served with X-Price-Stale when refresh fails
+
+// Currencies offered in the dashboard's price widget. The MENA set mirrors
+// what صراف tracks; the rest cover the six UI languages.
+const FX_CURRENCIES = [
+  "USD","EUR","GBP","AED","SAR","KWD","QAR","BHD","OMR",
+  "EGP","IRR","IQD","TRY","CNY","RUB","BRL","INR","PKR",
+];
+
+async function fetchBtcUsd() {
+  // CoinGecko first, Binance as fallback — same order the Express backend uses.
+  try {
+    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true", { cf: { cacheTtl: 60 } });
+    if (r.ok) {
+      const j = await r.json();
+      const price = j?.bitcoin?.usd, change = j?.bitcoin?.usd_24h_change;
+      if (price > 1000 && price < 1000000) return { price, change: change ?? 0, source: "CoinGecko" };
+    }
+  } catch {}
+  try {
+    const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT", { cf: { cacheTtl: 60 } });
+    if (r.ok) {
+      const j = await r.json();
+      const price = parseFloat(j?.lastPrice), change = parseFloat(j?.priceChangePercent);
+      if (price > 1000 && price < 1000000) return { price, change: isNaN(change) ? 0 : change, source: "Binance" };
+    }
+  } catch {}
+  return null;
+}
+
+async function fetchFxRates(env) {
+  let rates = {};
+  try {
+    const r = await fetch("https://open.er-api.com/v6/latest/USD", { cf: { cacheTtl: 3600 } });
+    if (r.ok) {
+      const j = await r.json();
+      if (j?.result === "success" && j.rates) {
+        for (const c of FX_CURRENCIES) if (typeof j.rates[c] === "number") rates[c] = j.rates[c];
+      }
+    }
+  } catch {}
+  rates.USD = 1;
+
+  // Operator overrides. For currencies with parallel markets the feed and the
+  // rate a user can actually transact at diverge — measured 2026-07-29, the
+  // feed put IRR at 1,266,355/USD while صراف quoted 1,780,000, so earnings
+  // would read ~71% of their real local value. صراف is the operator's own
+  // exchange and is the authority for those pairs, so its rate wins here.
+  // Set FX_OVERRIDES in wrangler.toml [vars] as JSON, e.g. {"IRR":1780000}
+  const overrides = {};
+  try {
+    const raw = env.FX_OVERRIDES;
+    if (raw) {
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      for (const [k, v] of Object.entries(parsed || {})) {
+        const n = Number(v);
+        if (isFinite(n) && n > 0) { rates[k] = n; overrides[k] = true; }
+      }
+    }
+  } catch {}
+
+  return { rates, overrides };
+}
+
+async function buildPriceBundle(env) {
+  const btc = await fetchBtcUsd();
+  if (!btc) return null;
+  const { rates, overrides } = await fetchFxRates(env);
+  return { ...btc, rates, rateOverrides: overrides, ts: Date.now() };
+}
+
+async function refreshPriceCache(env, redis) {
+  const data = await buildPriceBundle(env);
+  if (!data) return null;
+  // @upstash/redis SET takes an options OBJECT, not ioredis positional args.
+  await redis.set("btcprice:cache", JSON.stringify(data), { ex: PRICE_FRESH_TTL });
+  await redis.set("btcprice:stale", JSON.stringify(data), { ex: PRICE_STALE_TTL });
+  return data;
+}
+
 export default {
+  // Cron Trigger entrypoint. Without this nothing ever populates the price
+  // cache and /public/btcprice returns 503 forever.
+  async scheduled(event, env, ctx) {
+    let redis;
+    try {
+      redis = new Redis({ url: env.UPSTASH_REDIS_URL, token: env.UPSTASH_REDIS_TOKEN });
+    } catch {
+      return;
+    }
+    ctx.waitUntil(refreshPriceCache(env, redis).catch(() => {}));
+  },
+
   async fetch(request, env, ctx) {
     try {
       const url = new URL(request.url);
@@ -313,6 +410,17 @@ export default {
         if (stale) {
           const data = typeof stale === "string" ? JSON.parse(stale) : stale;
           return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "X-Price-Stale": "true", ...SECURITY_HEADERS, ...getCorsHeaders(env, request) } });
+        }
+        // Cold cache — build it inline rather than 503ing until the next cron.
+        const built = await buildPriceBundle(env);
+        if (built) {
+          ctx.waitUntil(
+            Promise.all([
+              redis.set("btcprice:cache", JSON.stringify(built), { ex: PRICE_FRESH_TTL }),
+              redis.set("btcprice:stale", JSON.stringify(built), { ex: PRICE_STALE_TTL }),
+            ]).catch(() => {})
+          );
+          return json(built, 200, env, request);
         }
         return json({ error: "Price unavailable" }, 503, env, request);
       } catch { return json({ error: "Failed" }, 500, env, request); }

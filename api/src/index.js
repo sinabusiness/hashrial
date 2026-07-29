@@ -810,11 +810,66 @@ async function fetchBtcPriceFromSources() {
   return null;
 }
 
+// Currencies offered in the dashboard price widget. The MENA set mirrors what
+// صراف tracks; the rest cover the six UI languages. Kept in step with the
+// Worker's FX_CURRENCIES — these two backends drift if you let them.
+const FX_CURRENCIES = [
+  "USD","EUR","GBP","AED","SAR","KWD","QAR","BHD","OMR",
+  "EGP","IRR","IQD","TRY","CNY","RUB","BRL","INR","PKR",
+];
+
+function fetchFxRates() {
+  return new Promise((resolve) => {
+    const req = https.get("https://open.er-api.com/v6/latest/USD", { timeout: 5000 }, (res) => {
+      let d = "";
+      res.on("data", c => d += c);
+      res.on("end", () => {
+        const rates = { USD: 1 };
+        try {
+          const j = JSON.parse(d);
+          if (j && j.result === "success" && j.rates) {
+            for (const c of FX_CURRENCIES) if (typeof j.rates[c] === "number") rates[c] = j.rates[c];
+          }
+        } catch {}
+        resolve(rates);
+      });
+    });
+    req.on("error", () => resolve({ USD: 1 }));
+    req.on("timeout", () => { req.destroy(); resolve({ USD: 1 }); });
+  });
+}
+
+// For currencies with parallel markets the feed and the rate a user can
+// actually transact at diverge — measured 2026-07-29, the feed put IRR at
+// 1,266,355/USD while صراف quoted 1,780,000, so earnings would read ~71% of
+// their real local value. صراف is the operator's own exchange and is the
+// authority for those pairs, so its rate wins here.
+// FX_OVERRIDES is JSON: currency code -> units per 1 USD, e.g. {"IRR":1780000}
+function applyFxOverrides(rates) {
+  const overrides = {};
+  try {
+    if (process.env.FX_OVERRIDES) {
+      const parsed = JSON.parse(process.env.FX_OVERRIDES);
+      for (const [k, v] of Object.entries(parsed || {})) {
+        const n = Number(v);
+        if (isFinite(n) && n > 0) { rates[k] = n; overrides[k] = true; }
+      }
+    }
+  } catch (e) {
+    console.error("[btcprice] FX_OVERRIDES is not valid JSON — ignoring:", e.message);
+  }
+  return overrides;
+}
+
 async function refreshBtcPriceCache() {
   if (btcPriceCircuitOpen) return;
-  
+
   const data = await fetchBtcPriceFromSources();
   if (data) {
+    const rates = await fetchFxRates();
+    data.rateOverrides = applyFxOverrides(rates);
+    data.rates = rates;
+    data.ts = Date.now();
     btcPriceFailures = 0;
     btcPriceCircuitOpen = false;
     await redis.set("btcprice:cache", JSON.stringify(data), "EX", BTC_PRICE_FRESH_TTL);

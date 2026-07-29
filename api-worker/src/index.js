@@ -166,12 +166,66 @@ async function checkTokenBlacklist(adminDb, user) {
   return true;
 }
 
+/* Rate limiting must not silently switch itself off.
+ *
+ * Every Redis WRITE currently fails — UPSTASH_REDIS_TOKEN is Upstash's
+ * read-only token — and the previous `catch { return true }` turned that into
+ * "allow everything". Login, register and password-reset have had no
+ * brute-force protection at all, with nothing in the logs to say so.
+ *
+ * Failing CLOSED is not the answer either: it would lock every user out the
+ * moment Redis has a problem, and right now that is 100% of the time — the fix
+ * would be an immediate outage. So this degrades to a per-isolate in-memory
+ * counter. Weaker than a global limit (a Worker runs many isolates, and an
+ * attacker spread across them gets a higher effective ceiling), but it is a
+ * real ceiling rather than none, and it cannot take the site down. */
+const memBuckets = new Map();
+let rateLimitDegraded = false;
+
+const MEM_BUCKET_CAP = 5000;
+
+function memoryRateLimit(key, limit, windowSec, now) {
+  const b = memBuckets.get(key);
+  if (!b || now >= b.reset) {
+    if (memBuckets.size >= MEM_BUCKET_CAP) {
+      // Drop what has already expired first — free and lossless.
+      for (const [k, v] of memBuckets) if (now >= v.reset) memBuckets.delete(k);
+      // Still full: evict the LEAST-USED buckets, never the whole map and
+      // never by age. Both of those hand an attacker a bypass — clearing
+      // resets every counter, and evicting by age removes established
+      // counters first, so spraying unique keys would wipe your own limit.
+      // Evicting by count keeps the buckets that are actively limiting
+      // someone; to displace one you must genuinely out-request it.
+      if (memBuckets.size >= MEM_BUCKET_CAP) {
+        const leastUsed = [...memBuckets.entries()]
+          .sort((x, y) => x[1].count - y[1].count)
+          .slice(0, Math.ceil(MEM_BUCKET_CAP / 5));
+        for (const [k] of leastUsed) memBuckets.delete(k);
+      }
+    }
+    memBuckets.set(key, { count: 1, reset: now + windowSec * 1000 });
+    return true;
+  }
+  b.count++;
+  return b.count <= limit;
+}
+
 async function checkRateLimit(redis, key, limit, windowSec) {
   try {
     const current = await redis.incr(key);
     if (current === 1) await redis.expire(key, windowSec);
     return current <= limit;
-  } catch { return true; }
+  } catch (e) {
+    if (!rateLimitDegraded) {
+      rateLimitDegraded = true;
+      console.error(
+        `[ratelimit] Redis unavailable (${e.message}) — degraded to per-isolate ` +
+        `in-memory limiting. If this says NOPERM, UPSTASH_REDIS_TOKEN is the ` +
+        `read-only token and needs replacing with the read-write one.`
+      );
+    }
+    return memoryRateLimit(key, limit, windowSec, Date.now());
+  }
 }
 
 // ── Password hashing with Web Crypto scrypt ─────────────────────
@@ -788,7 +842,14 @@ export default {
         // token ever reaching the actual email address it's meant to
         // confirm control of. Only the console log below should carry it
         // until real email sending is wired up.
-        return json({ token, user: { id: u.id, username: u.username, email: u.email } }, 200, env, request);
+        // The send is fire-and-forget, so the response cannot report delivery.
+        // It can at least report whether a sender is configured at all, so the
+        // UI stops promising an email that provably cannot leave.
+        return json({
+          token,
+          user: { id: u.id, username: u.username, email: u.email },
+          emailSent: !!(env.RESEND_API_KEY && env.EMAIL_FROM),
+        }, 200, env, request);
       } catch (e) { console.error(`[register] ${e.message}`, e.stack); return err("Registration failed: " + e.message, 500, env, request); }
     }
 
@@ -877,6 +938,48 @@ export default {
         // invalidated the next time it's used, across every device.
         return json({ ok: true }, 200, env, request);
       } catch (e) { return err("Failed", 500, env, request); }
+    }
+
+    /* Re-issue a verification link. Registration's email is fire-and-forget, so
+       any failure — an unset key, an unverified sender domain, a transient
+       bounce — used to leave the account permanently unreachable with no way
+       back except editing the database by hand. */
+    if (path === "/auth/resend-verification" && method === "POST") {
+      const { email } = body || {};
+      if (!email) return err("email required", 400, env, request);
+      // Tighter than the general auth limit: this endpoint sends mail, so
+      // abuse costs sender reputation, not just CPU.
+      if (!(await checkRateLimit(redis, `rl:resendverify:${ip}`, 3, 3600))) {
+        return err("Too many requests. Try again in an hour.", 429, env, request);
+      }
+      try {
+        const { data: us } = await adminDb.from("users")
+          .select("id, email, email_verified").eq("email", email).limit(1);
+        const u = us?.[0];
+        if (u && !u.email_verified) {
+          // Retire outstanding tokens so only the newest link is live.
+          await adminDb.from("email_verification_tokens")
+            .update({ used: true }).eq("user_id", u.id).eq("used", false);
+          const vToken = randomToken();
+          const vHash = await hashToken(vToken);
+          await adminDb.from("email_verification_tokens").insert({
+            user_id: u.id, token_hash: vHash,
+            expires_at: new Date(Date.now() + 86400000).toISOString(),
+          });
+          const verifyUrl = `${env.SITE_URL}/verify-email?token=${vToken}`;
+          ctx.waitUntil(sendEmail(env, {
+            to: u.email,
+            subject: "Verify your Hashrial account",
+            html: `<p>Here is a fresh verification link for your Hashrial account.</p><p><a href="${verifyUrl}">Verify your email</a>. This link expires in 24 hours and replaces any earlier link.</p><p>If you didn't request this, you can ignore it.</p>`,
+          }));
+        }
+        // Identical response whether or not the account exists or is already
+        // verified — otherwise this is an account-existence oracle.
+        return json({ ok: true, message: "If that account exists and is unverified, a new link is on its way." }, 200, env, request);
+      } catch (e) {
+        console.error(`[resend-verification] ${e.message}`);
+        return err("Failed", 500, env, request);
+      }
     }
 
     if (path === "/auth/verify-email" && method === "POST") {

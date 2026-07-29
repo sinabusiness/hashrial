@@ -7,6 +7,18 @@ compatibility_flags = ["nodejs_compat"]
 SITE_URL = "https://hashrial.com"
 STRATUM_HOST = "hashrial.com"
 MAIN_SUBACCOUNT = "hashrial"
+
+# Which upstream pool the backend polls. MUST match proxy/.env's ACTIVE_POOL —
+# if the proxy forwards to Braiins while this still says antpool, the poller
+# queries sub-accounts receiving no hashrate and every user reads zero.
+#   antpool -> per-user sub-accounts, polled by the Express antpoolPoller
+#   braiins -> ONE aggregate account; per-user figures are derived here by
+#              parsing `hashrial.{user}_{worker}` worker labels
+# Leave on antpool until `node scripts/verify-braiins.js` passes.
+ACTIVE_POOL = "antpool"
+BRAIINS_ACCOUNT = "hashrial"
+# BRAIINS_TOKEN is a credential and must NOT live here. Set it with:
+#   wrangler secret put BRAIINS_TOKEN
 MIN_PAYOUT_BTC = "0.001"
 # EMAIL_FROM is an address, not a credential, so it's fine in this
 # committed file. RESEND_API_KEY is deliberately NOT here — set it with:

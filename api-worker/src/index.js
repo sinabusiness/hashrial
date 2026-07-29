@@ -500,6 +500,105 @@ export function buildBraiinsAttribution(profileJson, workersJson, accountName) {
   };
 }
 
+/* Braiins reports each worker's rate with an explicit hash_rate_unit. Coercing
+   those numbers without honouring it would mix Gh/s and Th/s in one column —
+   a 1000x error in what a user appears to be contributing, and therefore in
+   what they get paid. Everything is normalised to TH/s, which is what the
+   dashboard's formatter assumes. */
+const HASH_UNIT_TO_TH = {
+  "h/s": 1e-12, "kh/s": 1e-9, "mh/s": 1e-6, "gh/s": 1e-3,
+  "th/s": 1, "ph/s": 1e3, "eh/s": 1e6,
+};
+export function toTeraHash(value, unit) {
+  const n = Number(value || 0);
+  if (!isFinite(n)) return 0;
+  if (!unit) return n; // already TH/s by convention
+  const f = HASH_UNIT_TO_TH[String(unit).trim().toLowerCase()];
+  if (f === undefined) { console.error(`[braiins] unknown hash_rate_unit "${unit}" — treating as TH/s`); return n; }
+  return n * f;
+}
+
+/* Polls Braiins and writes per-user rows derived from the aggregate account.
+   Exactly TWO upstream requests per run: Braiins documents a limit of roughly
+   one request per five seconds and warns that sustained overuse can get the
+   caller's IP banned, so this must never scale with user count. */
+async function pollBraiins(env, adminDb) {
+  if ((env.ACTIVE_POOL || "").trim().toLowerCase() !== "braiins") return;
+  if (!env.BRAIINS_TOKEN) { console.error("[braiins] ACTIVE_POOL=braiins but BRAIINS_TOKEN is unset — nothing will be polled"); return; }
+
+  const account = env.BRAIINS_ACCOUNT || "hashrial";
+  const [profileJson, workersJson] = await Promise.all([
+    braiinsFetch(env, "/accounts/profile/json/btc/"),
+    braiinsFetch(env, "/accounts/workers/json/btc"),
+  ]);
+
+  const attr = buildBraiinsAttribution(profileJson, workersJson, account);
+  if (!attr) return; // already logged; writes nothing rather than zeros
+
+  // username -> id, one query rather than one per worker.
+  const names = [...new Set(attr.rows.map(r => r.username))];
+  if (!names.length) { console.error("[braiins] no worker label resolved to a user — check the naming scheme"); return; }
+  const { data: users, error: uErr } = await adminDb.from("users").select("id, username").in("username", names);
+  if (uErr) { console.error("[braiins] user lookup failed:", uErr.message); return; }
+  const idByName = new Map((users || []).map(u => [u.username, u.id]));
+
+  const unresolved = names.filter(n => !idByName.has(n));
+  if (unresolved.length) console.error(`[braiins] ${unresolved.length} label(s) matched no Hashrial user: ${unresolved.slice(0, 5).join(", ")}`);
+
+  // Group per user — a user may run several rigs.
+  const byUser = new Map();
+  for (const r of attr.rows) {
+    const id = idByName.get(r.username);
+    if (!id) continue;
+    if (!byUser.has(id)) byUser.set(id, []);
+    byUser.get(id).push(r);
+  }
+
+  const nowIso = new Date().toISOString();
+  const workerRows = [], hashRows = [], earnRows = [];
+
+  for (const [userId, rigs] of byUser) {
+    let shares = 0, h5 = 0, h60 = 0, h24 = 0, online = 0;
+    for (const r of rigs) {
+      const t5 = toTeraHash(r.hs_5m, r.unit);
+      const t60 = toTeraHash(r.hs_60m, r.unit);
+      const t24 = toTeraHash(r.hs_24h, r.unit);
+      shares += r.shares; h5 += t5; h60 += t60; h24 += t24;
+      // Braiins states: ok / low / off / dis. `low` is a live-but-degraded rig,
+      // which the dashboard renders as its own state rather than as offline.
+      const status = r.state === "ok" || r.state === "low" ? "online" : "offline";
+      if (status === "online") online++;
+      workerRows.push({
+        user_id: userId, worker_name: r.worker, status,
+        last_seen: r.lastShare ? new Date(r.lastShare * 1000).toISOString() : nowIso,
+      });
+      hashRows.push({ user_id: userId, worker_name: r.worker, hs_10m: t5, hs_1h: t60, hs_1d: t24, accepted: r.shares, stale: 0 });
+    }
+    hashRows.push({ user_id: userId, worker_name: null, hs_10m: h5, hs_1h: h60, hs_1d: h24, accepted: shares, stale: 0, active_workers: online });
+
+    // Revenue split. Braiins knows one account; this is the only place a user's
+    // share of it is decided, which is why it keys on work accepted rather than
+    // on hashrate (itself an average).
+    const frac = attr.totalShares > 0 ? shares / attr.totalShares : 0;
+    earnRows.push({
+      user_id: userId,
+      balance: +(attr.account.balance * frac).toFixed(12),
+      earn_24h: +(attr.account.today * frac).toFixed(12),
+      earn_total: +(attr.account.allTime * frac).toFixed(12),
+      paid_out: 0,
+    });
+  }
+
+  const w = await adminDb.from("workers").upsert(workerRows, { onConflict: "user_id,worker_name" });
+  if (w.error) console.error("[braiins] workers upsert:", w.error.message);
+  const h = await adminDb.from("hashrate_history").insert(hashRows);
+  if (h.error) console.error("[braiins] hashrate insert:", h.error.message);
+  const e = await adminDb.from("earnings_history").insert(earnRows);
+  if (e.error) console.error("[braiins] earnings insert:", e.error.message);
+
+  console.log(`[braiins] ${byUser.size} users, ${workerRows.length} workers, ${attr.totalShares} shares split`);
+}
+
 export default {
   // Cron Trigger entrypoint. Without this nothing ever populates the price
   // cache and /public/btcprice returns 503 forever.
@@ -508,9 +607,13 @@ export default {
     try {
       redis = new Redis({ url: env.UPSTASH_REDIS_URL, token: env.UPSTASH_REDIS_TOKEN });
     } catch {
-      return;
+      redis = null;
     }
-    ctx.waitUntil(refreshPriceCache(env, redis).catch(() => {}));
+    const adminDb = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+    ctx.waitUntil(Promise.allSettled([
+      redis ? refreshPriceCache(env, redis) : Promise.resolve(),
+      pollBraiins(env, adminDb),
+    ]).then(rs => rs.forEach(r => r.status === "rejected" && console.error("[cron]", r.reason?.message || r.reason))));
   },
 
   async fetch(request, env, ctx) {

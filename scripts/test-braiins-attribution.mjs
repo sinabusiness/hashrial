@@ -7,7 +7,7 @@
  *
  *   node scripts/test-braiins-attribution.mjs
  */
-import { parseBraiinsWorkerLabel, buildBraiinsAttribution } from "../api-worker/src/index.js";
+import { parseBraiinsWorkerLabel, buildBraiinsAttribution, toTeraHash } from "../api-worker/src/index.js";
 
 let pass = 0, fail = 0;
 const eq = (name, got, want) => {
@@ -74,6 +74,18 @@ const bare = buildBraiinsAttribution(
   { workers: { "alice_rig01": { shares_24h: 10, hash_rate_5m: 1, state: "ok" } } },
   "hashrial");
 eq("bare root handled", bare && bare.rows.length, 1);
+
+console.log("\ntoTeraHash — unit normalisation (a 1000x slip here misprices payouts)");
+eq("Th/s passes through", toTeraHash(100, "Th/s"), 100);
+eq("Gh/s scales down", toTeraHash(1000, "Gh/s"), 1);
+eq("Ph/s scales up", toTeraHash(2, "Ph/s"), 2000);
+eq("Eh/s scales up", toTeraHash(1, "Eh/s"), 1e6);
+eq("Mh/s", toTeraHash(1e6, "Mh/s"), 1);
+eq("case insensitive", toTeraHash(1000, "gh/s"), 1);
+eq("whitespace tolerated", toTeraHash(1000, " Gh/s "), 1);
+eq("missing unit assumed TH/s", toTeraHash(50, null), 50);
+eq("unknown unit falls back rather than zeroing", toTeraHash(50, "furlongs"), 50);
+eq("non-numeric -> 0", toTeraHash("abc", "Th/s"), 0);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

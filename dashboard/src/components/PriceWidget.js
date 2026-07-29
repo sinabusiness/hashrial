@@ -13,25 +13,29 @@ import { useLang } from "../i18n";
    double the money noise on a phone and defeat the telemetry
    hierarchy the dashboard is built around.
 
-   Rates come from /api/public/btcprice — CoinGecko for BTC,
-   open.er-api.com for FX, with operator overrides (FX_OVERRIDES)
-   for pairs where the public feed and the rate people actually
-   transact at diverge.
+   Rates come from /api/public/btcprice — CoinGecko/Kraken for BTC,
+   open.er-api.com for FX, and صراف's own live Iran feed (Wallex
+   USDT/IRR) for Toman and Rial. The public feed publishes Iran's
+   OFFICIAL rate, which is more than 50% below what anyone actually
+   transacts at, so it cannot be used for those two.
    ───────────────────────────────────────────────────────────── */
 
 // Default denomination per UI language. Spanish spans too many economies for a
 // single sensible default, so it falls back to USD; the control overrides all.
-const LANG_CURRENCY = { en: "USD", fa: "IRR", zh: "CNY", ru: "RUB", es: "USD", pt: "BRL" };
+const LANG_CURRENCY = { en: "USD", fa: "TMN", zh: "CNY", ru: "RUB", es: "USD", pt: "BRL" };
 
 export const CURRENCIES = [
-  "USD", "EUR", "GBP", "AED", "SAR", "KWD", "QAR", "BHD", "OMR",
-  "EGP", "IRR", "IQD", "TRY", "CNY", "RUB", "BRL", "INR", "PKR",
+  "USD", "TMN", "IRR", "EUR", "GBP", "AED", "SAR", "KWD", "QAR", "BHD",
+  "OMR", "EGP", "IQD", "TRY", "CNY", "RUB", "BRL", "INR", "PKR",
 ];
 
 const SYMBOL = {
   USD: "$", EUR: "€", GBP: "£", IRR: "﷼", AED: "د.إ", SAR: "﷼", TRY: "₺",
   CNY: "¥", RUB: "₽", BRL: "R$", INR: "₹", PKR: "₨", EGP: "E£",
   KWD: "د.ك", QAR: "﷼", BHD: ".د.ب", OMR: "﷼", IQD: "ع.د",
+  // Toman is the unit Iranians actually quote. 1 Toman = 10 Rial, so a rial
+  // figure is a number the reader has to divide by ten in their head.
+  TMN: "تومان",
 };
 
 const STORAGE_KEY = "hashrial_denom";
@@ -110,7 +114,9 @@ export function PriceRail({ data, stale, denom, setDenom, localCurrency }) {
   const change = typeof data.change === "number" && isFinite(data.change) ? data.change : null;
   const up = (change ?? 0) >= 0;
   const localPer1 = btcToFiat(1, data.price, data.rates, localCurrency);
-  const overridden = !!(data.rateOverrides && data.rateOverrides[localCurrency]);
+  // Rate provenance: صراف live feed, or a pinned operator override.
+  const rateSource = data.rateMeta && data.rateMeta[localCurrency];
+  const pinned = !!(data.rateOverrides && data.rateOverrides[localCurrency]);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 11 }}>
@@ -127,11 +133,11 @@ export function PriceRail({ data, stale, denom, setDenom, localCurrency }) {
       {localCurrency !== "USD" && localPer1 !== null && (
         <span
           className="num"
-          title={overridden ? t("rateFromSarrafHint") : undefined}
+          title={rateSource ? `${t("rateFromSarrafHint")} (${rateSource.source})` : undefined}
           style={{ color: "var(--text3)" }}
         >
           · {fiatSymbol(localCurrency)} {formatFiat(localPer1, lang)}
-          {overridden && <span style={{ marginInlineStart: 4 }}>({t("rateFromSarraf")})</span>}
+          {(rateSource || pinned) && <span style={{ marginInlineStart: 4 }}>({t("rateFromSarraf")})</span>}
         </span>
       )}
 
@@ -160,7 +166,7 @@ export function PriceRail({ data, stale, denom, setDenom, localCurrency }) {
       </label>
 
       <a className="hr-link" href={SARRAF_URL} target="_blank" rel="noopener noreferrer"
-         style={{ color: "var(--accent)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
+         style={{ color: "var(--accent-text)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
         {t("exchangeAtSarraf")}
       </a>
     </div>

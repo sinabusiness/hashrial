@@ -382,6 +382,39 @@ const FX_CURRENCIES = [
   "EGP","IRR","IQD","TRY","CNY","RUB","BRL","INR","PKR",
 ];
 
+/* صراف's own live Iran rate, from its public edge function (no auth, CORS *).
+   It sources USDT/IRR from Wallex, an Iranian exchange, which is the rate
+   people actually transact at.
+
+   This replaces a hardcoded FX_OVERRIDES value that had already gone stale:
+   1,780,000 against a live 1,938,950 understated every Iranian user's earnings
+   by 8.2%. A rate you have to remember to update is a rate that will be wrong.
+
+   TMN (Toman) is derived here, not fetched: 1 Toman = 10 Rial. Iranians quote
+   and think in Toman, so showing a Rial figure is showing someone a number they
+   will mentally divide by ten. صراف itself displays Toman. */
+const SARRAF_RATES_URL = "https://hzitehnpxtiesilfugcp.supabase.co/functions/v1/iran-rates";
+
+async function fetchSarrafIrr() {
+  try {
+    const r = await fetch(SARRAF_RATES_URL, { cf: { cacheTtl: 300 } });
+    if (!r.ok) { console.error(`[fx] صراف iran-rates HTTP ${r.status}`); return null; }
+    const j = await r.json();
+    const rial = Number(j?.average ?? j?.rates?.[0]?.price);
+    // Sanity band: the free-market rate is in the millions. A value outside this
+    // is either the official rate or a broken response, and quietly using it
+    // would misprice every Iranian balance.
+    if (!isFinite(rial) || rial < 300000 || rial > 20000000) {
+      console.error(`[fx] صراف returned an implausible IRR rate: ${rial}`);
+      return null;
+    }
+    return { rial, source: j?.rates?.[0]?.source || "صراف", ts: j?.timestamp || null };
+  } catch (e) {
+    console.error(`[fx] صراف iran-rates threw: ${e.message}`);
+    return null;
+  }
+}
+
 // Several public price APIs refuse Cloudflare's egress IPs (CoinGecko rate
 // limits them, Binance geo-blocks some regions outright), so this tries a
 // chain and logs why each one failed — a silent catch here is how the price
@@ -452,12 +485,29 @@ async function fetchFxRates(env) {
   } catch {}
   rates.USD = 1;
 
-  // Operator overrides. For currencies with parallel markets the feed and the
-  // rate a user can actually transact at diverge — measured 2026-07-29, the
-  // feed put IRR at 1,266,355/USD while صراف quoted 1,780,000, so earnings
-  // would read ~71% of their real local value. صراف is the operator's own
-  // exchange and is the authority for those pairs, so its rate wins here.
-  // Set FX_OVERRIDES in wrangler.toml [vars] as JSON, e.g. {"IRR":1780000}
+  /* صراف is authoritative for Iran, so it wins over the public feed — which
+     publishes the OFFICIAL rate (~1.27M) rather than the one anyone transacts
+     at (~1.94M), a difference of more than 50%. Toman is derived, and is what
+     the UI actually shows to Persian users. */
+  const sarraf = await fetchSarrafIrr();
+  const meta = {};
+  if (sarraf) {
+    rates.IRR = sarraf.rial;
+    rates.TMN = sarraf.rial / 10;
+    meta.IRR = { source: sarraf.source, ts: sarraf.ts };
+    meta.TMN = { source: sarraf.source, ts: sarraf.ts };
+  } else if (rates.IRR) {
+    // Fall back to the public feed but derive Toman anyway, so the unit is
+    // never silently wrong even when the rate is only approximate.
+    rates.TMN = rates.IRR / 10;
+  }
+
+  /* Manual overrides, now only an escape hatch. IRR used to be pinned here and
+     it drifted: 1,780,000 hardcoded against a live 1,938,950, understating
+     Iranian earnings by 8.2%. A rate someone has to remember to edit is a rate
+     that will be wrong, so IRR/TMN come from صراف live and this exists purely
+     for a pair صراف does not cover, or to pin one during an outage.
+     FX_OVERRIDES in wrangler.toml [vars] as JSON, e.g. {"IQD":1310} */
   const overrides = {};
   try {
     const raw = env.FX_OVERRIDES;
@@ -465,19 +515,19 @@ async function fetchFxRates(env) {
       const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
       for (const [k, v] of Object.entries(parsed || {})) {
         const n = Number(v);
-        if (isFinite(n) && n > 0) { rates[k] = n; overrides[k] = true; }
+        if (isFinite(n) && n > 0) { rates[k] = n; overrides[k] = true; delete meta[k]; }
       }
     }
   } catch {}
 
-  return { rates, overrides };
+  return { rates, overrides, rateMeta: meta };
 }
 
 async function buildPriceBundle(env) {
   const btc = await fetchBtcUsd();
   if (!btc) return null;
-  const { rates, overrides } = await fetchFxRates(env);
-  return { ...btc, rates, rateOverrides: overrides, ts: Date.now() };
+  const { rates, overrides, rateMeta } = await fetchFxRates(env);
+  return { ...btc, rates, rateOverrides: overrides, rateMeta, ts: Date.now() };
 }
 
 async function refreshPriceCache(env, redis) {

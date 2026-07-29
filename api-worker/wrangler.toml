@@ -29,14 +29,12 @@ MIN_PAYOUT_BTC = "0.001"
 #   wrangler secret put RESEND_API_KEY
 EMAIL_FROM = "Hashrial <noreply@hashrial.com>"
 
-# Local-currency display for the dashboard price widget. Rates come from
-# open.er-api.com, but for currencies with a parallel market the feed lags the
-# rate a user can actually transact at: on 2026-07-29 the feed put IRR at
-# 1,266,355/USD while صراف quoted 1,780,000, so earnings would read ~71% of
-# their real local value. صراف is the operator's own exchange, so its rate is
-# authoritative here. Keep this in step with صراف when that rate moves.
-# Format: JSON object of currency code -> units per 1 USD.
-FX_OVERRIDES = '{"IRR":1780000}'
+# Manual FX pins. IRR and TMN now come LIVE from صراف's own feed (Wallex
+# USDT/IRR) so there is nothing to pin here — a hardcoded 1,780,000 had already
+# drifted 8.2% below the live 1,938,950, understating every Iranian balance.
+# Only set this for a pair صراف does not cover, or to freeze one during an
+# outage. JSON, currency -> units per 1 USD, e.g. {"IQD":1310}
+FX_OVERRIDES = '{}'
 
 # Populates the BTC price + FX cache. Without a trigger the Worker has no way
 # to run it (no timers), and /public/btcprice 503s — which is what production

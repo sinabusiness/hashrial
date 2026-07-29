@@ -14,3 +14,6 @@ build/
 pwa/build/
 mobile/build/
 builds/
+
+# wrangler local state
+.wrangler/

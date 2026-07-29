@@ -76,57 +76,58 @@ export function htmlToText(html) {
     .trim();
 }
 
-/* Cloudflare Email Sending first, Resend as fallback.
+/* Resend is the sender. Hashrial uses its own Resend account, separate from
+ * صراف's — Resend's free plan verifies one domain per account, and صراف holds
+ * the slot on the other one. That keeps both products sending for free.
  *
- * Resend's free plan allows one verified domain and this account's slot is
- * used by صراف, so noreply@hashrial.com had no verified sender there and every
- * send was rejected. The Cloudflare binding has no per-domain plan cap and no
- * API key to leak — the account is already on Workers.
+ * Cloudflare Email Sending is supported as a fallback but is NOT wired up:
+ * there is no send_email binding in wrangler.toml, so env.EMAIL is undefined
+ * and this path is skipped. It bills monthly; add the binding back only if you
+ * decide to pay for it.
  *
- * The `from` domain still has to be onboarded once:
- *   wrangler email sending enable hashrial.com
- * Until that happens the binding throws E_SENDER_NOT_VERIFIED, which is logged
- * with its code rather than swallowed. Failures never throw to the caller. */
+ * A 403 from Resend almost always means the `from` domain is not verified in
+ * whichever account this key belongs to — the failure that meant no user ever
+ * received a verification email. Failures are logged with the response body
+ * and never thrown to the caller. */
 async function sendEmail(env, { to, subject, html, text }) {
   const from = parseEmailFrom(env.EMAIL_FROM);
   const body = text || htmlToText(html);
 
+  if (env.RESEND_API_KEY && env.EMAIL_FROM) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, html, text: body }),
+      });
+      if (res.ok) return true;
+      const detail = await res.text();
+      console.error(`[email] Resend ${res.status} sending to ${to}: ${detail}`);
+      if (res.status === 403 || /domain/i.test(detail)) {
+        console.error(`[email] verify "${from.email.split("@")[1]}" under Domains in the Resend account this key belongs to`);
+      }
+    } catch (e) {
+      console.error(`[email] Resend request to ${to} threw: ${e.message}`);
+    }
+  }
+
+  // Only reachable if a send_email binding is added back.
   if (env.EMAIL && from.email) {
     try {
       await env.EMAIL.send({ to, from: { email: from.email, name: from.name }, subject, html, text: body });
       return true;
     } catch (e) {
-      // E_SENDER_NOT_VERIFIED means the domain was never onboarded; retrying
-      // will not help, so say so plainly instead of burying it.
       console.error(`[email] Cloudflare send to ${to} failed: ${e.code || "?"} ${e.message}`);
-      if (e.code === "E_SENDER_NOT_VERIFIED" || e.code === "E_SENDER_DOMAIN_NOT_AVAILABLE") {
-        console.error(`[email] run: wrangler email sending enable ${from.email.split("@")[1]}`);
-      }
     }
   }
 
-  if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
-    console.warn(`[email] no sender configured (no EMAIL binding, no RESEND_API_KEY) — skipping send to ${to}`);
-    return false;
+  if (!env.RESEND_API_KEY && !env.EMAIL) {
+    console.warn(`[email] no sender configured — skipping send to ${to}`);
   }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, html, text: body }),
-    });
-    if (!res.ok) {
-      console.error(`[email] Resend ${res.status} sending to ${to}:`, await res.text());
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error(`[email] send failed to ${to}:`, e.message);
-    return false;
-  }
+  return false;
 }
 
 async function hashToken(t) {

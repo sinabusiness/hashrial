@@ -35,6 +35,9 @@ import { PriceRail, useDenomination, makeMoneyFormatter } from "../components/Pr
 // rig to itself, so it needs no per-model configuration and no new data.
 const DEGRADED_RATIO = 0.6;
 
+// Module scope so it is not a hook dependency.
+const STATE_RANK = { offline: 0, degraded: 1, online: 2 };
+
 function fmt(val) {
   const n = parseFloat(val || 0);
   if (n === 0) return "0.00";
@@ -164,10 +167,9 @@ export default function Dashboard() {
   const onlineCount  = rigs.length - offlineRigs.length;
 
   // Worst first — problems cluster at the start of both the strip and the table.
-  const rank = { offline: 0, degraded: 1, online: 2 };
   const sortedRigs = useMemo(
-    () => [...rigs].sort((a, b) => rank[a.state] - rank[b.state] || a.ratio - b.ratio),
-    [rigs] // eslint-disable-line react-hooks/exhaustive-deps
+    () => [...rigs].sort((a, b) => STATE_RANK[a.state] - STATE_RANK[b.state] || a.ratio - b.ratio),
+    [rigs]
   );
 
   const acceptedN = parseInt(hr.accepted || 0);

@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { useLang } from "../i18n";
 
-function fmtBTC(val) { return `${parseFloat(val||0).toFixed(8)} BTC`; }
+/* Earnings + payouts. Styling from the design system in index.css.
+
+   Money renders in --text-bright, not --accent. Orange means hashrate and only
+   hashrate; when it also meant money, links and active tabs it meant nothing.
+   Status colours here describe payout STATE, which is the one other job those
+   tokens have. */
+
+function fmtBTC(val) { return parseFloat(val || 0).toFixed(8); }
 
 export default function Earnings() {
   const { t } = useLang();
@@ -30,131 +37,140 @@ export default function Earnings() {
 
   const earn = overview?.earnings || {};
   const usd  = (btc) => btcPrice?.price
-    ? ` ≈ $${(parseFloat(btc||0)*btcPrice.price).toLocaleString("en-US",{maximumFractionDigits:2})}`
+    ? `≈ $${(parseFloat(btc||0)*btcPrice.price).toLocaleString("en-US",{maximumFractionDigits:2})}`
     : "";
 
   function requestPayout() {
     const bal = parseFloat(earn.balance || 0);
-    if (!window.confirm(`Request payout of ${fmtBTC(bal)}? This action cannot be undone.`)) return;
+    if (!window.confirm(`${t("requestPayout")}: ${fmtBTC(bal)} BTC?`)) return;
     setRequesting(true);
     setPayoutMsg(null);
     api.requestPayout()
-      .then(r => setPayoutMsg({ ok:true, msg:`Payout request submitted: ${r.amount} BTC to ${r.address}` }))
+      .then(r => setPayoutMsg({ ok:true, msg:`${fmtBTC(r.amount)} BTC → ${r.address}` }))
       .catch(e => setPayoutMsg({ ok:false, msg: e.message }))
       .finally(() => setRequesting(false));
   }
 
-  const card = { background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", overflow:"hidden", marginBottom:16 };
-  const ch   = { padding:"14px 18px", borderBottom:"1px solid var(--border)", display:"flex", justifyContent:"space-between", alignItems:"center" };
+  const payoutPill = (status) =>
+    status === "completed" ? "pill-ok" : status === "failed" ? "pill-bad" : "pill-warn";
 
   return (
-    <div style={{ padding:"24px 28px", maxWidth:1100 }}>
-      <h1 style={{ fontSize:22, fontWeight:700, marginBottom:20 }}>{t("earningsTitle")}</h1>
-
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:14, marginBottom:20 }}>
-        {[
-          { label:t("balance2"), value:fmtBTC(earn.balance), sub:usd(earn.balance), color:"var(--yellow)" },
-          { label:t("earn24h"),  value:fmtBTC(earn.earn24h), sub:usd(earn.earn24h), color:"var(--green)" },
-          { label:t("earnTotal"),value:fmtBTC(earn.earnTotal),sub:usd(earn.earnTotal),color:"var(--accent)" },
-          { label:t("paidOut"),  value:fmtBTC(earn.paidOut),  sub:"",               color:"var(--text2)" },
-        ].map(c => (
-          <div key={c.label} style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"16px 18px" }}>
-            <div style={{ fontSize:10, color:"var(--text2)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.6px", marginBottom:8 }}>{c.label}</div>
-            <div style={{ fontSize:18, fontWeight:700, color:c.color, fontFamily:"var(--mono)", marginBottom:3 }}>{c.value}</div>
-            {c.sub && <div style={{ fontSize:11, color:"var(--text2)" }}>{c.sub}</div>}
-          </div>
-        ))}
+    <div className="page" style={{ maxWidth: 1100 }}>
+      <div className="page-head">
+        <h1 className="page-title">{t("earningsTitle")}</h1>
       </div>
 
-      <div style={{ background:"rgba(247,147,26,0.06)", border:"1px solid rgba(247,147,26,0.18)", borderRadius:"var(--r2)", padding:"13px 16px", marginBottom:16, fontSize:13, color:"var(--text2)", lineHeight:1.7 }}>
-        <strong style={{ color:"var(--accent)" }}>ℹ 2% Pool Fee</strong> — Hashrial charges 2% for pool infrastructure. The earnings shown are your net balance after the fee.
+      {/* Balance is the one figure that matters here, so it gets the hero and
+          the rest become supporting metrics rather than four equal cards. */}
+      <div className="panel panel-pad" style={{ marginBottom: 16 }}>
+        <div className="eyebrow" style={{ marginBottom: 8 }}>{t("balance2")}</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+          <span className="num" style={{ fontSize: 34, fontWeight: 700, color: "var(--text-bright)", lineHeight: 1 }}>
+            {fmtBTC(earn.balance)}
+            <span style={{ fontSize: 16, fontWeight: 500, color: "var(--text2)", marginInlineStart: 7 }}>BTC</span>
+          </span>
+          {usd(earn.balance) && <span className="num" style={{ fontSize: 14, color: "var(--text2)" }}>{usd(earn.balance)}</span>}
+        </div>
+
+        <div className="metric-row" style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+          <div className="metric">
+            <div className="metric-label">{t("earn24h")}</div>
+            <div className="metric-value" style={{ color: "var(--green)" }}>{fmtBTC(earn.earn24h)}</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">{t("earnTotal")}</div>
+            <div className="metric-value">{fmtBTC(earn.earnTotal)}</div>
+          </div>
+          <div className="metric metric-last">
+            <div className="metric-label">{t("paidOut")}</div>
+            <div className="metric-value" style={{ color: "var(--text2)" }}>{fmtBTC(earn.paidOut)}</div>
+          </div>
+        </div>
+
+        <div className="meta" style={{ marginTop: 14 }}>{t("poolFeeNote")}</div>
       </div>
 
       {/* Payout request */}
-      <div style={{ ...card }}>
-        <div style={ch}><div style={{ fontSize:14, fontWeight:600 }}>{t("requestPayout")}</div></div>
-        <div style={{ padding:"16px 18px" }}>
-          <div style={{ fontSize:13, color:"var(--text2)", marginBottom:12 }}>
-            Minimum: 0.001 BTC. {t("payoutMinNote")}
+      <div className="panel" style={{ marginBottom: 16 }}>
+        <div className="panel-head"><div className="panel-title">{t("requestPayout")}</div></div>
+        <div className="panel-pad">
+          <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 12, lineHeight: 1.6 }}>
+            {t("payoutMinNote")}
           </div>
           {payoutMsg && (
-            <div style={{ marginBottom:12, padding:"10px 14px", borderRadius:"var(--r)", fontSize:13,
-              background: payoutMsg.ok ? "rgba(46,168,76,0.1)" : "rgba(232,64,64,0.1)",
-              color: payoutMsg.ok ? "var(--green)" : "var(--red)",
-              border: `1px solid ${payoutMsg.ok ? "rgba(46,168,76,0.2)" : "rgba(232,64,64,0.2)"}`,
-            }}>{payoutMsg.msg}</div>
+            <div className={`alert ${payoutMsg.ok ? "alert-ok" : "alert-bad"}`}>
+              <span className={payoutMsg.ok ? "num" : undefined}>{payoutMsg.msg}</span>
+            </div>
           )}
-          <button onClick={requestPayout} disabled={requesting} style={{
-            padding:"10px 22px", borderRadius:"var(--r)", border:"none", cursor: requesting?"not-allowed":"pointer",
-            background:"var(--accent)", color:"#000", fontWeight:600, fontSize:13, opacity: requesting?0.7:1,
-          }}>{requesting ? t("submitting") + "…" : t("requestPayout")}</button>
+          <button className="btn btn-primary" onClick={requestPayout} disabled={requesting}>
+            {requesting ? t("submitting") + "…" : t("requestPayout")}
+          </button>
         </div>
       </div>
 
       {/* Payout history */}
       {payouts.length > 0 && (
-        <div style={card}>
-          <div style={ch}><div style={{ fontSize:14, fontWeight:600 }}>{t("payoutHistory")}</div></div>
-          <table style={{ width:"100%", borderCollapse:"collapse" }}>
-            <thead><tr style={{ borderBottom:"1px solid var(--border)", background:"var(--bg3)" }}>
-              {[t("date"),"Amount","Address","Status","TxID"].map(h => (
-                <th key={h} style={{ textAlign:"left", padding:"9px 16px", fontSize:10, color:"var(--text2)", fontWeight:600, textTransform:"uppercase" }}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {payouts.map(p => (
-                <tr key={p.id} style={{ borderBottom:"1px solid rgba(255,255,255,0.03)" }}>
-                  <td style={{ padding:"10px 16px", color:"var(--text2)", fontSize:12 }}>{new Date(p.requested_at).toLocaleDateString()}</td>
-                  <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:12, color:"var(--accent)" }}>{fmtBTC(p.amount_btc)}</td>
-                  <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:11, color:"var(--text2)", maxWidth:160, overflow:"hidden", textOverflow:"ellipsis" }}>{p.address}</td>
-                  <td style={{ padding:"10px 16px" }}>
-                    <span style={{ padding:"2px 8px", borderRadius:20, fontSize:10.5, fontWeight:600,
-                      background: p.status==="completed"?"rgba(46,168,76,0.1)":p.status==="failed"?"rgba(232,64,64,0.1)":"rgba(212,160,23,0.1)",
-                      color: p.status==="completed"?"var(--green)":p.status==="failed"?"var(--red)":"var(--yellow)",
-                    }}>{p.status}</span>
-                  </td>
-                  <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:10, color:"var(--blue)" }}>{p.txid ? `${p.txid.slice(0,12)}…` : "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="panel" style={{ marginBottom: 16 }}>
+          <div className="panel-head"><div className="panel-title">{t("payoutHistory")}</div></div>
+          <div className="tbl-scroll">
+            <table className="tbl">
+              <thead>
+                <tr>{["date","amount","address","status","txid"].map(k => <th key={k}>{t(k)}</th>)}</tr>
+              </thead>
+              <tbody>
+                {payouts.map(p => (
+                  <tr key={p.id}>
+                    <td className="num" style={{ color: "var(--text2)" }}>{new Date(p.requested_at).toLocaleDateString()}</td>
+                    <td className="num" style={{ color: "var(--text-bright)", fontWeight: 600 }}>{fmtBTC(p.amount_btc)}</td>
+                    <td className="num" style={{ color: "var(--text2)", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" }}>{p.address}</td>
+                    <td><span className={`pill ${payoutPill(p.status)}`}>{p.status}</span></td>
+                    <td className="num" style={{ color: "var(--text3)" }}>{p.txid ? `${p.txid.slice(0,12)}…` : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {/* Earnings history */}
-      <div style={card}>
-        <div style={ch}>
-          <div style={{ fontSize:14, fontWeight:600 }}>{t("earningsHistory")}</div>
-          <span style={{ fontSize:12, color:"var(--text2)" }}>{earnings.total || 0} records</span>
+      <div className="panel">
+        <div className="panel-head">
+          <div className="panel-title">{t("earningsHistory")}</div>
+          <span className="meta"><span className="num">{earnings.total || 0}</span> {t("records")}</span>
         </div>
-        {earnings.rows.length === 0
-          ? <div style={{ padding:32, textAlign:"center", color:"var(--text2)" }}>{t("noEarnings")}</div>
-          : <>
-              <table style={{ width:"100%", borderCollapse:"collapse" }}>
-                <thead><tr style={{ borderBottom:"1px solid var(--border)", background:"var(--bg3)" }}>
-                  {[t("date"),t("balance2"),t("earn24h"),t("earnTotal"),t("paidOut")].map(h => (
-                    <th key={h} style={{ textAlign:"left", padding:"9px 16px", fontSize:10, color:"var(--text2)", fontWeight:600, textTransform:"uppercase" }}>{h}</th>
-                  ))}
-                </tr></thead>
+        {loading ? (
+          <div className="empty">{t("loading2")}</div>
+        ) : earnings.rows.length === 0 ? (
+          <div className="empty">{t("noEarnings")}</div>
+        ) : (
+          <>
+            <div className="tbl-scroll">
+              <table className="tbl">
+                <thead>
+                  <tr>{["date","balance2","earn24h","earnTotal","paidOut"].map(k => <th key={k}>{t(k)}</th>)}</tr>
+                </thead>
                 <tbody>
                   {earnings.rows.map((r,i) => (
-                    <tr key={i} style={{ borderBottom:"1px solid rgba(255,255,255,0.03)" }}>
-                      <td style={{ padding:"10px 16px", fontSize:12, color:"var(--text2)" }}>{r.settle_date || new Date(r.ts).toLocaleDateString()}</td>
-                      <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:12, color:"var(--yellow)" }}>{fmtBTC(r.balance)}</td>
-                      <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:12, color:"var(--green)" }}>{fmtBTC(r.earn_24h)}</td>
-                      <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:12, color:"var(--accent)" }}>{fmtBTC(r.earn_total)}</td>
-                      <td style={{ padding:"10px 16px", fontFamily:"var(--mono)", fontSize:12, color:"var(--text2)" }}>{fmtBTC(r.paid_out)}</td>
+                    <tr key={i}>
+                      <td className="num" style={{ color: "var(--text2)" }}>{r.settle_date || new Date(r.ts).toLocaleDateString()}</td>
+                      <td className="num" style={{ color: "var(--text-bright)" }}>{fmtBTC(r.balance)}</td>
+                      <td className="num" style={{ color: "var(--green)" }}>{fmtBTC(r.earn_24h)}</td>
+                      <td className="num">{fmtBTC(r.earn_total)}</td>
+                      <td className="num" style={{ color: "var(--text2)" }}>{fmtBTC(r.paid_out)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div style={{ padding:"12px 18px", display:"flex", gap:8, justifyContent:"flex-end", borderTop:"1px solid var(--border)" }}>
-                {page > 1 && <button onClick={() => setPage(p=>p-1)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid var(--border2)", background:"var(--bg4)", color:"var(--text2)", cursor:"pointer", fontSize:12 }}>{t("prev")}</button>}
-                <span style={{ padding:"5px 12px", fontSize:12, color:"var(--text2)" }}>{t("page")} {page}</span>
-                {earnings.total > page * 20 && <button onClick={() => setPage(p=>p+1)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid var(--border2)", background:"var(--bg4)", color:"var(--text2)", cursor:"pointer", fontSize:12 }}>{t("next")}</button>}
-              </div>
-            </>
-        }
+            </div>
+            <div style={{ padding: "12px 22px", display: "flex", gap: 8, justifyContent: "flex-end",
+                          alignItems: "center", borderTop: "1px solid var(--border)" }}>
+              {page > 1 && <button className="btn btn-ghost" style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setPage(p=>p-1)}>{t("prev")}</button>}
+              <span className="meta">{t("page")} <span className="num">{page}</span></span>
+              {earnings.total > page * 20 && <button className="btn btn-ghost" style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setPage(p=>p+1)}>{t("next")}</button>}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

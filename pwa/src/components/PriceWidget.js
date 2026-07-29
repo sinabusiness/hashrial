@@ -105,8 +105,10 @@ export function PriceRail({ data, stale, denom, setDenom, localCurrency }) {
   if (!data?.price) {
     return <span style={{ fontSize: 11, color: "var(--text3)" }}>{t("priceUnavailable")}</span>;
   }
-  const change = data.change || 0;
-  const up = change >= 0;
+  // null = the source that served this price carries no 24h change. Rendering
+  // "0.00%" would assert the price is flat, which is not what we know.
+  const change = typeof data.change === "number" && isFinite(data.change) ? data.change : null;
+  const up = (change ?? 0) >= 0;
   const localPer1 = btcToFiat(1, data.price, data.rates, localCurrency);
   const overridden = !!(data.rateOverrides && data.rateOverrides[localCurrency]);
 
@@ -116,9 +118,11 @@ export function PriceRail({ data, stale, denom, setDenom, localCurrency }) {
       <span className="num" style={{ color: "var(--text2)", fontWeight: 600 }}>
         ${data.price.toLocaleString("en-US", { maximumFractionDigits: 0 })}
       </span>
-      <span className="num" style={{ color: up ? "var(--green)" : "var(--red)", fontWeight: 600 }}>
-        {up ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
-      </span>
+      {change !== null && (
+        <span className="num" style={{ color: up ? "var(--green)" : "var(--red)", fontWeight: 600 }}>
+          {up ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
+        </span>
+      )}
 
       {localCurrency !== "USD" && localPer1 !== null && (
         <span

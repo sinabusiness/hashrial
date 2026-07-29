@@ -277,24 +277,60 @@ const FX_CURRENCIES = [
   "EGP","IRR","IQD","TRY","CNY","RUB","BRL","INR","PKR",
 ];
 
+// Several public price APIs refuse Cloudflare's egress IPs (CoinGecko rate
+// limits them, Binance geo-blocks some regions outright), so this tries a
+// chain and logs why each one failed — a silent catch here is how the price
+// feed stayed dead without anyone knowing.
+const BTC_SOURCES = [
+  {
+    name: "CoinGecko",
+    url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
+    parse: (j) => ({ price: j?.bitcoin?.usd, change: j?.bitcoin?.usd_24h_change ?? 0 }),
+  },
+  {
+    name: "Binance",
+    url: "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT",
+    parse: (j) => ({ price: parseFloat(j?.lastPrice), change: parseFloat(j?.priceChangePercent) }),
+  },
+  {
+    // Ordered before Coinbase because Kraken carries the day's open, so a real
+    // 24h change can be derived. Coinbase's spot endpoint has no change at all.
+    name: "Kraken",
+    url: "https://api.kraken.com/0/public/Ticker?pair=XBTUSD",
+    parse: (j) => {
+      const k = j?.result && Object.keys(j.result)[0];
+      const t = k && j.result[k];
+      const price = parseFloat(t?.c?.[0]);
+      const open = parseFloat(t?.o);
+      return { price, change: open > 0 ? ((price - open) / open) * 100 : null };
+    },
+  },
+  {
+    // Last resort: correct price, but no 24h change. Reported as null rather
+    // than 0 so the UI hides the indicator instead of claiming the price is flat.
+    name: "Coinbase",
+    url: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+    parse: (j) => ({ price: parseFloat(j?.data?.amount), change: null }),
+  },
+];
+
 async function fetchBtcUsd() {
-  // CoinGecko first, Binance as fallback — same order the Express backend uses.
-  try {
-    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true", { cf: { cacheTtl: 60 } });
-    if (r.ok) {
-      const j = await r.json();
-      const price = j?.bitcoin?.usd, change = j?.bitcoin?.usd_24h_change;
-      if (price > 1000 && price < 1000000) return { price, change: change ?? 0, source: "CoinGecko" };
+  for (const s of BTC_SOURCES) {
+    try {
+      const r = await fetch(s.url, { headers: { "User-Agent": "hashrial-pool/1.0" }, cf: { cacheTtl: 60 } });
+      if (!r.ok) { console.error(`[btcprice] ${s.name} HTTP ${r.status}`); continue; }
+      const { price, change } = s.parse(await r.json());
+      if (price > 1000 && price < 1000000) {
+        // null means "this source has no 24h change", which the UI hides. Do
+        // not coerce to 0 — that renders as a flat price, which is a claim.
+        return { price, change: (change === null || !isFinite(change)) ? null : change, source: s.name };
+      }
+      console.error(`[btcprice] ${s.name} returned an out-of-range price: ${price}`);
+    } catch (e) {
+      console.error(`[btcprice] ${s.name} threw: ${e.message}`);
     }
-  } catch {}
-  try {
-    const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT", { cf: { cacheTtl: 60 } });
-    if (r.ok) {
-      const j = await r.json();
-      const price = parseFloat(j?.lastPrice), change = parseFloat(j?.priceChangePercent);
-      if (price > 1000 && price < 1000000) return { price, change: isNaN(change) ? 0 : change, source: "Binance" };
-    }
-  } catch {}
+  }
+  console.error("[btcprice] every source failed");
   return null;
 }
 

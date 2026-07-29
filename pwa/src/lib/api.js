@@ -37,6 +37,7 @@ export const api = {
   forgotPassword:     (email) => req("/api/auth/forgot-password", { method: "POST", body: { email } }),
   resetPassword:      (token, password) => req("/api/auth/reset-password", { method: "POST", body: { token, password } }),
   verifyEmail:        (token) => req("/api/auth/verify-email", { method: "POST", body: { token } }),
+  resendVerification: (email) => req("/api/auth/resend-verification", { method: "POST", body: { email } }),
   changePassword:     (currentPassword, newPassword) => req("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
   overview:           () => req("/api/dashboard/overview"),
   hashrate:           (period, worker) => req(`/api/dashboard/hashrate?period=${period}${worker ? `&worker=${worker}` : ""}`),

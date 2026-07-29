@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useLang } from "../i18n";
@@ -10,6 +10,18 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
+  // The backend reports whether a sender is even configured. Without this the
+  // page said "check your email" regardless — which is what happened when no
+  // email could physically be sent, leaving people waiting for nothing.
+  const [emailSent, setEmailSent] = useState(true);
+  const [resendState, setResendState] = useState("idle"); // idle | sending | sent | error
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
 
   async function submit(e) {
     e.preventDefault();
@@ -17,8 +29,9 @@ export default function Register() {
     if (form.password.length < 10) { setError(t("registerPasswordError")); return; }
     setLoading(true);
     try {
-      const { token } = await api.register(form.username, form.email, form.password);
-      localStorage.setItem("hashrial_token", token);
+      const res = await api.register(form.username, form.email, form.password);
+      localStorage.setItem("hashrial_token", res.token);
+      setEmailSent(res.emailSent !== false);
       // Show a check-your-email step rather than redirecting silently —
       // a verification email is actually sent now, so the user should know
       // to expect it instead of finding it in spam days later.
@@ -26,6 +39,20 @@ export default function Register() {
     } catch (err) {
       setError(err.message || t("registerFailed"));
     } finally { setLoading(false); }
+  }
+
+  async function resend() {
+    if (cooldown > 0 || resendState === "sending") return;
+    setResendState("sending");
+    try {
+      await api.resendVerification(form.email);
+      setResendState("sent");
+      // The endpoint allows 3/hour; this keeps the button from inviting
+      // people to burn that allowance in a few seconds.
+      setCooldown(60);
+    } catch {
+      setResendState("error");
+    }
   }
 
   if (registered) {
@@ -37,9 +64,53 @@ export default function Register() {
             <div style={{ fontSize:22, fontWeight:700 }}>Hashrial</div>
           </div>
           <div style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"28px 32px", textAlign:"center" }}>
-            <div style={{ fontSize:28, marginBottom:14 }}>&#9993;</div>
-            <h1 style={{ fontSize:17, fontWeight:600, marginBottom:10 }}>{t("registerCheckEmailTitle")}</h1>
-            <div style={{ fontSize:13, color:"var(--text2)", marginBottom:22, lineHeight:1.6 }}>{t("registerCheckEmailSub")}</div>
+            <div style={{ fontSize:28, marginBottom:14 }}>{emailSent ? "✉" : "⚠"}</div>
+            <h1 style={{ fontSize:17, fontWeight:600, marginBottom:10 }}>
+              {emailSent ? t("registerCheckEmailTitle") : t("registerEmailUnavailableTitle")}
+            </h1>
+            <div style={{ fontSize:13, color:"var(--text2)", marginBottom:8, lineHeight:1.6 }}>
+              {emailSent ? t("registerCheckEmailSub") : t("registerEmailUnavailableSub")}
+            </div>
+
+            {emailSent && (
+              <>
+                <div className="num" style={{ fontSize:13, fontWeight:600, color:"var(--text)", marginBottom:16, direction:"ltr", unicodeBidi:"isolate" }}>
+                  {form.email}
+                </div>
+                <div style={{ fontSize:11.5, color:"var(--text3)", marginBottom:18, lineHeight:1.6 }}>
+                  {t("registerCheckSpam")}
+                </div>
+
+                <div style={{ marginBottom:18 }}>
+                  {resendState === "sent" ? (
+                    <div style={{ fontSize:12, color:"var(--green)", fontWeight:500 }}>{t("registerResendSent")}</div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={resend}
+                      disabled={cooldown > 0 || resendState === "sending"}
+                      style={{
+                        background:"transparent", border:"none", padding:0,
+                        fontSize:12, fontWeight:500,
+                        color: cooldown > 0 ? "var(--text3)" : "var(--accent)",
+                        cursor: cooldown > 0 ? "default" : "pointer",
+                        textDecoration: cooldown > 0 ? "none" : "underline",
+                      }}
+                    >
+                      {resendState === "sending"
+                        ? t("registerResending")
+                        : cooldown > 0
+                          ? `${t("registerResendWait")} (${cooldown}s)`
+                          : t("registerResendLink")}
+                    </button>
+                  )}
+                  {resendState === "error" && (
+                    <div style={{ fontSize:12, color:"var(--red)", marginTop:6 }}>{t("registerResendFailed")}</div>
+                  )}
+                </div>
+              </>
+            )}
+
             <button onClick={() => navigate("/dashboard/connect")} style={{ width:"100%", padding:11, borderRadius:"var(--r)", border:"none", background:"var(--accent)", color:"#000", fontWeight:700, fontSize:14, cursor:"pointer" }}>
               {t("registerContinueToDashboard")}
             </button>

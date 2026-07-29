@@ -50,17 +50,29 @@ const SHELL_CSS = `
               background: var(--accent); }
 .hs-navicon { width: 20px; flex: 0 0 auto; font-size: 15px; text-align: center; }
 .hs-navlabel{ flex: 1; min-width: 0; }
-.hs-badge   { flex: 0 0 auto; background: var(--accent); color: #000;
-              border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+/* Neutral, not accent. An unread count is neither hashrate nor brand, and it is
+   not worker state either, so it gets no colour token at all — weight and the
+   chip outline carry it. Orange here would be the third accent element in the
+   chrome at once (brand mark, active rail, badge), which is what emptied
+   --accent of meaning in the first place. */
+.hs-badge   { flex: 0 0 auto; background: var(--bg-card); color: var(--text);
+              border: 1px solid var(--border2); border-radius: 10px;
+              padding: 0 6px; font-size: 10px; font-weight: 700; }
 
 .hs-foot    { padding: 8px 8px 12px; border-top: 1px solid var(--border); }
 .hs-user    { display: flex; align-items: center; gap: 9px; padding: 7px 10px; }
+.hs-userinfo{ min-width: 0; }
 .hs-avatar  { width: 27px; height: 27px; flex: 0 0 auto; border-radius: 50%;
               background: var(--bg-card); border: 1px solid var(--border);
               color: var(--text2); font-size: 11px; font-weight: 700;
               display: flex; align-items: center; justify-content: center; }
 .hs-username{ font-size: 12.5px; font-weight: 600; color: var(--text);
               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Quiet on purpose: signing out is an exit, not a call to action, so it does
+   not take the accent .btn-link colour. Two classes to outrank .btn-link. */
+.btn-link.hs-signout { font-size: 11px; color: var(--text3); }
+.btn-link.hs-signout:hover { color: var(--text2); }
+.hs-langwrap{ position: relative; margin-top: 4px; }
 .btn.hs-sidebtn { display: flex; align-items: center; gap: 7px; width: 100%;
               margin-top: 4px; padding: 7px 10px; font-size: 11.5px;
               font-weight: 500; text-align: start; }
@@ -83,7 +95,16 @@ const SHELL_CSS = `
               background: var(--bg2); border-bottom: 1px solid var(--border); }
 .hs-greet   { min-width: 0; font-size: 13px; color: var(--text2);
               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs-greet strong { color: var(--text); font-weight: 600; }
 .hs-headend { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; }
+
+/* Spot price is money, so it is not accent — orange inside this frame means
+   hashrate. Direction is carried by the glyph, not by colour, because
+   green/red are reserved for worker state. */
+.hs-btc     { display: flex; align-items: center; gap: 6px; }
+.hs-btc-val { font-size: 11.5px; font-weight: 600; color: var(--text); }
+.hs-btc-chg { font-size: 10.5px; color: var(--text3); }
+
 .hs-live::before { animation: pulse 2s infinite; }
 .hs-main    { flex: 1; overflow: auto; background: var(--bg); }
 
@@ -104,7 +125,10 @@ const SHELL_CSS = `
 @media (max-width: 620px) {
   .hs-side    { width: 172px; }
   .hs-navlink { font-size: 12.5px; padding: 8px 9px; gap: 7px; }
-  .hs-hide-sm { display: none; }
+  /* !important because this must beat the display the hidden element sets for
+     itself — .hs-btc is display:flex, and a utility that loses to the thing it
+     hides is not a utility. */
+  .hs-hide-sm { display: none !important; }
 }
 `;
 
@@ -198,11 +222,9 @@ export default function Layout() {
               <div className="hs-avatar" aria-hidden="true">
                 {user.username?.[0]?.toUpperCase()}
               </div>
-              <div style={{ minWidth: 0 }}>
+              <div className="hs-userinfo">
                 <div className="hs-username">{user.username}</div>
-                {/* Quiet on purpose: signing out is an exit, not a call to
-                    action, so it does not take the accent .btn-link colour. */}
-                <button onClick={logout} className="btn-link" style={{ fontSize: 11, color: "var(--text3)" }}>
+                <button onClick={logout} className="btn-link hs-signout">
                   {t("signOut")}
                 </button>
               </div>
@@ -217,7 +239,7 @@ export default function Layout() {
               <span>{theme === "dark" ? t("lightMode") : t("darkMode")}</span>
             </button>
 
-            <div style={{ position: "relative", marginTop: 4 }}>
+            <div className="hs-langwrap">
               <button
                 onClick={() => setShowLang(p => !p)}
                 className="btn btn-ghost hs-sidebtn"
@@ -228,7 +250,9 @@ export default function Layout() {
                 <span>{t("language")}</span>
               </button>
               {showLang && (
-                <div className="hs-menu" aria-label={t("language")}>
+                /* role="group" so the aria-label is actually exposed — on a
+                   plain div it is ignored by every screen reader. */
+                <div className="hs-menu" role="group" aria-label={t("language")}>
                   {langs.map(l => (
                     <button
                       key={l.code}
@@ -251,20 +275,16 @@ export default function Layout() {
       <div className="hs-body">
         <header className="hs-header">
           <div className="hs-greet">
-            {user && <span>{t("headerWelcome")}, <strong style={{ color: "var(--text)" }}>{user.username}</strong></span>}
+            {user && <span>{t("headerWelcome")}, <strong>{user.username}</strong></span>}
           </div>
           <div className="hs-headend">
             {btcPrice?.price && (
-              <span className="hs-hide-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span className="hs-btc hs-hide-sm">
                 <span className="eyebrow">BTC</span>
-                {/* Spot price is money, so it is not accent — orange inside this
-                    frame means hashrate. */}
-                <span className="num" style={{ fontSize: 11.5, fontWeight: 600, color: "var(--text)" }}>
+                <span className="num hs-btc-val">
                   ${btcPrice.price.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                 </span>
-                {/* Direction is carried by the glyph, not by colour: green and
-                    red are reserved for worker state. */}
-                <span className="num" style={{ fontSize: 10.5, color: "var(--text3)" }}>
+                <span className="num hs-btc-chg">
                   {priceUp ? "▲" : "▼"} {Math.abs(btcPrice.change || 0).toFixed(1)}%
                 </span>
               </span>

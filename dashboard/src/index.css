@@ -31,6 +31,12 @@
   --text-bright:#ffffff;
 
   --accent:     #f7931a;
+  /* Accent as TEXT vs accent as a SURFACE need different values on light.
+     No single orange satisfies both: #c46a08 is 3.16:1 as text on the light
+     background (fails AA for the 11-12px link text it was being used for),
+     while darkening it far enough for text drops black-on-accent below AA
+     for the primary button fill. So they are separate tokens. */
+  --accent-text: #f7931a;
   --accent2:    #e8830d;
   --accent-glow: rgba(247,147,26,0.25);
 
@@ -57,6 +63,8 @@
 
 /* ── Light Theme ── */
 [data-theme="light"] {
+  --accent-text: #9a5208;
+
   /* Status colours on the light surface. The dark-theme values were inherited
      unchanged and failed contrast badly (yellow was 1.58:1). These are 5.2-5.8:1. */
   --green:      #166534;
@@ -260,7 +268,7 @@ input, select, textarea { font-family: var(--font); }
 .btn-ghost     { background: transparent; color: var(--text2); border-color: var(--border); }
 .btn-ghost:hover:not(:disabled)   { background: var(--bg-card); color: var(--text); }
 .btn-link      { background: none; border: 0; padding: 0; font-size: 12px; font-weight: 500;
-                 color: var(--accent); cursor: pointer; }
+                 color: var(--accent-text); cursor: pointer; }
 
 /* Segmented range switcher — one control, used identically everywhere. */
 .seg           { display: inline-flex; gap: 2px; background: var(--bg-card);
@@ -269,7 +277,7 @@ input, select, textarea { font-family: var(--font); }
                  font-size: 11px; font-weight: 500; padding: 5px 12px; border: 0;
                  border-radius: 6px; cursor: pointer; background: transparent;
                  color: var(--text2); transition: background .15s ease, color .15s ease; }
-.seg-item[aria-pressed="true"] { background: rgba(247,147,26,0.14); color: var(--accent); }
+.seg-item[aria-pressed="true"] { background: rgba(247,147,26,0.14); color: var(--accent-text); }
 
 /* ── Tables ─────────────────────────────────────────────────────────── */
 .tbl           { width: 100%; border-collapse: collapse; }

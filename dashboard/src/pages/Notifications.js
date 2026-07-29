@@ -2,6 +2,27 @@ import React, { useState, useEffect, useCallback } from "react";
 import { api } from "../lib/api";
 import { useLang } from "../i18n";
 
+/* Notification feed. Styling comes from the design system in index.css — see
+   the HASHRIAL DESIGN SYSTEM block.
+
+   The per-type fills were hardcoded rgba() literals (red/green/amber at 0.1
+   alpha) which failed contrast in the light theme; they now come from the
+   --*-weak surface tokens paired with the matching strong token for the glyph.
+   Those three colours describe worker state, which is the one job they have.
+
+   Unread is marked with an accent dot rather than a coloured row wash: orange
+   is brand/hashrate, and green/amber/red must stay reserved for rig state, so
+   neither can be spent on read-state decoration. */
+
+/* Glyphs rather than emoji so the token colour actually drives them — emoji
+   ignore `color` and can't respond to the theme. */
+const TYPES = {
+  worker_offline: { glyph: "●", fill: "var(--red-weak)",   color: "var(--red)",   label: "notifWorkerOffline" },
+  worker_online:  { glyph: "●", fill: "var(--green-weak)", color: "var(--green)", label: "notifWorkerOnline"  },
+  hashrate_drop:  { glyph: "▾", fill: "var(--amber-weak)", color: "var(--amber)", label: "notifHashrateDrop"  },
+};
+const TYPE_FALLBACK = { glyph: "·", fill: "var(--bg-card)", color: "var(--text3)", label: null };
+
 export default function Notifications() {
   const { t } = useLang();
   const [notifs, setNotifs] = useState([]);
@@ -23,50 +44,73 @@ export default function Notifications() {
 
   const unread = notifs.filter(n => !n.read).length;
 
-  const iconMap = {
-    worker_offline: { icon:"🔴", cls:"rgba(232,64,64,0.1)"     },
-    worker_online:  { icon:"🟢", cls:"rgba(46,168,76,0.1)"     },
-    hashrate_drop:  { icon:"⚠️", cls:"rgba(212,160,23,0.1)"   },
-  };
-
   return (
-    <div style={{ padding:"24px 28px", maxWidth:760 }}>
-      <div style={{ marginBottom:20, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+    <div className="page" style={{ maxWidth: 760 }}>
+      <div className="page-head">
         <div>
-          <h1 style={{ fontSize:22, fontWeight:700, marginBottom:4 }}>{t("notifTitle")}</h1>
-          <div style={{ color:"var(--text2)", fontSize:13 }}>{unread} {t("unread")}</div>
+          <h1 className="page-title">{t("notifTitle")}</h1>
+          <div className="page-sub">{t("notifSub")}</div>
         </div>
-        {unread > 0 && (
-          <button onClick={markRead} style={{ padding:"7px 16px", borderRadius:6, border:"1px solid var(--border2)", background:"var(--bg2)", color:"var(--text2)", fontSize:12.5, cursor:"pointer" }}>
-            {t("markAllRead")}
-          </button>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span className="meta"><span className="num">{unread}</span> {t("unread")}</span>
+          {unread > 0 && (
+            <button className="btn btn-ghost" onClick={markRead}>{t("markAllRead")}</button>
+          )}
+        </div>
       </div>
 
-      <div style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", overflow:"hidden" }}>
+      <div className="panel">
         {loading ? (
-          <div style={{ padding:40, textAlign:"center", color:"var(--text2)" }}>{t("loading")}</div>
+          <div className="empty">{t("loading")}</div>
         ) : notifs.length === 0 ? (
-          <div style={{ padding:40, textAlign:"center", color:"var(--text2)" }}>
-            <div style={{ fontSize:28, marginBottom:8 }}>🔔</div>
+          <div className="empty">
+            <div style={{ fontSize: 26, marginBottom: 8 }} aria-hidden="true">🔔</div>
             {t("noNotifs")}
           </div>
-        ) : notifs.map(n => {
-          const { icon, cls } = iconMap[n.type] || { icon:"ℹ️", cls:"rgba(74,158,255,0.1)" };
+        ) : notifs.map((n, i) => {
+          const cfg = TYPES[n.type] || TYPE_FALLBACK;
           return (
             <div key={n.id} style={{
-              padding:"13px 18px", borderBottom:"1px solid var(--border)",
-              display:"flex", gap:12, alignItems:"flex-start",
-              background: n.read ? "transparent" : "rgba(247,147,26,0.04)",
+              display: "flex", gap: 14, alignItems: "flex-start",
+              padding: "14px 22px",
+              borderTop: i === 0 ? "none" : "1px solid var(--border)",
+              background: n.read ? "transparent" : "var(--bg-card)",
             }}>
-              <div style={{ width:34, height:34, borderRadius:8, background:cls, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, flexShrink:0 }}>{icon}</div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:13, marginBottom:3, color: n.read ? "var(--text2)" : "var(--text)" }}>{n.message}</div>
-                <div style={{ fontSize:11, color:"var(--text3)", display:"flex", gap:8, alignItems:"center" }}>
-                  {new Date(n.created_at).toLocaleString()}
-                  {!n.read && <span style={{ fontSize:10, color:"var(--accent)", background:"rgba(247,147,26,0.1)", borderRadius:4, padding:"1px 6px", fontWeight:600 }}>new</span>}
+              {/* role=img + label so the state is announced, not carried by
+                  colour and a glyph alone. */}
+              <div
+                role="img"
+                aria-label={cfg.label ? t(cfg.label) : undefined}
+                title={cfg.label ? t(cfg.label) : undefined}
+                style={{
+                  width: 32, height: 32, borderRadius: 9, flex: "0 0 auto",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: cfg.fill, color: cfg.color, fontSize: 13,
+                }}
+              >
+                {cfg.glyph}
+              </div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, lineHeight: 1.55, color: n.read ? "var(--text2)" : "var(--text)" }}>
+                  {n.message}
+                </div>
+                <div className="meta" style={{ marginTop: 4 }}>
+                  <span className="num">{new Date(n.created_at).toLocaleString()}</span>
                 </div>
               </div>
+
+              {!n.read && (
+                <span
+                  role="img"
+                  aria-label={t("unread")}
+                  title={t("unread")}
+                  style={{
+                    width: 6, height: 6, borderRadius: "50%", flex: "0 0 auto",
+                    background: "var(--accent)", marginBlockStart: 13,
+                  }}
+                />
+              )}
             </div>
           );
         })}

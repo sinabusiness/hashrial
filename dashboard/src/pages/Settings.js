@@ -40,11 +40,18 @@ export default function Settings() {
   }
 
   /* A settings form is one column of decisions — the reading measure stays
-     narrow while the page padding matches every other page via .page. */
+     narrow while the page padding matches every other page via .page.
+
+     The row rhythm is defined once here and reused. Both row kinds previously
+     carried their own copy of the same border/padding literal, and the divider
+     was suppressed two different ways (an override in one block, an index
+     comparison in the other) — that is the drift this exercise exists to stop. */
   const rowStyle = {
     display:"flex", justifyContent:"space-between", alignItems:"center",
     gap:16, padding:"13px 0", borderBottom:"1px solid var(--border)",
   };
+  const lastRow    = { borderBottom:"none" };
+  const infoRow    = { ...rowStyle, alignItems:"baseline", padding:"9px 0" };
   const fieldLabel = { fontWeight:500, fontSize:13, marginBottom:2 };
   const fieldDesc  = { fontSize:11.5, color:"var(--text2)", lineHeight:1.55 };
 
@@ -136,7 +143,7 @@ export default function Settings() {
               </div>
             ))}
 
-            <div style={{ ...rowStyle, borderBottom:"none" }}>
+            <div style={{ ...rowStyle, ...lastRow }}>
               <div>
                 <div style={fieldLabel}>
                   {t('notifyThreshold')}:{" "}
@@ -174,11 +181,7 @@ export default function Settings() {
                 [t("poolFee"), "2.0%"],
                 [t("memberSince"), user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"],
               ].map(([label, val], i, arr) => (
-                <div key={label} style={{
-                  display:"flex", justifyContent:"space-between", alignItems:"baseline",
-                  gap:16, padding:"9px 0",
-                  borderBottom: i === arr.length - 1 ? "none" : "1px solid var(--border)",
-                }}>
+                <div key={label} style={i === arr.length - 1 ? { ...infoRow, ...lastRow } : infoRow}>
                   <span style={{ color:"var(--text2)", fontSize:13 }}>{label}</span>
                   <span className="num" style={{ fontSize:12, color:"var(--text)", textAlign:"end", wordBreak:"break-all" }}>{val}</span>
                 </div>

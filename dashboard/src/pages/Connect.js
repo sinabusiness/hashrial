@@ -2,15 +2,41 @@ import React, { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { useLang } from "../i18n";
 
+/* Stratum connection instructions. Styling comes from the design system in
+   index.css — see the HASHRIAL DESIGN SYSTEM block.
+
+   Everything a miner has to type into its config panel (host, worker, password,
+   sub-account) is a technical identifier, so it renders .num: mono, tabular and
+   bidi-isolated. Without the isolation a stratum URL inside Persian copy gets
+   reordered by the bidi algorithm and is no longer correct when copied.
+
+   No status colour on this page — nothing here is a worker state. The accent
+   tint and the hardcoded rgba(76,175,80,…) panel that used to open the page are
+   gone; the fee note is a neutral alert and the pool identity is a plain panel. */
+
 function CopyBox({ label, value }) {
   const [copied, setCopied] = useState(false);
   function copy() { navigator.clipboard.writeText(value).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }
   return (
-    <div style={{ marginBottom:14 }}>
-      <div style={{ fontSize:10.5, color:"var(--text2)", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:5, fontWeight:600 }}>{label}</div>
-      <div style={{ display:"flex", gap:7 }}>
-        <div style={{ flex:1, background:"var(--bg3)", border:"1px solid var(--border)", borderRadius:"var(--r)", padding:"9px 13px", fontFamily:"var(--mono)", fontSize:12, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{value}</div>
-        <button onClick={copy} style={{ padding:"9px 14px", borderRadius:"var(--r)", border:"1px solid var(--border2)", background: copied?"rgba(46,168,76,0.1)":"var(--bg4)", color: copied?"var(--green)":"var(--text2)", fontSize:11, cursor:"pointer", flexShrink:0, transition:"all .15s" }}>
+    <div style={{ marginBottom: 14 }}>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>{label}</div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <div className="num" style={{
+          flex: 1, minWidth: 0, background: "var(--bg3)", border: "1px solid var(--border)",
+          borderRadius: "var(--r)", padding: "9px 13px", fontSize: 12.5, color: "var(--text)",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>{value}</div>
+        {/* Confirmation borrows the .alert-ok pairing (strong token for text,
+            weak for fill) so it holds contrast in the light theme too. */}
+        <button
+          className="btn btn-ghost"
+          onClick={copy}
+          aria-live="polite"
+          style={{
+            flex: "0 0 auto", padding: "8px 14px", fontSize: 12,
+            ...(copied ? { color: "var(--green)", background: "var(--green-weak)", borderColor: "var(--green-weak)" } : null),
+          }}
+        >
           {copied ? "✓ Copied" : "Copy"}
         </button>
       </div>
@@ -24,62 +50,104 @@ export default function Connect() {
   const [workerName, setWorkerName] = useState("rig01");
 
   useEffect(() => { api.connectInfo().then(setInfo).catch(console.error); }, []);
-  if (!info) return <div style={{ padding:40, textAlign:"center", color:"var(--text2)" }}>{t("loading")}</div>;
+  if (!info) return <div className="page"><div className="empty">{t("loading")}</div></div>;
 
   // info.username is "mainSub.username.WORKER_NAME" — replace last segment with typed worker name
   const parts = info.username?.split(".") || [];
   const baseParts = parts.slice(0, -1);
   const username = `${baseParts.join(".")}.${workerName || "WORKER_NAME"}`;
 
-  return (
-    <div style={{ padding:"24px 28px", maxWidth:780 }}>
-      <h1 style={{ fontSize:22, fontWeight:700, marginBottom:4 }}>{t("connectTitle")}</h1>
-      <div style={{ color:"var(--text2)", fontSize:13, marginBottom:22 }}>{t("connectIntro")}</div>
+  const MINERS = [
+    { name: "Antminer (Bitmain)",   path: "Miner → Configuration → Pool Configuration" },
+    { name: "WhatsMiner (MicroBT)", path: "Miner Management → Pool Settings" },
+    { name: "Avalon (Canaan)",      path: "Network → Pool Configuration → Pool 1" },
+    { name: "CGMiner / BFGMiner",   path: "--url <stratum> --user <user> --pass x", mono: true },
+  ];
 
-      <div style={{ background:"rgba(247,147,26,0.06)", border:"1px solid rgba(247,147,26,0.18)", borderRadius:"var(--r2)", padding:"13px 16px", marginBottom:20, fontSize:13, color:"var(--text2)", lineHeight:1.7 }}>
-        {t("poolFee")}
+  return (
+    <div className="page" style={{ maxWidth: 820 }}>
+      <div className="page-head">
+        <div>
+          <h1 className="page-title">{t("connectTitle")}</h1>
+          <div className="page-sub">{t("connectIntro")}</div>
+        </div>
       </div>
 
+      <div className="alert" style={{ color: "var(--text2)" }}>{t("poolFee")}</div>
+
       {info.poolName && (
-        <div style={{ background:"rgba(76,175,80,0.06)", border:"1px solid rgba(76,175,80,0.18)", borderRadius:"var(--r2)", padding:"13px 16px", marginBottom:20, fontSize:13, color:"var(--green, #4caf50)", lineHeight:1.7 }}>
-          <strong>{info.poolName}</strong> — Your mining sub-account: <code style={{ fontFamily:"var(--mono)", fontSize:12 }}>{info.antpoolSubAccount}</code>
+        <div className="panel panel-pad" style={{ marginBottom: 16 }}>
+          <div className="eyebrow" style={{ marginBottom: 6 }}>{info.poolName}</div>
+          <div style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.6 }}>
+            Your mining sub-account:{" "}
+            <span className="num" style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text)" }}>
+              {info.antpoolSubAccount}
+            </span>
+          </div>
         </div>
       )}
 
-      <div style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"20px 22px", marginBottom:16 }}>
-        <h2 style={{ fontSize:14, fontWeight:600, marginBottom:14 }}>Step 1 — {t("workerLabel")}</h2>
-        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <input value={workerName} onChange={e => setWorkerName(e.target.value.replace(/[^a-zA-Z0-9_-]/g,""))}
-            placeholder={t("workerExample")}
-            style={{ padding:"9px 13px", borderRadius:"var(--r)", border:"1px solid var(--border2)", background:"var(--bg3)", color:"var(--text)", fontSize:13, fontFamily:"var(--mono)", width:200, outline:"none" }}
-            onFocus={e=>e.target.style.borderColor="var(--accent)"} onBlur={e=>e.target.style.borderColor="var(--border2)"}
-          />
-          <span style={{ fontSize:12, color:"var(--text2)" }}>Letters, numbers, underscore, dash</span>
+      <div className="panel" style={{ marginBottom: 16 }}>
+        <div className="panel-head">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 4 }}>Step 1</div>
+            <div className="panel-title">{t("workerLabel")}</div>
+          </div>
+        </div>
+        <div className="panel-pad">
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+            <input
+              className="num"
+              value={workerName}
+              onChange={e => setWorkerName(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ""))}
+              placeholder={t("workerExample")}
+              aria-label={t("workerLabel")}
+              style={{
+                width: 200, padding: "9px 13px", borderRadius: "var(--r)",
+                border: "1px solid var(--border2)", background: "var(--bg3)",
+                color: "var(--text)", fontSize: 13,
+              }}
+            />
+            <span className="meta">Letters, numbers, underscore, dash</span>
+          </div>
         </div>
       </div>
 
-      <div style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"20px 22px", marginBottom:16 }}>
-        <h2 style={{ fontSize:14, fontWeight:600, marginBottom:16 }}>Step 2 — Pool settings</h2>
-        <CopyBox label={t("stratumHost")} value={info.stratum} />
-        <CopyBox label={t("workerLabel")} value={username} />
-        <CopyBox label="Password" value="x" />
-        <div style={{ fontSize:11.5, color:"var(--text2)", marginTop:6, lineHeight:1.7 }}>{info.note}</div>
+      {/* The focal point: the three values that go into the miner. */}
+      <div className="panel" style={{ marginBottom: 16 }}>
+        <div className="panel-head">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 4 }}>Step 2</div>
+            <div className="panel-title">Pool settings</div>
+          </div>
+        </div>
+        <div className="panel-pad">
+          <CopyBox label={t("stratumHost")} value={info.stratum} />
+          <CopyBox label={t("workerLabel")} value={username} />
+          <CopyBox label={t("loginPassword")} value="x" />
+          <div className="meta" style={{ marginTop: 8 }}>{info.note}</div>
+        </div>
       </div>
 
-      <div style={{ background:"var(--bg2)", border:"1px solid var(--border)", borderRadius:"var(--r2)", padding:"20px 22px" }}>
-        <h2 style={{ fontSize:14, fontWeight:600, marginBottom:14 }}>Step 3 — Configure your miner</h2>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-          {[
-            { name:"Antminer (Bitmain)", path:"Miner → Configuration → Pool Configuration" },
-            { name:"WhatsMiner (MicroBT)", path:"Miner Management → Pool Settings" },
-            { name:"Avalon (Canaan)", path:"Network → Pool Configuration → Pool 1" },
-            { name:"CGMiner / BFGMiner", path:"--url <stratum> --user <user> --pass x" },
-          ].map(m => (
-            <div key={m.name} style={{ background:"var(--bg3)", border:"1px solid var(--border)", borderRadius:"var(--r)", padding:"11px 13px" }}>
-              <div style={{ fontWeight:600, fontSize:12.5, marginBottom:3 }}>{m.name}</div>
-              <div style={{ fontSize:11.5, color:"var(--text2)" }}>{m.path}</div>
-            </div>
-          ))}
+      <div className="panel">
+        <div className="panel-head">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 4 }}>Step 3</div>
+            <div className="panel-title">Configure your miner</div>
+          </div>
+        </div>
+        <div className="panel-pad">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
+            {MINERS.map(m => (
+              <div key={m.name} style={{
+                background: "var(--bg-card)", border: "1px solid var(--border)",
+                borderRadius: "var(--r)", padding: "12px 14px",
+              }}>
+                <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 4 }}>{m.name}</div>
+                <div className={m.mono ? "meta num" : "meta"}>{m.path}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

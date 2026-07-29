@@ -85,15 +85,18 @@ export default function Dashboard() {
 
   const loadBtcPrice = useCallback(() => api.btcPrice().then(setBtcPrice).catch(() => {}), []);
 
+  // Range changes must not re-enter the loading state — that blanks the whole
+  // panel. Only the chart depends on `period`, so it owns that dependency.
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadOverview(), loadChart(period), loadBtcPrice()]).finally(() => setLoading(false));
+    Promise.all([loadOverview(), loadBtcPrice()]).finally(() => setLoading(false));
     const t1 = setInterval(loadOverview, 60000);
     const t3 = setInterval(loadBtcPrice, 30000);
     return () => { clearInterval(t1); clearInterval(t3); };
-  }, [loadOverview, loadChart, loadBtcPrice, period]);
+  }, [loadOverview, loadBtcPrice]);
 
   useEffect(() => {
+    loadChart(period);
     const t2 = setInterval(() => loadChart(period), 60000);
     return () => clearInterval(t2);
   }, [loadChart, period]);
@@ -311,7 +314,7 @@ export default function Dashboard() {
                         </span>
                       </td>
                       <td style={{ ...NUM, padding: "13px 22px", fontSize: 13 }}>{fmtFull(w.hs_10m)}</td>
-                      <td style={{ ...NUM, padding: "13px 22px", fontSize: 13, color: "var(--text2)" }}>{fmt(w.hs_1h)}</td>
+                      <td style={{ ...NUM, padding: "13px 22px", fontSize: 13, color: "var(--text2)" }}>{fmtFull(w.hs_1h)}</td>
                       <td style={{ ...NUM, padding: "13px 22px", fontSize: 13, color: pct ? "var(--green)" : "var(--text3)" }}>{pct ? pct + "%" : "—"}</td>
                       <td style={{ ...NUM, padding: "13px 22px", fontSize: 13, color: "var(--text3)" }}>{s.toLocaleString()}</td>
                     </tr>

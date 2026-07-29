@@ -14,8 +14,12 @@ MAIN_SUBACCOUNT = "hashrial"
 #   antpool -> per-user sub-accounts, polled by the Express antpoolPoller
 #   braiins -> ONE aggregate account; per-user figures are derived here by
 #              parsing `hashrial.{user}_{worker}` worker labels
-# Leave on antpool until `node scripts/verify-braiins.js` passes.
-ACTIVE_POOL = "antpool"
+# Set to braiins. The poller stays inert until BRAIINS_TOKEN is set, so this is
+# safe to commit ahead of the account existing:
+#   wrangler secret put BRAIINS_TOKEN
+# Verify the live response shape before trusting it with balances:
+#   BRAIINS_TOKEN=xxxx node scripts/verify-braiins.js
+ACTIVE_POOL = "braiins"
 BRAIINS_ACCOUNT = "hashrial"
 # BRAIINS_TOKEN is a credential and must NOT live here. Set it with:
 #   wrangler secret put BRAIINS_TOKEN

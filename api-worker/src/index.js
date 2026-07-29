@@ -543,7 +543,12 @@ export function parseBraiinsWorkerLabel(label, accountName) {
   if (!label || typeof label !== "string") return null;
   let s = label;
   if (accountName && s.startsWith(accountName + ".")) s = s.slice(accountName.length + 1);
-  if (s.startsWith("fee.") || s === "fee") return { fee: true };
+  // Fee-routed shares. "fee-" is the current marker from poolConfig.js; the
+  // hyphen cannot occur in a username (^[a-z0-9_]{3,20}$) so it can never be
+  // mistaken for a real user. "fee." and a bare "fee" are still recognised so
+  // shares submitted before the marker changed are not attributed to a phantom
+  // user and silently paid out.
+  if (s.startsWith("fee-") || s.startsWith("fee.") || s === "fee") return { fee: true };
   const i = s.indexOf("_");
   if (i <= 0 || i === s.length - 1) return null;
   return { username: s.slice(0, i), worker: s.slice(i + 1) };

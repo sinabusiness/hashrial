@@ -26,6 +26,10 @@ eq("worker names may contain underscores",
 eq("fee-routed shares are flagged, not attributed",
    parseBraiinsWorkerLabel("hashrial.fee.alice_rig01", "hashrial"), { fee: true });
 eq("bare fee label", parseBraiinsWorkerLabel("hashrial.fee", "hashrial"), { fee: true });
+eq("current fee marker (hyphen)", parseBraiinsWorkerLabel("hashrial.fee-alice_rig01", "hashrial"), { fee: true });
+eq("legacy dot marker still recognised", parseBraiinsWorkerLabel("hashrial.fee.alice_rig01", "hashrial"), { fee: true });
+eq("a user cannot spoof the marker (hyphens illegal in usernames)",
+   parseBraiinsWorkerLabel("hashrial.feeder_rig01", "hashrial"), { username: "feeder", worker: "rig01" });
 eq("no underscore is unparseable", parseBraiinsWorkerLabel("hashrial.alice", "hashrial"), null);
 eq("leading underscore is unparseable", parseBraiinsWorkerLabel("_rig01", "hashrial"), null);
 eq("trailing underscore is unparseable", parseBraiinsWorkerLabel("alice_", "hashrial"), null);

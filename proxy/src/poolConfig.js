@@ -117,6 +117,14 @@ function buildUpstreamUsername(pool, session) {
   return `${pool.accountName}.${label}`;
 }
 
+// Marker for fee-routed shares in aggregate mode. A hyphen is deliberate:
+// Hashrial usernames are validated as ^[a-z0-9_]{3,20}$, so a hyphen cannot
+// appear in one and this prefix can never be mistaken for a real user when the
+// label is parsed back out. It also keeps the worker name to a single segment —
+// "hashrial.fee.alice_rig01" would put a dot INSIDE the worker name, which not
+// every pool accepts.
+const AGGREGATE_FEE_PREFIX = "fee-";
+
 // Builds the username used for the 2% fee shares.
 function buildFeeUsername(pool, session) {
   if (pool.sharded) {
@@ -124,8 +132,12 @@ function buildFeeUsername(pool, session) {
   }
   const label = `${session.username || "unknown"}_${session.workerName || "default"}`
     .replace(/[^a-zA-Z0-9._-]/g, "_")
-    .slice(0, 64);
-  return `${pool.feeSubaccount}.${label}`;
+    .slice(0, 60);
+  // In aggregate mode all revenue lands in ONE pool account, so the fee is not
+  // a separate payee — it is simply the slice Hashrial does not redistribute.
+  // Tagging those shares keeps them out of the per-user split and leaves an
+  // auditable trail in the pool's own worker list.
+  return `${pool.accountName}.${AGGREGATE_FEE_PREFIX}${label}`;
 }
 
-module.exports = { loadPoolConfig, buildUpstreamUsername, buildFeeUsername, PRESETS };
+module.exports = { loadPoolConfig, buildUpstreamUsername, buildFeeUsername, PRESETS, AGGREGATE_FEE_PREFIX };

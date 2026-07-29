@@ -384,6 +384,122 @@ async function refreshPriceCache(env, redis) {
   return data;
 }
 
+/* ── Braiins Pool polling ─────────────────────────────────────────────────
+   Antpool gives every Hashrial user their own sub-account, so the Antpool
+   poller can ask it for per-user numbers directly. Braiins is the opposite
+   model: ALL hashrate points at one aggregate account and Braiins knows
+   nothing about individual Hashrial users. Attribution has to happen here.
+
+   What makes it work is the worker label. The proxy authorizes miners as
+   `hashrial.{user}_{worker}` (poolConfig.js, sharded:false), so Braiins'
+   own per-worker rows carry the Hashrial username inside the label. Parse
+   the label back out and the aggregate becomes per-user.
+
+   Revenue is split by shares_24h — actual work accepted — not by hashrate,
+   which is itself a derived average. The 2% fee needs no separate arithmetic:
+   the proxy already routes every 50th share to a `fee.*` worker label, so
+   those shares sit outside the user set and are excluded from the split.
+
+   ⚠️ Field names below are from Braiins' published docs, NOT from a verified
+   live response. CLAUDE.md records that trusting Antpool's docs over a real
+   response meant zero worker rows were written and all hashrate read 0 for
+   months. So this validates the shape before writing anything and aborts
+   loudly rather than persisting zeros. Run scripts/verify-braiins.js with a
+   real token before enabling. */
+
+const BRAIINS_BASE = "https://pool.braiins.com";
+
+async function braiinsFetch(env, path) {
+  try {
+    const r = await fetch(BRAIINS_BASE + path, {
+      headers: { "Pool-Auth-Token": env.BRAIINS_TOKEN, "User-Agent": "hashrial-pool/1.0" },
+    });
+    if (!r.ok) { console.error(`[braiins] ${path} HTTP ${r.status}`); return null; }
+    return await r.json();
+  } catch (e) {
+    console.error(`[braiins] ${path} threw: ${e.message}`);
+    return null;
+  }
+}
+
+// Payloads are documented as nested under the coin key. Probe both that and
+// the bare root so an envelope change surfaces as a validation failure rather
+// than as silent zeros.
+function braiinsUnwrap(j, key) {
+  if (!j || typeof j !== "object") return null;
+  const root = (j.btc && typeof j.btc === "object") ? j.btc : j;
+  if (!key) return root;
+  return root[key] ?? null;
+}
+
+// `hashrial.alice_rig01` / `alice_rig01` -> { username: "alice", worker: "rig01" }
+// Fee-routed shares carry a `fee.` prefix and belong to no user.
+export function parseBraiinsWorkerLabel(label, accountName) {
+  if (!label || typeof label !== "string") return null;
+  let s = label;
+  if (accountName && s.startsWith(accountName + ".")) s = s.slice(accountName.length + 1);
+  if (s.startsWith("fee.") || s === "fee") return { fee: true };
+  const i = s.indexOf("_");
+  if (i <= 0 || i === s.length - 1) return null;
+  return { username: s.slice(0, i), worker: s.slice(i + 1) };
+}
+
+/* Returns null (writing nothing) unless the response carries the fields this
+   depends on. A partial write here misstates what users are owed. */
+export function buildBraiinsAttribution(profileJson, workersJson, accountName) {
+  const profile = braiinsUnwrap(profileJson);
+  const workersRoot = braiinsUnwrap(workersJson, "workers") || braiinsUnwrap(workersJson);
+  if (!profile || !workersRoot || typeof workersRoot !== "object") {
+    console.error("[braiins] unexpected envelope — refusing to write");
+    return null;
+  }
+  for (const f of ["current_balance", "all_time_reward", "today_reward"]) {
+    if (profile[f] === undefined) {
+      console.error(`[braiins] profile is missing "${f}" — refusing to write`);
+      return null;
+    }
+  }
+
+  const rows = [];
+  let totalShares = 0, sawShareField = false;
+  for (const [label, w] of Object.entries(workersRoot)) {
+    if (!w || typeof w !== "object") continue;
+    const parsed = parseBraiinsWorkerLabel(label, accountName);
+    if (!parsed || parsed.fee) continue;
+    if (w.shares_24h !== undefined) sawShareField = true;
+    const shares = Number(w.shares_24h || 0);
+    totalShares += shares;
+    rows.push({
+      username: parsed.username,
+      worker: parsed.worker,
+      shares,
+      // Braiins states hash_rate_unit alongside the values; normalising to a
+      // number here without honouring it would silently mix Gh/s with Th/s.
+      unit: w.hash_rate_unit || null,
+      hs_5m: Number(w.hash_rate_5m || 0),
+      hs_60m: Number(w.hash_rate_60m || 0),
+      hs_24h: Number(w.hash_rate_24h || 0),
+      state: w.state || null,
+      lastShare: w.last_share ? Number(w.last_share) : null,
+    });
+  }
+
+  if (rows.length && !sawShareField) {
+    console.error('[braiins] no worker carried "shares_24h" — refusing to split revenue');
+    return null;
+  }
+
+  return {
+    account: {
+      balance: Number(profile.current_balance || 0),
+      allTime: Number(profile.all_time_reward || 0),
+      today: Number(profile.today_reward || 0),
+    },
+    rows,
+    totalShares,
+  };
+}
+
 export default {
   // Cron Trigger entrypoint. Without this nothing ever populates the price
   // cache and /public/btcprice returns 503 forever.
@@ -466,12 +582,20 @@ export default {
       try {
         const c = await redis.get("pool:stats");
         if (c) return json(typeof c === "string" ? JSON.parse(c) : c, 200, env, request);
-        const { count: u } = await adminDb.from("users").select("*", { count: "exact", head: true });
-        const { count: w } = await adminDb.from("workers").select("*", { count: "exact", head: true }).eq("status", "online");
+        // Errors here were previously discarded, so a broken query was
+        // indistinguishable from an empty pool and the endpoint just 500'd.
+        const { count: u, error: uErr } = await adminDb.from("users").select("*", { count: "exact", head: true });
+        if (uErr) console.error("[pool/stats] users count:", uErr.message || JSON.stringify(uErr));
+        const { count: w, error: wErr } = await adminDb.from("workers").select("*", { count: "exact", head: true }).eq("status", "online");
+        if (wErr) console.error("[pool/stats] workers count:", wErr.message || JSON.stringify(wErr));
+        if (uErr && wErr) return json({ error: "Pool stats unavailable" }, 503, env, request);
         const d = { totalUsers: u || 0, activeWorkers: w || 0 };
         await redis.set("pool:stats", JSON.stringify(d), { ex: 60 });
         return json(d, 200, env, request);
-      } catch { return json({ error: "Failed" }, 500, env, request); }
+      } catch (e) {
+        console.error("[pool/stats] threw:", e.message);
+        return json({ error: "Failed" }, 500, env, request);
+      }
     }
 
     if (path === "/auth/register" && method === "POST") {

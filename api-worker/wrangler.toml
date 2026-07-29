@@ -39,3 +39,14 @@ FX_OVERRIDES = '{"IRR":1780000}'
 # was doing before this was added.
 [triggers]
 crons = ["*/5 * * * *"]
+
+# Cloudflare Email Sending. No API key and no per-domain plan cap — Resend's
+# free tier allows one verified domain and صراف is using this account's slot.
+# The domain must be onboarded ONCE before the first send:
+#   wrangler email sending enable hashrial.com
+# Until then the binding throws E_SENDER_NOT_VERIFIED.
+# allowed_sender_addresses restricts what this binding may send AS, so a bug
+# elsewhere in the Worker cannot send mail as an arbitrary address.
+[[send_email]]
+name = "EMAIL"
+allowed_sender_addresses = ["noreply@hashrial.com"]

@@ -54,9 +54,59 @@ function randomToken() {
 // which is committed to git. EMAIL_FROM's domain must be verified in
 // Resend before it delivers to real recipients. Failures are logged and
 // swallowed, never thrown.
-async function sendEmail(env, { to, subject, html }) {
+// EMAIL_FROM is a display header ("Hashrial <noreply@hashrial.com>"). Resend
+// takes that string whole; the Cloudflare binding wants the parts separately.
+export function parseEmailFrom(value) {
+  const s = String(value || "").trim();
+  const m = s.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  if (m) return { name: m[1].replace(/^"|"$/g, "") || undefined, email: m[2].trim() };
+  return { name: undefined, email: s };
+}
+
+// Some clients render only plain text, and a missing text part costs points
+// with spam filters — so derive one rather than sending HTML alone.
+export function htmlToText(html) {
+  return String(html || "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/* Cloudflare Email Sending first, Resend as fallback.
+ *
+ * Resend's free plan allows one verified domain and this account's slot is
+ * used by صراف, so noreply@hashrial.com had no verified sender there and every
+ * send was rejected. The Cloudflare binding has no per-domain plan cap and no
+ * API key to leak — the account is already on Workers.
+ *
+ * The `from` domain still has to be onboarded once:
+ *   wrangler email sending enable hashrial.com
+ * Until that happens the binding throws E_SENDER_NOT_VERIFIED, which is logged
+ * with its code rather than swallowed. Failures never throw to the caller. */
+async function sendEmail(env, { to, subject, html, text }) {
+  const from = parseEmailFrom(env.EMAIL_FROM);
+  const body = text || htmlToText(html);
+
+  if (env.EMAIL && from.email) {
+    try {
+      await env.EMAIL.send({ to, from: { email: from.email, name: from.name }, subject, html, text: body });
+      return true;
+    } catch (e) {
+      // E_SENDER_NOT_VERIFIED means the domain was never onboarded; retrying
+      // will not help, so say so plainly instead of burying it.
+      console.error(`[email] Cloudflare send to ${to} failed: ${e.code || "?"} ${e.message}`);
+      if (e.code === "E_SENDER_NOT_VERIFIED" || e.code === "E_SENDER_DOMAIN_NOT_AVAILABLE") {
+        console.error(`[email] run: wrangler email sending enable ${from.email.split("@")[1]}`);
+      }
+    }
+  }
+
   if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
-    console.warn(`[email] RESEND_API_KEY or EMAIL_FROM not set — skipping send to ${to}`);
+    console.warn(`[email] no sender configured (no EMAIL binding, no RESEND_API_KEY) — skipping send to ${to}`);
     return false;
   }
   try {
@@ -66,7 +116,7 @@ async function sendEmail(env, { to, subject, html }) {
         "Authorization": `Bearer ${env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, html }),
+      body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, html, text: body }),
     });
     if (!res.ok) {
       console.error(`[email] Resend ${res.status} sending to ${to}:`, await res.text());

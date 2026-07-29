@@ -123,7 +123,7 @@ export default function Earnings() {
                     <td className="num" style={{ color: "var(--text2)" }}>{new Date(p.requested_at).toLocaleDateString()}</td>
                     <td className="num" style={{ color: "var(--text-bright)", fontWeight: 600 }}>{fmtBTC(p.amount_btc)}</td>
                     <td className="num" style={{ color: "var(--text2)", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" }}>{p.address}</td>
-                    <td><span className={`pill ${payoutPill(p.status)}`}>{p.status}</span></td>
+                    <td><span className={`pill ${payoutPill(p.status)}`}>{t(p.status)}</span></td>
                     <td className="num" style={{ color: "var(--text3)" }}>{p.txid ? `${p.txid.slice(0,12)}…` : "—"}</td>
                   </tr>
                 ))}

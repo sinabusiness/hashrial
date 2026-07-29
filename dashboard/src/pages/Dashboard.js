@@ -257,9 +257,9 @@ export default function Dashboard() {
 
         <div className="hr-telebody" style={{ display: "flex", alignItems: "flex-end", gap: 34 }}>
           <div style={{ flex: "0 0 auto" }}>
-            <div className="hr-readout-v num" style={{ ...NUM, fontSize: 66, fontWeight: 700, lineHeight: 0.92, color: "var(--accent)" }}>
+            <div className="display display-hero" style={{ color: "var(--text-bright)" }}>
               {fmt(hr.hs_10m)}
-              <span style={{ fontSize: 26, fontWeight: 500, color: "var(--text2)", marginInlineStart: 8 }}>{unit(hr.hs_10m)}</span>
+              <span className="display-unit" style={{ fontSize: 21 }}>{unit(hr.hs_10m)}</span>
             </div>
             {/* The highest-leverage microcopy on the page: every pool surveyed
                 gets asked "why is this lower than my miner?" and none answer
@@ -277,13 +277,13 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div style={{ flex: 1, minWidth: 0, height: 92 }}>
+          <div style={{ flex: 1, minWidth: 240, height: 118 }}>
             {chart.length === 0 ? (
               <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text3)", fontSize: 12.5 }}>
                 {t("noHashrateData")}
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={92}>
+              <ResponsiveContainer width="100%" height={118}>
                 <ComposedChart data={chart} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
@@ -338,7 +338,7 @@ export default function Dashboard() {
           ) : (
             <>
               {/* A sentence, not a fraction — the user should never do arithmetic. */}
-              <div style={{ fontSize: 20, fontWeight: 700, color: attention.length ? (offlineRigs.length ? "var(--red)" : "var(--amber)") : "var(--green)" }}>
+              <div className="headline" style={{ color: attention.length ? (offlineRigs.length ? "var(--red)" : "var(--amber)") : "var(--green)" }}>
                 {attention.length === 0
                   ? t("allRigsHealthy").replace("{n}", rigs.length)
                   : t("attentionCount").replace("{n}", attention.length)}
@@ -351,13 +351,8 @@ export default function Dashboard() {
               {attention.length > 0 && (
                 <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 6 }}>
                   {attention.slice(0, 3).map(r => (
-                    <div key={r.worker_name} style={{
-                      display: "flex", alignItems: "center", gap: 8, fontSize: 12,
-                      background: r.offline ? "var(--red-weak)" : "var(--amber-weak)",
-                      border: "1px solid var(--border)", borderRadius: 6, padding: "6px 9px",
-                    }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: r.offline ? "var(--red)" : "var(--amber)", flex: "0 0 auto" }} />
-                      <span className="num" style={{ ...NUM, fontWeight: 600, color: "var(--text)" }}>{r.worker_name}</span>
+                    <div key={r.worker_name} className={`attn ${r.offline ? "attn-bad" : "attn-warn"}`}>
+                      <span className="num nowrap" style={{ fontWeight: 600, color: "var(--text)" }}>{r.worker_name}</span>
                       <span style={{ color: r.offline ? "var(--red)" : "var(--amber)" }}>
                         {r.offline ? t("offline") : t("degraded")}
                       </span>
@@ -379,25 +374,22 @@ export default function Dashboard() {
               {/* The skyline: colour = state, height = this rig against its own
                   1h average. A half-height amber block is findable without
                   colour vision and without counting. */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, margin: "16px 0 0", alignItems: "flex-end" }}>
+              <div className="rigs" style={{ marginTop: 18 }}>
                 {sortedRigs.map(r => (
                   <button
                     key={r.worker_name}
-                    className="hr-rig"
+                    className="rig hr-rig"
                     onClick={() => setFocusWorker(focusWorker === r.worker_name ? null : r.worker_name)}
                     aria-label={r.worker_name + " — " + t(r.state)}
                     title={r.worker_name + " — " + t(r.state) + (r.h1h > 0 ? " · " + Math.round((r.h10 / r.h1h) * 100) + "%" : "")}
                     style={{
-                      width: 19, height: 30, borderRadius: 4,
-                      display: "flex", alignItems: "flex-end",
                       outline: focusWorker === r.worker_name ? "2px solid var(--accent)" : "none",
                       outlineOffset: 1,
                     }}
                   >
                     <span style={{
-                      width: "100%", height: Math.round(r.ratio * 30), borderRadius: 4,
+                      height: Math.max(5, Math.round(r.ratio * 34)),
                       background: r.offline ? "var(--red)" : r.degraded ? "var(--amber)" : "var(--green)",
-                      opacity: 0.9,
                     }} />
                   </button>
                 ))}
@@ -421,8 +413,8 @@ export default function Dashboard() {
               only hashrate; when it also means money, links and active tabs it
               has no meaning left. */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
-            <span className="num" style={{ ...NUM, fontSize: 30, fontWeight: 700, color: "var(--text-bright)" }}>
-              {bal.text}<span style={{ fontSize: 16, fontWeight: 500, marginInlineStart: 6, color: "var(--text2)" }}>{bal.unit}</span>
+            <span className="display display-md" style={{ color: "var(--text-bright)" }}>
+              {bal.text}<span className="display-unit" style={{ fontSize: 16 }}>{bal.unit}</span>
             </span>
           </div>
 

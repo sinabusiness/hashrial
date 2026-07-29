@@ -326,3 +326,46 @@ input, select, textarea { font-family: var(--font); }
   .tbl th, .tbl td { padding-inline: 14px; }
   .metric     { padding-inline-end: 18px; margin-inline-end: 18px; }
 }
+
+/* ── Display numerals ───────────────────────────────────────────────── */
+/* Large figures use Inter with tabular FIGURES, not the mono face. Mono's
+   uniform advance width is exactly what makes a big number look spaced-out and
+   crude — "842.16" at 60px in mono reads as a calculator readout. Inter's
+   tabular figures give the identical no-jitter guarantee on the 60s refresh
+   with far better proportions, and negative tracking closes the gaps that
+   remain at display size. */
+.display        { font-family: var(--font); font-variant-numeric: tabular-nums;
+                  direction: ltr; unicode-bidi: isolate;
+                  font-weight: 700; letter-spacing: -0.03em; }
+.display-hero   { font-size: clamp(38px, 6.5vw, 60px); line-height: 0.95; }
+.display-md     { font-size: 31px; line-height: 1; letter-spacing: -0.02em; }
+.display-unit   { font-weight: 500; letter-spacing: -0.01em; color: var(--text2);
+                  margin-inline-start: 9px; }
+
+/* A 1px inner top highlight reads as depth without a shadow, and survives both
+   themes because it is alpha over whatever surface is underneath. */
+.panel, .panel-hero { box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); }
+[data-theme="light"] .panel, [data-theme="light"] .panel-hero {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* Five metrics overflowed the hero rather than wrapping. */
+.metric-row     { flex-wrap: wrap; gap: 18px 0; }
+.metric-value   { white-space: nowrap; }
+
+/* Headlines and rig identifiers should never break mid-phrase. */
+.headline       { font-size: 19px; font-weight: 650; letter-spacing: -0.01em; text-wrap: balance; }
+.nowrap         { white-space: nowrap; }
+
+/* State rail instead of a full-width colour wash — lighter at small counts. */
+.attn           { display: flex; align-items: center; gap: 8px; font-size: 12px;
+                  border: 1px solid var(--border); border-radius: 5px; padding: 7px 10px; }
+.attn-bad       { border-inline-start: 3px solid var(--red); }
+.attn-warn      { border-inline-start: 3px solid var(--amber); }
+
+/* Rig skyline: narrow bars with air read as a pattern; 19px blocks read as a
+   brick wall and hide the height encoding entirely. */
+.rigs           { display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-end; }
+.rig            { width: 11px; height: 34px; border-radius: 3px; border: 0; padding: 0;
+                  background: transparent; cursor: pointer; display: flex; align-items: flex-end; }
+.rig > span     { width: 100%; border-radius: 3px; opacity: 0.9; }

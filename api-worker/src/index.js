@@ -748,18 +748,32 @@ export default {
     let body = {};
     if (["POST", "PUT"].includes(method)) { try { body = await request.json(); } catch {} }
 
-    const authRateKey = `rl:auth:${ip}`;
-    const apiRateKey = `rl:api:${ip}`;
-    const isAuthRoute = path.startsWith("/auth/");
+    /* Rate limiting is bucketed by what an endpoint can be ABUSED for, not by
+       its URL prefix.
 
-    if (isAuthRoute) {
-      if (!(await checkRateLimit(redis, authRateKey, 10, 900))) {
+       Everything under /auth/ previously shared one 10-per-15-minutes bucket.
+       But /auth/me is a token check that Layout fires on EVERY mount, so simply
+       using the app burned the allowance and then locked the user out of
+       logging in — with the misleading message "Too many attempts". That was
+       latent for as long as rate limiting silently did nothing; enforcing it
+       correctly is what exposed the misconfiguration.
+
+       Only endpoints that accept credentials or send mail get the strict
+       bucket. Session checks are ordinary reads. */
+    const CREDENTIAL_ROUTES = [
+      "/auth/login", "/auth/register", "/auth/forgot-password",
+      "/auth/reset-password", "/auth/change-password", "/auth/resend-verification",
+      "/auth/verify-email",
+    ];
+    const isCredentialRoute = CREDENTIAL_ROUTES.includes(path);
+
+    if (isCredentialRoute) {
+      // Per-endpoint, so exhausting password-reset cannot also block login.
+      if (!(await checkRateLimit(redis, `rl:cred:${path}:${ip}`, 10, 900))) {
         return err("Too many attempts. Try again in 15 minutes.", 429, env, request);
       }
-    } else {
-      if (!(await checkRateLimit(redis, apiRateKey, 120, 60))) {
-        return err("Too many requests.", 429, env, request);
-      }
+    } else if (!(await checkRateLimit(redis, `rl:api:${ip}`, 120, 60))) {
+      return err("Too many requests.", 429, env, request);
     }
 
     if (path === "/health" && method === "GET") {

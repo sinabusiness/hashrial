@@ -8,6 +8,13 @@ SITE_URL = "https://hashrial.com"
 STRATUM_HOST = "hashrial.com"
 MAIN_SUBACCOUNT = "hashrial"
 
+# Admin allow-list: comma-separated user UUIDs. Deliberately an ID list here
+# rather than a role column in the database — a role can be escalated by
+# anything able to write to the database, whereas changing this requires a
+# deploy. Every /admin/* endpoint re-checks it server-side; the sidebar entry
+# only appears for these users as a convenience, never as the control.
+ADMIN_USER_IDS = "6830a5d0-c5fa-4515-bff1-f0badf7a770b"
+
 # Which upstream pool the backend polls. MUST match proxy/.env's ACTIVE_POOL —
 # if the proxy forwards to Braiins while this still says antpool, the poller
 # queries sub-accounts receiving no hashrate and every user reads zero.

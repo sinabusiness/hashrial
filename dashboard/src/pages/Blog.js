@@ -30,6 +30,15 @@ function useLocalisedPosts() {
   }, [lang]);
 }
 
+/* Every language version gets its OWN url. Sharing one url between translations
+   meant Google could index only one of them, which defeats the point of writing
+   Farsi-first. The primary edition (Persian where it exists) keeps the bare
+   /blog/<slug>; the others hang off it. */
+export function postPath(slug, lang, translations) {
+  const primary = (translations || []).includes("fa") ? "fa" : (translations || [])[0];
+  return lang === primary ? `/blog/${slug}` : `/blog/${slug}/${lang}`;
+}
+
 function fmtDate(d, lang) {
   try {
     return new Date(d).toLocaleDateString(lang === "fa" ? "fa-IR" : lang === "zh" ? "zh-CN" : "en-GB",
@@ -57,7 +66,7 @@ export function BlogIndex() {
           {posts.map(p => (
             <Link
               key={`${p.slug}.${p.lang}`}
-              to={`/blog/${p.slug}`}
+              to={postPath(p.slug, p.lang, p.translations)}
               className="panel panel-pad hr-link"
               style={{ display: "block", textDecoration: "none", color: "inherit" }}
             >
@@ -72,9 +81,10 @@ export function BlogIndex() {
                   <span className="num">{fmtDate(p.date, lang)}</span>
                   <span aria-hidden="true">·</span>
                   <span><span className="num">{p.readingMinutes}</span> {t("blogMinRead")}</span>
-                  {p.lang !== lang && (
-                    <span className="pill pill-idle" style={{ textTransform: "uppercase" }}>{p.lang}</span>
-                  )}
+                  {(p.translations || []).map(l => (
+                    <span key={l} className={`pill ${l === p.lang ? "pill-ok" : "pill-idle"}`}
+                          style={{ textTransform: "uppercase" }}>{l}</span>
+                  ))}
                 </div>
               </article>
             </Link>
@@ -86,17 +96,20 @@ export function BlogIndex() {
 }
 
 export function BlogPost() {
-  const { slug } = useParams();
+  const { slug, lang: urlLang } = useParams();
   const { t, lang } = useLang();
 
   const post = useMemo(() => {
     const versions = POSTS.filter(p => p.slug === slug);
     if (!versions.length) return null;
-    // Prefer the reader's language, then Persian (the primary), then anything.
+    // An explicit language in the url wins — that url is what gets indexed and
+    // shared, so it must always render the edition it names, regardless of
+    // whatever interface language the visitor happens to have set.
+    if (urlLang) return versions.find(p => p.lang === urlLang) || null;
     return versions.find(p => p.lang === lang)
         || versions.find(p => p.lang === "fa")
         || versions[0];
-  }, [slug, lang]);
+  }, [slug, lang, urlLang]);
 
   if (!post) return <Navigate to="/blog" replace />;
 
@@ -122,7 +135,9 @@ export function BlogPost() {
           <div className="meta" style={{ marginBottom: 20, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <span>{t("blogAlsoIn")}</span>
             {others.map(o => (
-              <span key={o.lang} className="pill pill-idle" style={{ textTransform: "uppercase" }}>{o.lang}</span>
+              <Link key={o.lang} to={postPath(o.slug, o.lang, o.translations)}
+                    className="pill pill-idle hr-link"
+                    style={{ textTransform: "uppercase", textDecoration: "none" }}>{o.lang}</Link>
             ))}
           </div>
         )}

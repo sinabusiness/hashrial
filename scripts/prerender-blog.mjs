@@ -45,74 +45,77 @@ function run() {
 
   let written = 0;
   for (const [slug, versions] of bySlug) {
-    // Farsi is the primary edition, so it supplies the head when present.
-    const primary = versions.find(v => v.lang === "fa") || versions[0];
-    const url = `${SITE}/blog/${slug}`;
+    const primaryLang = versions.some(v => v.lang === "fa") ? "fa" : versions[0].lang;
+    const pathFor = (lang) => lang === primaryLang ? `/blog/${slug}` : `/blog/${slug}/${lang}`;
 
-    const hreflang = versions
-      .map(v => `<link rel="alternate" hreflang="${v.lang}" href="${url}"/>`)
-      .join("\n    ")
-      + `\n    <link rel="alternate" hreflang="x-default" href="${url}"/>`;
+    // One page per language, each at its OWN url. Sharing a url between
+    // translations meant only one could ever be indexed — which defeats the
+    // point of writing Farsi-first. hreflang now points at genuinely distinct
+    // urls, which is what it is actually for.
+    for (const post of versions) {
+      const url = `${SITE}${pathFor(post.lang)}`;
 
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      headline: primary.title,
-      description: primary.description,
-      inLanguage: primary.lang,
-      datePublished: primary.date,
-      dateModified: primary.date,
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      author: { "@type": "Organization", name: "Hashrial", url: SITE },
-      publisher: {
-        "@type": "Organization", name: "Hashrial",
-        logo: { "@type": "ImageObject", url: `${SITE}/favicon.png` },
-      },
-      image: `${SITE}/og-image.png`,
-      keywords: (primary.keywords || []).join(", "),
-    };
+      const hreflang = versions
+        .map(v => `<link rel="alternate" hreflang="${v.lang}" href="${SITE}${pathFor(v.lang)}"/>`)
+        .join("\n    ")
+        + `\n    <link rel="alternate" hreflang="x-default" href="${SITE}${pathFor(primaryLang)}"/>`;
 
-    const head = `
-    <title>${esc(primary.title)} — Hashrial</title>
-    <meta name="description" content="${esc(primary.description)}"/>
+      const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.description,
+        inLanguage: post.lang,
+        datePublished: post.date,
+        dateModified: post.date,
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        author: { "@type": "Organization", name: "Hashrial", url: SITE },
+        publisher: {
+          "@type": "Organization", name: "Hashrial",
+          logo: { "@type": "ImageObject", url: `${SITE}/favicon.png` },
+        },
+        image: `${SITE}/og-image.png`,
+        keywords: (post.keywords || []).join(", "),
+      };
+
+      const head = `
+    <title>${esc(post.title)} — Hashrial</title>
+    <meta name="description" content="${esc(post.description)}"/>
     <link rel="canonical" href="${url}"/>
     ${hreflang}
     <meta property="og:type" content="article"/>
     <meta property="og:url" content="${url}"/>
-    <meta property="og:title" content="${esc(primary.title)}"/>
-    <meta property="og:description" content="${esc(primary.description)}"/>
+    <meta property="og:title" content="${esc(post.title)}"/>
+    <meta property="og:description" content="${esc(post.description)}"/>
     <meta property="og:image" content="${SITE}/og-image.png"/>
-    <meta property="og:locale" content="${primary.lang === "fa" ? "fa_IR" : "en_US"}"/>
-    <meta property="article:published_time" content="${primary.date}"/>
+    <meta property="og:locale" content="${post.lang === "fa" ? "fa_IR" : "en_US"}"/>
+    <meta property="article:published_time" content="${post.date}"/>
     <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:title" content="${esc(primary.title)}"/>
-    <meta name="twitter:description" content="${esc(primary.description)}"/>
+    <meta name="twitter:title" content="${esc(post.title)}"/>
+    <meta name="twitter:description" content="${esc(post.description)}"/>
     <meta name="twitter:image" content="${SITE}/og-image.png"/>
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
 
-    // Replace the SPA's own title/description/canonical rather than appending,
-    // or crawlers see two of each and pick unpredictably.
-    let html = shell
-      .replace(/<title>[\s\S]*?<\/title>/, "")
-      .replace(/<meta name="description"[^>]*>/g, "")
-      .replace(/<meta name="title"[^>]*>/g, "")
-      .replace(/<link rel="canonical"[^>]*>/g, "")
-      .replace(/<meta property="og:[^>]*>/g, "")
-      .replace(/<meta property="twitter:[^>]*>/g, "")
-      .replace("</head>", `${head}\n  </head>`);
+      let html = shell
+        .replace(/<title>[\s\S]*?<\/title>/, "")
+        .replace(/<meta name="description"[^>]*>/g, "")
+        .replace(/<meta name="title"[^>]*>/g, "")
+        .replace(/<link rel="canonical"[^>]*>/g, "")
+        .replace(/<meta property="og:[^>]*>/g, "")
+        .replace(/<meta property="twitter:[^>]*>/g, "")
+        .replace("</head>", `${head}\n  </head>`);
 
-    // The article text itself, so a JS-less crawler reads the content and not
-    // an empty div. React replaces this on hydration.
-    const noscript = `<div id="prerendered-article" dir="${primary.dir}">` +
-      `<h1>${esc(primary.title)}</h1>${primary.html}</div>`;
-    html = html.replace('<div id="root">', `<div id="root">${noscript}`);
-    html = html.replace(/<html([^>]*)lang="[^"]*"/, `<html$1lang="${primary.lang}"`);
-    if (primary.dir === "rtl") html = html.replace(/<html([^>]*)>/, `<html$1 dir="rtl">`);
+      const noscript = `<div id="prerendered-article" dir="${post.dir}">` +
+        `<h1>${esc(post.title)}</h1>${post.html}</div>`;
+      html = html.replace('<div id="root">', `<div id="root">${noscript}`);
+      html = html.replace(/<html([^>]*)lang="[^"]*"/, `<html$1lang="${post.lang}"`);
+      if (post.dir === "rtl") html = html.replace(/<html([^>]*)>/, `<html$1 dir="rtl">`);
 
-    const dir = path.join(BUILD, "blog", slug);
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "index.html"), html);
-    written++;
+      const dir = path.join(BUILD, ...pathFor(post.lang).split("/").filter(Boolean));
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, "index.html"), html);
+      written++;
+    }
   }
 
   // /blog itself
@@ -139,7 +142,14 @@ function run() {
   const staticRoutes = ["", "/blog", "/register", "/login", "/terms", "/privacy"];
   const urls = [
     ...staticRoutes.map(r => ({ loc: `${SITE}${r}`, priority: r === "" ? "1.0" : "0.6" })),
-    ...[...bySlug.keys()].map(s => ({ loc: `${SITE}/blog/${s}`, priority: "0.8" })),
+    // Every language edition is a distinct indexable url.
+    ...[...bySlug.entries()].flatMap(([slug, versions]) => {
+      const primaryLang = versions.some(v => v.lang === "fa") ? "fa" : versions[0].lang;
+      return versions.map(v => ({
+        loc: `${SITE}${v.lang === primaryLang ? `/blog/${slug}` : `/blog/${slug}/${v.lang}`}`,
+        priority: "0.8",
+      }));
+    }),
   ];
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.w3.org/1999/xhtml/sitemap" xmlns:xhtml="http://www.w3.org/1999/xhtml">

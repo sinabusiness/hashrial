@@ -86,6 +86,7 @@ export default function App() {
           <Route path="/verify-email"    element={<VerifyEmail />} />
           <Route path="/blog"        element={<BlogIndex />} />
           <Route path="/blog/:slug"  element={<BlogPost />} />
+          <Route path="/blog/:slug/:lang" element={<BlogPost />} />
           <Route path="/terms"    element={<Terms />} />
           <Route path="/privacy"  element={<Privacy />} />
           <Route path="/cookies"  element={<Cookies />} />

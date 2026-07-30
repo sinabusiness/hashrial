@@ -821,6 +821,86 @@ async function pollBraiins(env, adminDb) {
   console.log(`[braiins] ${byUser.size} users, ${workerRows.length} workers, ${attr.totalShares} shares split`);
 }
 
+
+/* Credits referrers. Runs on the cron, after the pool poller has written
+   earnings.
+
+   The gross figure is derived as (lifetime earn_total) MINUS (everything already
+   credited for that user). That is deliberate and it matters:
+
+   - It is EXACT. earn_24h is a rolling window rewritten every 5 minutes, so
+     "which of today's 288 samples is the day's earnings" has no good answer.
+     A lifetime delta has exactly one.
+   - It is SELF-HEALING. If the job does not run for three days, the next run
+     credits the whole gap rather than silently losing it.
+   - It cannot double-pay. UNIQUE(referrer, referred, settle_date) rejects a
+     second insert for the same day, and because the next run recomputes from
+     the ledger rather than from a cursor, a rejected insert is not a lost
+     credit — it is just a no-op.
+
+   Nothing here mutates a balance. Every credit is a row, so any total shown to
+   a user can be reconciled against the credits behind it. */
+async function creditReferrals(env, adminDb) {
+  const settleDate = new Date().toISOString().slice(0, 10);
+
+  const { data: pairs, error: pErr } = await adminDb
+    .from("users").select("id, referred_by").not("referred_by", "is", null);
+  if (pErr) { console.error("[referral] pair lookup:", pErr.message); return; }
+  if (!pairs?.length) return;
+
+  // Everything credited so far, per referred user, in one query rather than one
+  // per user — this runs on every cron tick.
+  const ids = pairs.map(p => p.id);
+  const { data: prior, error: eErr } = await adminDb
+    .from("referral_earnings").select("referred_id, referred_gross_btc").in("referred_id", ids);
+  if (eErr) { console.error("[referral] prior credits:", eErr.message); return; }
+
+  const creditedByUser = new Map();
+  for (const r of prior || []) {
+    creditedByUser.set(r.referred_id,
+      (creditedByUser.get(r.referred_id) || 0) + parseFloat(r.referred_gross_btc || 0));
+  }
+
+  // Latest lifetime total per referred user.
+  const { data: earnings, error: erErr } = await adminDb
+    .from("earnings_history").select("user_id, earn_total, ts")
+    .in("user_id", ids).order("ts", { ascending: false });
+  if (erErr) { console.error("[referral] earnings lookup:", erErr.message); return; }
+
+  const latestTotal = new Map();
+  for (const row of earnings || []) {
+    if (!latestTotal.has(row.user_id)) latestTotal.set(row.user_id, parseFloat(row.earn_total || 0));
+  }
+
+  const rows = [];
+  for (const pair of pairs) {
+    if (pair.referred_by === pair.id) continue;            // belt and braces; the DB also forbids it
+    const lifetime = latestTotal.get(pair.id);
+    if (!(lifetime > 0)) continue;
+    const alreadyCredited = creditedByUser.get(pair.id) || 0;
+    const newGross = lifetime - alreadyCredited;
+    // Below one satoshi of reward there is nothing meaningful to record, and
+    // writing zero rows would burn the day's UNIQUE slot for nothing.
+    if (!(newGross > 0)) continue;
+    const { gross, fee, reward } = referralReward(newGross);
+    if (!(reward > 0)) continue;
+    rows.push({
+      referrer_id: pair.referred_by, referred_id: pair.id, settle_date: settleDate,
+      referred_gross_btc: gross, fee_btc: fee, reward_btc: reward,
+    });
+  }
+
+  if (!rows.length) return;
+  // ignoreDuplicates makes the whole job idempotent: a re-run on the same day
+  // is a no-op rather than a second payment.
+  const { error: iErr } = await adminDb
+    .from("referral_earnings")
+    .upsert(rows, { onConflict: "referrer_id,referred_id,settle_date", ignoreDuplicates: true });
+  if (iErr) { console.error("[referral] credit insert:", iErr.message); return; }
+  const total = rows.reduce((n, r) => n + r.reward_btc, 0);
+  console.log(`[referral] ${rows.length} credit(s) for ${settleDate}, ${total.toFixed(8)} BTC total`);
+}
+
 export default {
   // Cron Trigger entrypoint. Without this nothing ever populates the price
   // cache and /public/btcprice returns 503 forever.
@@ -832,10 +912,16 @@ export default {
       redis = null;
     }
     const adminDb = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-    ctx.waitUntil(Promise.allSettled([
-      redis ? refreshPriceCache(env, redis) : Promise.resolve(),
-      pollBraiins(env, adminDb),
-    ]).then(rs => rs.forEach(r => r.status === "rejected" && console.error("[cron]", r.reason?.message || r.reason))));
+    ctx.waitUntil((async () => {
+      // Referral credits are derived FROM earnings, so the poller must finish
+      // first — running them concurrently would credit against stale totals.
+      const rs = await Promise.allSettled([
+        redis ? refreshPriceCache(env, redis) : Promise.resolve(),
+        pollBraiins(env, adminDb),
+      ]);
+      rs.forEach(r => r.status === "rejected" && console.error("[cron]", r.reason?.message || r.reason));
+      await creditReferrals(env, adminDb).catch(e => console.error("[cron] referral:", e.message));
+    })());
   },
 
   async fetch(request, env, ctx) {

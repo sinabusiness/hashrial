@@ -539,6 +539,68 @@ async function refreshPriceCache(env, redis) {
   return data;
 }
 
+
+/* ── Referral programme ──────────────────────────────────────────────────
+   Hashrial keeps 2% of a user's gross. A referrer receives HALF of the fee
+   taken from people they brought in — 1% of those users' gross. It is a split
+   of revenue already collected, not an extra charge: the referred user still
+   pays 2% and still receives 98%.
+
+   REFERRAL_SHARE is the fraction OF THE FEE, not of gross. Writing it as 0.5
+   keeps the relationship to the fee explicit, so changing the pool fee cannot
+   silently change what referrers are owed. */
+const FEE_RATE        = 0.02;
+const REFERRAL_SHARE  = 0.5;
+
+// Codes are read aloud and typed, so O/0/I/1/L are excluded.
+const REF_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function generateReferralCode(len = 8) {
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  let out = "";
+  for (const b of bytes) out += REF_ALPHABET[b % REF_ALPHABET.length];
+  return out;
+}
+
+/* Reward for one day of one referred user's earnings. Kept pure so the
+   arithmetic is testable without a database — this decides what people are
+   paid, so it should never only exist inside a query. */
+export function referralReward(referredGrossBtc, feeRate = FEE_RATE, share = REFERRAL_SHARE) {
+  const gross = Number(referredGrossBtc);
+  if (!isFinite(gross) || gross <= 0) return { gross: 0, fee: 0, reward: 0 };
+  const fee = gross * feeRate;
+  // 8 dp is the BTC floor everywhere else in this codebase; rounding at the
+  // boundary keeps the stored row and the displayed figure identical.
+  const round8 = (n) => Math.round(n * 1e8) / 1e8;
+  return { gross: round8(gross), fee: round8(fee), reward: round8(fee * share) };
+}
+
+/* Resolve a referral code to a user id. Returns null for anything unusable
+   rather than throwing, because this runs inside registration and a bad code
+   must never block a signup. */
+async function resolveReferralCode(adminDb, code) {
+  if (!code || typeof code !== "string") return null;
+  const clean = code.trim().toUpperCase().slice(0, 16);
+  if (!/^[A-Z0-9]{4,16}$/.test(clean)) return null;
+  try {
+    const { data } = await adminDb.from("users").select("id").eq("referral_code", clean).limit(1);
+    return data?.[0]?.id || null;
+  } catch { return null; }
+}
+
+/* Allocate a code, retrying on the unique-index collision rather than trusting
+   randomness. 31^8 is large, but "probably unique" is not a guarantee and a
+   duplicate code would silently attribute someone else's referrals. */
+async function assignReferralCode(adminDb, userId) {
+  for (let i = 0; i < 5; i++) {
+    const code = generateReferralCode();
+    const { error } = await adminDb.from("users").update({ referral_code: code }).eq("id", userId);
+    if (!error) return code;
+    console.error(`[referral] code assign attempt ${i + 1} failed:`, error.message);
+  }
+  return null;
+}
+
 /* ── Braiins Pool polling ─────────────────────────────────────────────────
    Antpool gives every Hashrial user their own sub-account, so the Antpool
    poller can ask it for per-user numbers directly. Braiins is the opposite
@@ -897,6 +959,29 @@ export default {
         await adminDb.from("email_verification_tokens").insert({
           user_id: u.id, token_hash: vHash, expires_at: new Date(Date.now() + 86400000).toISOString(),
         });
+
+        /* Referral attribution. Both of these are deliberately non-fatal: a bad
+           or missing code must never stop someone signing up. The DB also holds
+           a CHECK constraint against self-referral, so no code path can create
+           one even if this logic were bypassed. */
+        ctx.waitUntil((async () => {
+          const code = await assignReferralCode(adminDb, u.id);
+          if (!code) console.error(`[referral] could not assign a code to ${u.id}`);
+          const refCode = (body || {}).ref;
+          if (refCode) {
+            const referrerId = await resolveReferralCode(adminDb, refCode);
+            if (!referrerId) {
+              console.warn(`[referral] unknown code "${String(refCode).slice(0, 16)}" at signup — ignored`);
+            } else if (referrerId === u.id) {
+              console.warn(`[referral] self-referral attempt by ${u.id} — ignored`);
+            } else {
+              const { error } = await adminDb.from("users")
+                .update({ referred_by: referrerId, referred_at: new Date().toISOString() })
+                .eq("id", u.id);
+              if (error) console.error(`[referral] attribution failed:`, error.message);
+            }
+          }
+        })().catch(e => console.error("[referral] signup hook:", e.message)));
         const verifyUrl = `${env.SITE_URL}/verify-email?token=${vToken}`;
         // ctx.waitUntil keeps this alive past the response — without it a
         // Worker can freeze the execution context the instant json()
@@ -1047,6 +1132,52 @@ export default {
         return json({ ok: true, message: "If that account exists and is unverified, a new link is on its way." }, 200, env, request);
       } catch (e) {
         console.error(`[resend-verification] ${e.message}`);
+        return err("Failed", 500, env, request);
+      }
+    }
+
+    /* Referral dashboard data. Totals are SUMMED from immutable rows rather
+       than read off a counter, so the figure shown can always be reconciled
+       against the individual credits behind it. */
+    if (path === "/referral/stats" && method === "GET") {
+      if (!user) return err("Unauthorized", 401, env, request);
+      try {
+        const { data: me } = await adminDb.from("users").select("referral_code").eq("id", user.id).limit(1);
+        let code = me?.[0]?.referral_code;
+        // Backfill for accounts created before the programme existed.
+        if (!code) code = await assignReferralCode(adminDb, user.id);
+
+        const { data: referred } = await adminDb.from("users")
+          .select("username, referred_at, email_verified")
+          .eq("referred_by", user.id).order("referred_at", { ascending: false }).limit(200);
+
+        const { data: rows } = await adminDb.from("referral_earnings")
+          .select("referred_id, settle_date, referred_gross_btc, fee_btc, reward_btc")
+          .eq("referrer_id", user.id).order("settle_date", { ascending: false }).limit(400);
+
+        const total = (rows || []).reduce((n, r) => n + parseFloat(r.reward_btc || 0), 0);
+        const cutoff = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+        const last30 = (rows || [])
+          .filter(r => String(r.settle_date) >= cutoff)
+          .reduce((n, r) => n + parseFloat(r.reward_btc || 0), 0);
+
+        return json({
+          code,
+          shareOfFee: REFERRAL_SHARE,     // 0.5 — half the pool fee
+          feeRate: FEE_RATE,              // 0.02 — so the UI can state "1% of their earnings"
+          referredCount: (referred || []).length,
+          // Verified accounts are the ones that can actually mine, so an
+          // unverified signup should not read as a converted referral.
+          activeCount: (referred || []).filter(r => r.email_verified).length,
+          totalReward: +total.toFixed(8),
+          last30Reward: +last30.toFixed(8),
+          referred: (referred || []).map(r => ({
+            username: r.username, joinedAt: r.referred_at, verified: !!r.email_verified,
+          })),
+          history: (rows || []).slice(0, 60),
+        }, 200, env, request);
+      } catch (e) {
+        console.error("[referral/stats]", e.message);
         return err("Failed", 500, env, request);
       }
     }

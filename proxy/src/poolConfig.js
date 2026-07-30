@@ -111,10 +111,27 @@ function buildUpstreamUsername(pool, session) {
   if (pool.sharded) {
     return `${pool.accountName}${session.poolIndex || 1}.${session.username}.${session.workerName}`;
   }
-  const label = `${session.username}_${session.workerName}`
-    .replace(/[^a-zA-Z0-9._-]/g, "_")
-    .slice(0, 64);
-  return `${pool.accountName}.${label}`;
+  return `${pool.accountName}.${sanitizeAggregateLabel(session.username, session.workerName)}`;
+}
+
+
+// Braiins documents the valid worker name as ^[-a-zA-Z0-9_@+:]+$ and — this is
+// the dangerous part — a name that FAILS the regex is not rejected. The
+// hashrate is silently accounted to an automatic worker called [auto].
+//
+// The previous sanitizer permitted "." (illegal at Braiins) and stripped
+// "@ + :" (legal). Worker names come from the miner's own config and dots are
+// everywhere in ASIC naming ("rig.01", "farm.a"), so any such miner would have
+// had its hashrate pooled into [auto] — unattributable to a Hashrial user, and
+// therefore unpaid, while Braiins still counted the work. No error anywhere.
+const BRAIINS_WORKER_OK = /^[-a-zA-Z0-9_@+:]+$/;
+
+function sanitizeAggregateLabel(username, workerName, maxLen = 60) {
+  const label = `${username}_${workerName}`
+    .replace(/[^-a-zA-Z0-9_@+:]/g, "_")   // exactly Braiins' allowed set
+    .slice(0, maxLen);
+  // Never emit a label the upstream will silently discard.
+  return BRAIINS_WORKER_OK.test(label) ? label : "invalid";
 }
 
 // Marker for fee-routed shares in aggregate mode. A hyphen is deliberate:
@@ -130,14 +147,12 @@ function buildFeeUsername(pool, session) {
   if (pool.sharded) {
     return `${pool.feeSubaccount}.${session.workerName || "default"}`;
   }
-  const label = `${session.username || "unknown"}_${session.workerName || "default"}`
-    .replace(/[^a-zA-Z0-9._-]/g, "_")
-    .slice(0, 60);
+  const label = AGGREGATE_FEE_PREFIX + sanitizeAggregateLabel(session.username || "unknown", session.workerName || "default", 60 - AGGREGATE_FEE_PREFIX.length);
   // In aggregate mode all revenue lands in ONE pool account, so the fee is not
   // a separate payee — it is simply the slice Hashrial does not redistribute.
   // Tagging those shares keeps them out of the per-user split and leaves an
   // auditable trail in the pool's own worker list.
-  return `${pool.accountName}.${AGGREGATE_FEE_PREFIX}${label}`;
+  return `${pool.accountName}.${label}`;
 }
 
-module.exports = { loadPoolConfig, buildUpstreamUsername, buildFeeUsername, PRESETS, AGGREGATE_FEE_PREFIX };
+module.exports = { loadPoolConfig, buildUpstreamUsername, buildFeeUsername, PRESETS, AGGREGATE_FEE_PREFIX, sanitizeAggregateLabel, BRAIINS_WORKER_OK };

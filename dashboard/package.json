@@ -15,7 +15,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "prebuild": "node ../scripts/build-blog.mjs",
+    "postbuild": "node ../scripts/prerender-blog.mjs"
   },
   "proxy": "http://api:4000",
   "browserslist": {
@@ -26,5 +28,8 @@
     "development": [
       "last 1 chrome version"
     ]
+  },
+  "devDependencies": {
+    "marked": "^18.0.7"
   }
 }

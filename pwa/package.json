@@ -12,7 +12,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "generate-icons": "node generate-icons.js"
+    "generate-icons": "node generate-icons.js",
+    "prebuild": "node ../scripts/build-blog.mjs"
   },
   "browserslist": {
     "production": [

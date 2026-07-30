@@ -429,3 +429,44 @@ input, select, textarea { font-family: var(--font); }
   .pricerail-ctl  { margin-inline-start: 0; justify-content: space-between; }
   .pricerail-usd  { font-size: 15px; }
 }
+
+/* ── Blog article body ──────────────────────────────────────────────── */
+/* Long-form prose, so the rules that suit a dashboard do not apply: wider
+   line-height, real spacing between blocks, and a measure that stays readable.
+   Applies to build-time HTML, hence element selectors rather than classes. */
+.blog-body            { font-size: 15.5px; line-height: 1.85; color: var(--text2); }
+.blog-body h2         { font-size: 20px; font-weight: 650; letter-spacing: -0.01em;
+                        color: var(--text); margin: 34px 0 12px; }
+.blog-body h3         { font-size: 16.5px; font-weight: 650; color: var(--text); margin: 26px 0 10px; }
+.blog-body p          { margin: 0 0 16px; }
+.blog-body strong     { color: var(--text); font-weight: 650; }
+.blog-body a          { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; }
+.blog-body ul,
+.blog-body ol         { margin: 0 0 16px; padding-inline-start: 22px; }
+.blog-body li         { margin-bottom: 7px; }
+.blog-body blockquote { margin: 0 0 18px; padding-inline-start: 16px;
+                        border-inline-start: 3px solid var(--border2); color: var(--text3); }
+.blog-body code       { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card);
+                        padding: 2px 5px; border-radius: 4px; color: var(--text); }
+.blog-body pre        { background: var(--bg3); border: 1px solid var(--border);
+                        border-radius: var(--r); padding: 14px 16px; overflow-x: auto;
+                        margin: 0 0 18px; direction: ltr; }
+.blog-body pre code   { background: none; padding: 0; }
+
+/* Tables carry the worked examples — the reason these articles are worth
+   reading — so they get real treatment rather than default borders. */
+.blog-body table      { width: 100%; border-collapse: collapse; margin: 0 0 20px;
+                        font-size: 14px; display: block; overflow-x: auto; }
+.blog-body th         { text-align: start; font-weight: 650; color: var(--text);
+                        background: var(--bg-card); padding: 9px 12px; white-space: nowrap; }
+.blog-body td         { padding: 9px 12px; border-top: 1px solid var(--border); }
+/* Figures inside prose still must not shift or reorder in Persian. */
+.blog-body td, .blog-body th { font-variant-numeric: tabular-nums; }
+
+.blog-body img        { max-width: 100%; height: auto; border-radius: var(--r); }
+.blog-body hr         { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+
+@media (max-width: 700px) {
+  .blog-body          { font-size: 15px; line-height: 1.8; }
+  .blog-body h2       { font-size: 18.5px; margin-top: 28px; }
+}

@@ -11,6 +11,7 @@ import Workers      from "./pages/Workers";
 import WorkerDetail from "./pages/WorkerDetail";
 import Earnings     from "./pages/Earnings";
 import Connect      from "./pages/Connect";
+import { BlogIndex, BlogPost } from "./pages/Blog";
 import Referral from "./pages/Referral";
 import Settings     from "./pages/Settings";
 import Notifications from "./pages/Notifications";
@@ -82,6 +83,8 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password"  element={<ResetPassword />} />
           <Route path="/verify-email"    element={<VerifyEmail />} />
+          <Route path="/blog"        element={<BlogIndex />} />
+          <Route path="/blog/:slug"  element={<BlogPost />} />
           <Route path="/terms"    element={<Terms />} />
           <Route path="/privacy"  element={<Privacy />} />
           <Route path="/cookies"  element={<Cookies />} />

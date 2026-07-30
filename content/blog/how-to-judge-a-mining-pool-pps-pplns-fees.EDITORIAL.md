@@ -22,3 +22,14 @@ MUST FACT-CHECK BEFORE PUBLISHING.
 8. Persian typography: Persian-Indic digits throughout with correct separators (٫ decimal, ٬ thousands), ZWNJ in compounds, هش‌ریت never written unspaced as هشریت (per the research, that collides with an unrelated Arabic-root word), Stratum left in Latin script rather than transliterated as استراتوم (which autocompletes to dermatology). Please do not normalise these away in the CMS.
 
 9. Slug is ASCII and shared across all language versions, per the technical SEO spec. Note that spec's finding that hashrial.com currently serves an empty SPA shell with a hardcoded canonical pointing at the root — until per-route prerendered heads exist, publishing this article will not get it indexed at any URL. That is a blocker upstream of this deliverable.
+
+## NUMERALS — spotted while proofing the rendered page
+
+The article mixes Persian and Latin digits in the same piece: the fee table uses
+Persian (۵۲٬۳۸۰٬۰۰۰) while the paragraph below it uses Latin (1,571,400).
+Pick one and apply it throughout before publishing.
+
+Recommendation: Persian numerals for prose and tables in the Farsi version —
+that is what a Persian reader expects — but keep hashrate figures, stratum URLs
+and worker names in Latin, because those are read against the miner's own web
+interface, which is Latin.

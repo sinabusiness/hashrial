@@ -74,6 +74,10 @@ const T = {
     faq7a: "All Stratum-compatible hardware: Antminer (S19/S21 series), Whatsminer (M50/M60 series), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner, and any Stratum software on port 3333.",
     faq8q: "How do payouts work?",
     faq8a: "Set your Bitcoin address in Settings. When your balance exceeds 0.001 BTC, request a payout. We process every Friday. Transaction IDs are visible in your earnings history.",
+    referTitle: "Bring a friend, earn 1%",
+    referBody: "Share your link. When someone signs up through it and starts mining, you earn 1% of everything they mine — for as long as they mine.",
+    referNote: "It comes out of our 2% fee, not theirs. The person you invited still keeps 98%, exactly as they would have.",
+    referBtn: "Get your link",
     ctaTitle: "Ready to Start Mining?",
     ctaDesc: "Join hundreds of miners earning Bitcoin with Hashrial's transparent 2% fee model. No hidden costs, no tricks.",
     ctaBtn: "Create Free Account",
@@ -135,6 +139,10 @@ const T = {
     faq7a: "تمام سخت‌افزارهای سازگار با Stratum: Antminer، Whatsminer، Avalon، CGMiner، BFGMiner و غیره.",
     faq8q: "پرداخت‌ها چگونه کار می‌کنند؟",
     faq8a: "آدرس بیت‌کوین خود را در تنظیمات وارد کنید. وقتی موجودی از ۰.۰۰۱ BTC بیشتر شد، درخواست پرداخت دهید.",
+    referTitle: "یک نفر را بیاورید، ۱٪ بگیرید",
+    referBody: "لینک خود را به اشتراک بگذارید. وقتی کسی با آن ثبت‌نام کند و شروع به استخراج کند، ۱٪ از هرچه استخراج می‌کند به شما می‌رسد — تا هر زمان که فعال باشد.",
+    referNote: "این مبلغ از کارمزد ۲٪ ما کم می‌شود، نه از سهم او. کسی که دعوت کرده‌اید دقیقاً همان ۹۸٪ همیشگی را می‌گیرد.",
+    referBtn: "دریافت لینک",
     ctaTitle: "آماده شروع ماینینگ هستید؟",
     ctaDesc: "به جمع ماینرهایی بپیوندید که با مدل شفاف ۲٪ Hashrial بیت‌کوین استخراج می‌کنند.",
     ctaBtn: "ایجاد حساب رایگان",
@@ -196,6 +204,10 @@ const T = {
     faq7a: "所有兼容 Stratum 的硬件：Antminer、Whatsminer、Avalon、CGMiner、BFGMiner 等。",
     faq8q: "支付如何工作？",
     faq8a: "在设置中输入您的比特币地址。余额超过 0.001 BTC 时请求支付。每周五处理。",
+    referTitle: "邀请好友，赚取 1%",
+    referBody: "分享您的链接。当有人通过它注册并开始挖矿时，您将获得他们所挖收益的 1%——只要他们持续挖矿。",
+    referNote: "这来自我们的 2% 手续费，而不是他们的收益。您邀请的人仍然完整保留 98%。",
+    referBtn: "获取您的链接",
     ctaTitle: "准备好开始挖矿了吗？",
     ctaDesc: "加入数百名矿工，通过 Hashrial 透明 2% 费率模式赚取比特币。",
     ctaBtn: "创建免费账户",
@@ -257,6 +269,10 @@ const T = {
     faq7a: "Все Stratum-совместимое: Antminer, Whatsminer, Avalon, CGMiner, BFGMiner и др.",
     faq8q: "Как работают выплаты?",
     faq8a: "Укажите Bitcoin адрес в настройках. При балансе от 0.001 BTC запросите выплату.",
+    referTitle: "Пригласите друга — получайте 1%",
+    referBody: "Поделитесь ссылкой. Когда кто-то зарегистрируется по ней и начнёт майнить, вы получаете 1% от всего, что он добывает, пока он майнит.",
+    referNote: "Это вычитается из нашей комиссии 2%, а не из его дохода. Приглашённый по-прежнему получает свои 98%.",
+    referBtn: "Получить ссылку",
     ctaTitle: "Готовы начать майнинг?",
     ctaDesc: "Присоединяйтесь к сотням майнеров с прозрачной комиссией 2%.",
     ctaBtn: "Создать аккаунт",
@@ -318,6 +334,10 @@ const T = {
     faq7a: "Todo hardware compatible con Stratum: Antminer, Whatsminer, Avalon, CGMiner, etc.",
     faq8q: "¿Cómo funcionan los pagos?",
     faq8a: "Configure su dirección Bitcoin. Cuando supere 0.001 BTC, solicite el pago.",
+    referTitle: "Trae a un amigo, gana el 1%",
+    referBody: "Comparte tu enlace. Cuando alguien se registre con él y empiece a minar, ganas el 1% de todo lo que mine, mientras siga minando.",
+    referNote: "Sale de nuestra comisión del 2%, no de la suya. La persona que invitaste conserva su 98%.",
+    referBtn: "Consigue tu enlace",
     ctaTitle: "¿Listo para Minar?",
     ctaDesc: "Únase a cientos de mineros con el modelo transparente de 2%.",
     ctaBtn: "Crear Cuenta Gratis",
@@ -379,6 +399,10 @@ const T = {
     faq7a: "Todo hardware compatível com Stratum: Antminer, Whatsminer, Avalon, CGMiner, etc.",
     faq8q: "Como funcionam os pagamentos?",
     faq8a: "Configure seu endereço Bitcoin. Quando o saldo exceder 0.001 BTC, solicite o pagamento.",
+    referTitle: "Traga um amigo, ganhe 1%",
+    referBody: "Compartilhe seu link. Quando alguém se cadastrar por ele e começar a minerar, você ganha 1% de tudo o que essa pessoa minerar, enquanto ela minerar.",
+    referNote: "Sai da nossa taxa de 2%, não da dela. Quem você convidou continua ficando com 98%.",
+    referBtn: "Obter seu link",
     ctaTitle: "Pronto para Minerar?",
     ctaDesc: "Junte-se a centenas de mineradores com taxa transparente de 2%.",
     ctaBtn: "Criar Conta Grátis",
@@ -440,6 +464,10 @@ const T = {
     faq7a: "جميع الأجهزة المتوافقة مع Stratum: Antminer (S19/S21) و Whatsminer (M50/M60) و Avalon (A12-A15) و CGminer و BFGminer و Awesome Miner وأي برنامج Stratum على المنفذ 3333.",
     faq8q: "كيف تعمل السحوبات؟",
     faq8a: "قم بتعيين عنوان البيتكوين في الإعدادات. عندما يتجاوز رصيدك 0.001 BTC، اطلب سحباً. نعالج كل جمعة. معرّفات المعاملات ظاهرة في سجل أرباحك.",
+    referTitle: "ادعُ صديقًا واربح 1%",
+    referBody: "شارك رابطك. عندما يسجّل شخص عبره ويبدأ التعدين، تربح 1% من كل ما يعدّنه، طالما استمر في التعدين.",
+    referNote: "تُخصم من عمولتنا البالغة 2%، وليس من حصته. من دعوته يحتفظ بنسبة 98% كما هي.",
+    referBtn: "احصل على رابطك",
     ctaTitle: "هل أنت مستعد للبدء في التعدين؟",
     ctaDesc: "انضم إلى مئات المعدنين الذين يكسبون البيتكوين مع نموذج الرسوم الثابتة 2% من Hashrial. لا تكاليف مخفية ولا حيل.",
     ctaBtn: "إنشاء حساب مجاني",
@@ -501,6 +529,10 @@ const T = {
     faq7a: "Tüm Stratum uyumlu donanımlar: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner ve 3333 portundaki herhangi bir Stratum yazılımı.",
     faq8q: "Ödemeler nasıl çalışır?",
     faq8a: "Ayarlardan Bitcoin adresinizi ayarlayın. Bakiyeniz 0.001 BTC'yi aştığında ödeme talebinde bulunun. Her Cuma işliyoruz. İşlem kimlikleri kazanç geçmişinizde görünür.",
+    referTitle: "Bir arkadaş getir, %1 kazan",
+    referBody: "Bağlantını paylaş. Biri onunla kaydolup madenciliğe başladığında, madenciliğe devam ettiği sürece kazandığının %1'ini alırsın.",
+    referNote: "Bu, onların değil bizim %2'lik komisyonumuzdan çıkar. Davet ettiğin kişi yine %98'ini alır.",
+    referBtn: "Bağlantını al",
     ctaTitle: "Madenciliğe Başlamaya Hazır mısınız?",
     ctaDesc: "Hashrial'ın şeffaf %2 ücret modeliyle Bitcoin kazanan yüzlerce madenciye katılın. Gizli maliyet yok, hile yok.",
     ctaBtn: "Ücretsiz Hesap Oluştur",
@@ -563,6 +595,10 @@ const T = {
     faq7a: "सभी स्ट्रैटम-संगत हार्डवेयर: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner, और पोर्ट 3333 पर कोई भी स्ट्रैटम सॉफ़्टवेयर।",
     faq8q: "भुगतान कैसे काम करते हैं?",
     faq8a: "सेटिंग्स में अपना बिटकॉइन पता सेट करें। जब आपका बैलेंस 0.001 BTC से अधिक हो, भुगतान का अनुरोध करें। हम हर शुक्रवार प्रोसेस करते हैं। ट्रांज़ैक्शन आईडी आपकी कमाई इतिहास में दिखाई देते हैं।",
+    referTitle: "दोस्त को लाएँ, 1% कमाएँ",
+    referBody: "अपना लिंक साझा करें। जब कोई उसके ज़रिए साइन अप करके माइनिंग शुरू करता है, तो वह जितना भी माइन करे, उसका 1% आपको मिलता है।",
+    referNote: "यह हमारी 2% फ़ीस से आता है, उनकी कमाई से नहीं। आपने जिसे बुलाया वह पूरे 98% रखता है।",
+    referBtn: "अपना लिंक पाएँ",
     ctaTitle: "माइनिंग शुरू करने के लिए तैयार?",
     ctaDesc: "Hashrial के पारदर्शी 2% शुल्क मॉडल के साथ बिटकॉइन कमाने वाले सैकड़ों माइनर्स से जुड़ें। कोई छिपी लागत नहीं, कोई चाल नहीं।",
     ctaBtn: "मुफ्त खाता बनाएँ",
@@ -624,6 +660,10 @@ const T = {
     faq7a: "تمام سٹریٹم مطابقت پذیر ہارڈ ویئر: Antminer (S19/S21)، Whatsminer (M50/M60)، Avalon (A12-A15)، CGminer، BFGminer، Awesome Miner، اور پورٹ 3333 پر کوئی بھی سٹریٹم سافٹ ویئر۔",
     faq8q: "ادائیگیاں کیسے کام کرتی ہیں؟",
     faq8a: "سیٹنگز میں اپنا بٹ کوائن ایڈریس سیٹ کریں۔ جب آپ کا بیلنس 0.001 BTC سے زیادہ ہو جائے، ادائیگی کی درخواست کریں۔ ہم ہر جمعہ پروسیس کرتے ہیں۔ ٹرانزیکشن آئیڈیز آپ کی کمائی کی تاریخ میں نظر آتے ہیں۔",
+    referTitle: "دوست کو لائیں، 1% کمائیں",
+    referBody: "اپنا لنک شیئر کریں۔ جب کوئی اس کے ذریعے سائن اپ کر کے مائننگ شروع کرے، تو وہ جتنا بھی مائن کرے اس کا 1% آپ کو ملتا ہے۔",
+    referNote: "یہ ہماری 2% فیس سے آتا ہے، ان کی کمائی سے نہیں۔ جسے آپ نے بلایا وہ پورے 98% رکھتا ہے۔",
+    referBtn: "اپنا لنک حاصل کریں",
     ctaTitle: "مائننگ شروع کرنے کے لیے تیار؟",
     ctaDesc: "Hashrial کے شفاف 2% فیس ماڈل کے ساتھ بٹ کوائن کمانے والے سینکڑوں مائنز سے جڑیں۔ کوئی چھپی ہوئی لاگت نہیں، کوئی چال نہیں۔",
     ctaBtn: "مفت اکاؤنٹ بنائیں",
@@ -685,6 +725,10 @@ const T = {
     faq7a: "সমস্ত স্ট্র্যাটাম-সামঞ্জস্যপূর্ণ হার্ডওয়্যার: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner, এবং পোর্ট 3333 এ যেকোনো স্ট্র্যাটাম সফটওয়্যার।",
     faq8q: "পেআউট কিভাবে কাজ করে?",
     faq8a: "সেটিংসে আপনার বিটকয়েন ঠিকানা সেট করুন। আপনার ব্যালেন্স 0.001 BTC অতিক্রান্ত হলে, পেআউটের অনুরোধ করুন। আমরা প্রতি শুক্রবার প্রক্রিয়া করি। ট্রানজেকশন আইডি আপনার উপার্জন ইতিহাসে দৃশ্যমান।",
+    referTitle: "বন্ধুকে আনুন, ১% আয় করুন",
+    referBody: "আপনার লিঙ্ক শেয়ার করুন। কেউ সেটি দিয়ে সাইন আপ করে মাইনিং শুরু করলে, সে যত মাইন করবে তার ১% আপনি পাবেন।",
+    referNote: "এটি আমাদের ২% ফি থেকে আসে, তার আয় থেকে নয়। আপনি যাকে আমন্ত্রণ করেছেন সে পুরো ৯৮% রাখে।",
+    referBtn: "আপনার লিঙ্ক নিন",
     ctaTitle: "মাইনিং শুরু করতে প্রস্তুত?",
     ctaDesc: "Hashrial-এর স্বচ্ছ 2% ফি মডেল দিয়ে বিটকয়েন উপার্জনকারী শত শত মাইনারদের সাথে যুক্ত হন। কোনো লুকানো খরচ নেই, কোনো কৌশল নেই।",
     ctaBtn: "বিনামূল্যে অ্যাকাউন্ট তৈরি করুন",
@@ -746,6 +790,10 @@ const T = {
     faq7a: "Alle Stratum-kompatiblen Hardware: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner und jede Stratum-Software auf Port 3333.",
     faq8q: "Wie funktionieren Auszahlungen?",
     faq8a: "Stellen Sie Ihre Bitcoin-Adresse in den Einstellungen ein. Wenn Ihr Guthaben 0.001 BTC überschreitet, fordern Sie eine Auszahlung an. Wir verarbeiten jede Freitag. TransaktionsIDs sind in Ihrem Einnahmenverlauf sichtbar.",
+    referTitle: "Freund einladen, 1% verdienen",
+    referBody: "Teile deinen Link. Wenn sich jemand darüber anmeldet und mit dem Mining beginnt, erhältst du 1% von allem, was er schürft — solange er schürft.",
+    referNote: "Das kommt aus unserer 2%-Gebühr, nicht aus seiner. Die eingeladene Person behält weiterhin ihre 98%.",
+    referBtn: "Link holen",
     ctaTitle: "Bereit, mit dem Mining zu beginnen?",
     ctaDesc: "Schließen Sie sich Hunderten von Minern an, die mit Hashrials transparentem 2%-Gebührenmodell Bitcoin verdienen. Keine versteckten Kosten, keine Tricks.",
     ctaBtn: "Kostenloses Konto erstellen",
@@ -807,6 +855,10 @@ const T = {
     faq7a: "Tout matériel compatible Stratum : Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner et tout logiciel Stratum sur le port 3333.",
     faq8q: "Comment fonctionnent les paiements ?",
     faq8a: "Définissez votre adresse Bitcoin dans les paramètres. Lorsque votre solde dépasse 0.001 BTC, demandez un paiement. Nous traitons chaque vendredi. Les IDs de transaction sont visibles dans votre historique de gains.",
+    referTitle: "Parrainez, gagnez 1%",
+    referBody: "Partagez votre lien. Lorsqu'une personne s'inscrit via ce lien et commence à miner, vous gagnez 1% de tout ce qu'elle mine, tant qu'elle mine.",
+    referNote: "Cela vient de notre commission de 2%, pas de la sienne. La personne invitée conserve bien ses 98%.",
+    referBtn: "Obtenir mon lien",
     ctaTitle: "Prêt à commencer le minage ?",
     ctaDesc: "Rejoignez des centaines de mineurs qui gagnent du Bitcoin avec le modèle de frais transparent de 2 % de Hashrial. Pas de coûts cachés, pas d'astuces.",
     ctaBtn: "Créer un compte gratuit",
@@ -868,6 +920,10 @@ const T = {
     faq7a: "すべてのストラタム互換ハードウェア：Antminer（S19/S21）、Whatsminer（M50/M60）、Avalon（A12-A15）、CGminer、BFGminer、Awesome Miner、ポート3333のすべてのストラタムソフトウェア。",
     faq8q: "ペイアウトはどのように機能する？",
     faq8a: "設定でビットコインアドレスを設定。残高が0.001 BTCを超えるとペイアウトをリクエスト。毎金曜日に処理。トランザクションIDは収益履歴で確認可能。",
+    referTitle: "友達を招待して1%を獲得",
+    referBody: "リンクを共有しましょう。誰かがそのリンクから登録してマイニングを始めると、その人が採掘する限り、採掘額の1%があなたに入ります。",
+    referNote: "これは相手の取り分ではなく、当社の2%の手数料から支払われます。招待された方は変わらず98%を受け取ります。",
+    referBtn: "リンクを取得",
     ctaTitle: "マイニングを始める準備はできましたか？",
     ctaDesc: "Hashrialの透明な2%料金モデルでビットコインを獲得する何百ものマイナーに参加。隠れたコストなし、トリックなし。",
     ctaBtn: "無料アカウント作成",
@@ -929,6 +985,10 @@ const T = {
     faq7a: "모든 스트라텀 호환 하드웨어: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner, 포트 3333의 모든 스트라텀 소프트웨어.",
     faq8q: "지급은 어떻게 작동?",
     faq8a: "설정에서 비트코인 주소를 설정. 잔액이 0.001 BTC를 초과하면 지급 요청. 매주 금요일 처리. 거래 ID가 수익 이력에서 확인 가능.",
+    referTitle: "친구를 초대하고 1%를 받으세요",
+    referBody: "링크를 공유하세요. 누군가 그 링크로 가입해 채굴을 시작하면, 그가 채굴하는 동안 채굴량의 1%를 받게 됩니다.",
+    referNote: "이는 상대방의 몫이 아니라 저희 2% 수수료에서 나갑니다. 초대받은 분은 그대로 98%를 받습니다.",
+    referBtn: "내 링크 받기",
     ctaTitle: "마이닝을 시작할 준비가 되셨나요?",
     ctaDesc: "Hashrial의 투명한 2% 수수료 모델로 비트코인을 버는 수백 명의 마이너에 합류. 숨겨진 비용 없음, 속임수 없음.",
     ctaBtn: "무료 계정 만들기",
@@ -990,6 +1050,10 @@ const T = {
     faq7a: "Semua perangkat keras kompatibel Stratum: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner, dan semua perangkat lunak Stratum di port 3333.",
     faq8q: "Bagaimana pembayaran dilakukan?",
     faq8a: "Atur alamat Bitcoin di Pengaturan. Ketika saldo Anda melebihi 0.001 BTC, minta pembayaran. Kami memproses setiap hari Jumat. ID transaksi terlihat di riwayat penghasilan Anda.",
+    referTitle: "Ajak teman, dapat 1%",
+    referBody: "Bagikan tautan Anda. Ketika seseorang mendaftar lewat tautan itu dan mulai menambang, Anda mendapat 1% dari semua yang ia tambang, selama ia menambang.",
+    referNote: "Ini diambil dari biaya 2% kami, bukan dari bagiannya. Orang yang Anda undang tetap menerima 98%.",
+    referBtn: "Dapatkan tautan",
     ctaTitle: "Siap Mulai Menambang?",
     ctaDesc: "Bergabunglah dengan ratusan penambang yang menghasilkan Bitcoin dengan model biaya transparan 2% Hashrial. Tanpa biaya tersembunyi, tanpa trik.",
     ctaBtn: "Buat Akun Gratis",
@@ -1051,6 +1115,10 @@ const T = {
     faq7a: "Все обладання, сумісне з Stratum: Antminer (S19/S21), Whatsminer (M50/M60), Avalon (A12-A15), CGminer, BFGminer, Awesome Miner та будь-яке програмне забезпечення Stratum на порту 3333.",
     faq8q: "Як працюють виплати?",
     faq8a: "Встановіть адресу біткоїна в налаштуваннях. Коли баланс перевищує 0.001 BTC, запитайте виплату. Ми обробляємо щоп'ятниці. ID транзакцій видні в історії заробітку.",
+    referTitle: "Запросіть друга — отримуйте 1%",
+    referBody: "Поділіться посиланням. Коли хтось зареєструється за ним і почне майнити, ви отримуєте 1% від усього, що він видобуває, доки він майнить.",
+    referNote: "Це вираховується з нашої комісії 2%, а не з його доходу. Запрошений так само отримує свої 98%.",
+    referBtn: "Отримати посилання",
     ctaTitle: "Готові почати майнінг?",
     ctaDesc: "Приєднуйтесь до сотень майнерів, які заробляють біткоїн з прозорою моделлю комісії 2% від Hashrial. Без прихованих витрат, без хитрощів.",
     ctaBtn: "Створити безкоштовний акаунт",
@@ -1360,6 +1428,7 @@ const calcHashrate = () => (732 * calcGrowth()).toFixed(1);
 export default function Landing() {
   const navigate = useNavigate();
   const [lang, setLang] = useState(() => localStorage.getItem("lang") || "en");
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const langMeta = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
   const isRtl = langMeta.dir === "rtl";
   const t = T[lang] || T.en;
@@ -1370,9 +1439,9 @@ export default function Landing() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const particlesRef = useRef(null);
   const heroRef = useRef(null);
+  const langMenuRef = useRef(null);
   const [btcPriceState, setBtcPriceState] = useState(() => Math.floor(Math.random() * 5000 + 62000));
   const [theme, setTheme] = useState(() => localStorage.getItem("hashrial_theme") || "dark");
-  const [showLang, setShowLang] = useState(false);
   const [priceTickerItems, setPriceTickerItems] = useState(DEFAULT_TICKER);
 
   const [blocksFound, setBlocksFound] = useState(calcBlocks);
@@ -1395,6 +1464,12 @@ export default function Landing() {
     document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "");
     localStorage.setItem("hashrial_theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    const handleClick = e => { if (langMenuRef.current && !langMenuRef.current.contains(e.target)) setShowLangMenu(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -1623,13 +1698,6 @@ export default function Landing() {
           .orb-ring-3{inset:20px}
         }
         @media(min-width:769px){.mobile-show{display:none!important}}
-        .hamburger-btn{padding:4px!important;background:none;border:none;cursor:pointer;display:none;flex-direction:column;justify-content:center;gap:5px;width:28px;height:28px}
-        @media(max-width:768px){.hamburger-btn{display:flex!important}}
-        @media(max-width:768px){
-          .section-hero h1{font-size:clamp(28px,9vw,48px)!important;letter-spacing:-1.5px!important}
-          .section-hero p{font-size:14px!important}
-          .section-hero .btn-primary,.section-hero .btn-ghost{padding:14px 28px!important;font-size:14px!important}
-        }
 
         ::-webkit-scrollbar{width:6px}
         ::-webkit-scrollbar-track{background:var(--bg)}
@@ -1710,40 +1778,36 @@ export default function Landing() {
           </nav>
         </div>
         <div className="mobile-hide" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          {/* Language dropdown */}
-          <div style={{ position: "relative" }}>
-            <button onClick={() => setShowLang(p => !p)} style={{
-              background: "none", border: "1px solid var(--border2)", color: "var(--text2)", cursor: "pointer",
-              padding: "6px 10px", borderRadius: 8, fontSize: 15, lineHeight: 1,
-              transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6,
+          {/* Language selector - popup */}
+          <div ref={langMenuRef} style={{ position: "relative", marginRight: 4 }}>
+            <button onClick={() => setShowLangMenu(!showLangMenu)} title={t.language || "Language"} style={{
+              background: showLangMenu ? "var(--bg-card)" : "transparent",
+              border: showLangMenu ? "1px solid var(--border)" : "1px solid transparent",
+              cursor: "pointer", padding: "4px 6px", borderRadius: 6, fontSize: 15, lineHeight: 1,
+              transition: "all 0.2s",
             }}
               onMouseEnter={e => { e.target.style.background = "var(--bg-card)"; }}
-              onMouseLeave={e => { e.target.style.background = "none"; }}
-            >🌐 {langMeta.flag}</button>
-            {showLang && (
-              <>
-                <div style={{ position: "fixed", inset: 0, zIndex: 200 }} onClick={() => setShowLang(false)} />
-                <div style={{
-                  position: "absolute", top: "100%", right: 0, marginTop: 6, zIndex: 201,
-                  background: "var(--bg2)", border: "1px solid var(--border2)", borderRadius: 12,
-                  padding: 8, minWidth: 180, maxHeight: 320, overflowY: "auto",
-                  boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
-                }}>
-                  {LANGUAGES.map(l => (
-                    <button key={l.code} onClick={() => { setLang(l.code); setShowLang(false); localStorage.setItem("lang", l.code); }} style={{
-                      display: "flex", alignItems: "center", gap: 8, width: "100%",
-                      padding: "8px 10px", border: "none", borderRadius: 8,
-                      background: lang === l.code ? "rgba(247,147,26,0.12)" : "transparent",
-                      color: lang === l.code ? "var(--accent)" : "var(--text)",
-                      cursor: "pointer", fontSize: 13, fontFamily: "inherit", textAlign: "start",
-                    }}
-                      onMouseEnter={e => { if (lang !== l.code) e.target.style.background = "var(--bg-card)"; }}
-                      onMouseLeave={e => { if (lang !== l.code) e.target.style.background = "transparent"; }}
-                    ><span style={{ fontSize: 16 }}>{l.flag}</span> {l.label}</button>
-                  ))}
-                </div>
-              </>
-            )}
+              onMouseLeave={e => { if (!showLangMenu) e.target.style.background = "transparent"; }}
+            >{langMeta.flag}</button>
+            {showLangMenu && <div style={{
+              position: "absolute", top: "100%", right: 0, marginTop: 6,
+              background: "var(--bg-glass)", backdropFilter: "blur(20px)",
+              border: "1px solid var(--border)", borderRadius: 12,
+              padding: "6px", zIndex: 200, minWidth: 180,
+              display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2,
+            }}>
+              {LANGUAGES.map(l => (
+                <button key={l.code} onClick={() => { setLang(l.code); setShowLangMenu(false); }} title={l.label} style={{
+                  background: lang === l.code ? "var(--bg-card-hover)" : "transparent",
+                  border: "none", cursor: "pointer", padding: "6px 8px", borderRadius: 8,
+                  fontSize: 13, lineHeight: 1, color: "var(--text)", textAlign: "left",
+                  fontFamily: "inherit", transition: "all 0.15s", display: "flex", alignItems: "center", gap: 6,
+                }}
+                  onMouseEnter={e => { e.target.style.background = "var(--bg-card)"; }}
+                  onMouseLeave={e => { if (lang !== l.code) e.target.style.background = "transparent"; }}
+                ><span style={{ fontSize: 16 }}>{l.flag}</span> {l.label}</button>
+              ))}
+            </div>}
           </div>
 
           {/* Theme toggle */}
@@ -1770,10 +1834,13 @@ export default function Landing() {
         </div>
 
         {/* Mobile hamburger */}
-        <button className="hamburger-btn" onClick={() => setMobileMenu(!mobileMenu)}>
-          <span style={{ display: "block", width: 22, height: 2.5, background: "var(--text)", borderRadius: 2, transition: "all .2s" }} />
-          <span style={{ display: "block", width: 22, height: 2.5, background: "var(--text)", borderRadius: 2, transition: "all .2s" }} />
-          <span style={{ display: "block", width: 22, height: 2.5, background: "var(--text)", borderRadius: 2, transition: "all .2s" }} />
+        <button className="mobile-show" onClick={() => setMobileMenu(!mobileMenu)} style={{
+          background: "none", border: "none", color: "var(--text)", cursor: "pointer", padding: 4,
+          flexDirection: "column", alignItems: "center",
+        }}>
+          <div style={{ width: 20, height: 2, background: "var(--text)", marginBottom: 4, borderRadius: 1 }} />
+          <div style={{ width: 20, height: 2, background: "var(--text)", marginBottom: 4, borderRadius: 1 }} />
+          <div style={{ width: 20, height: 2, background: "var(--text)", borderRadius: 1 }} />
         </button>
       </header>
 
@@ -1782,7 +1849,7 @@ export default function Landing() {
         <div className="mobile-menu-overlay" style={{
           position: "fixed", inset: 0, zIndex: 99,
           background: "var(--bg)", paddingTop: 100, display: "flex", flexDirection: "column",
-          alignItems: "center", gap: 24, overflowY: "auto",
+          alignItems: "center", gap: 24,
         }}>
           {[{ href: "#features", label: t.navFeatures },
             { href: "#mining", label: t.navMining },
@@ -1796,22 +1863,6 @@ export default function Landing() {
             style={{ fontSize: "18px", fontWeight: 500, color: "var(--accent)", textDecoration: "none" }}
           >{t.exchange || "صراف Exchange"}</a>
           <div style={{ height: 1, width: 40, background: "var(--border)", margin: "8px 0" }} />
-          {/* Mobile language grid */}
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, maxWidth: 320, padding: "0 16px" }}>
-            {LANGUAGES.map(l => (
-              <button key={l.code} onClick={() => { setLang(l.code); localStorage.setItem("lang", l.code); }} style={{
-                display: "flex", alignItems: "center", gap: 6, padding: "8px 12px",
-                border: lang === l.code ? "1px solid var(--accent)" : "1px solid var(--border)",
-                borderRadius: 8, background: lang === l.code ? "rgba(247,147,26,0.12)" : "var(--bg-card)",
-                color: lang === l.code ? "var(--accent)" : "var(--text)",
-                cursor: "pointer", fontSize: 13, fontFamily: "inherit",
-              }}><span style={{ fontSize: 16 }}>{l.flag}</span> {l.label}</button>
-            ))}
-          </div>
-          <div style={{ height: 1, width: 40, background: "var(--border)", margin: "8px 0" }} />
-          <button onClick={() => { setTheme(prev => prev === "dark" ? "light" : "dark"); }}
-            style={{ fontSize: "16px", fontWeight: 500, color: "var(--text)", background: "none", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 20px", cursor: "pointer" }}
-          >{theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}</button>
           <Link to="/login" onClick={() => setMobileMenu(false)}
             style={{ fontSize: "18px", fontWeight: 500, color: "var(--text)", textDecoration: "none" }}>{t.login}</Link>
           <Link to="/register" onClick={() => setMobileMenu(false)}
@@ -1829,8 +1880,8 @@ export default function Landing() {
         <div style={{
           position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
           width: "70%", height: "60%",
-          background: "radial-gradient(ellipse at center, rgba(247,147,26,0.35) 0%, rgba(247,147,26,0.08) 40%, transparent 70%)",
-          opacity: 0.8, pointerEvents: "none", zIndex: 0,
+          background: "radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%)",
+          opacity: 0.3, pointerEvents: "none", zIndex: 0,
         }} />
 
         <div style={{
@@ -2230,6 +2281,49 @@ export default function Landing() {
       <div className="section-divider" style={{ maxWidth: 400, marginTop: 40 }} />
 
       {/* ═══════ CTA ═══════ */}
+      {/* ═══════ REFERRAL ═══════ */}
+      {/* Placed immediately before the closing CTA rather than after it: it is
+          another reason to sign up, so it should feed the call to action rather
+          than sit underneath one the reader has already passed. */}
+      <div className="section-divider" style={{ maxWidth: 400, marginTop: 40 }} />
+
+      <section className="section-hero" id="referral" style={{ position: "relative", zIndex: 2, padding: "80px 28px 20px", maxWidth: 740, margin: "0 auto" }}>
+        <Reveal>
+          <div className="glass-card" style={{
+            padding: "44px 40px", border: "1px solid var(--border)",
+            borderRadius: 24, position: "relative", overflow: "hidden", textAlign: "center",
+          }}>
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 65%)",
+              opacity: 0.1, pointerEvents: "none",
+            }} />
+            {/* The number is the offer, so it carries the weight. */}
+            <div style={{
+              fontSize: 52, fontWeight: 900, letterSpacing: "-2px", lineHeight: 1,
+              color: "var(--accent)", position: "relative", marginBottom: 14,
+              fontVariantNumeric: "tabular-nums",
+            }}>1%</div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 12, position: "relative", letterSpacing: "-0.5px", color: "var(--text-bright)" }}>
+              {t.referTitle}
+            </h2>
+            <p style={{ fontSize: 15, color: "var(--text2)", lineHeight: 1.8, maxWidth: 500, margin: "0 auto 14px", position: "relative" }}>
+              {t.referBody}
+            </p>
+            {/* The objection everyone has is "does this cost my friend money?".
+                Answering it here, unprompted, is what makes the link shareable. */}
+            <p style={{ fontSize: 13.5, color: "var(--text3)", lineHeight: 1.75, maxWidth: 460, margin: "0 auto 28px", position: "relative" }}>
+              {t.referNote}
+            </p>
+            <button onClick={() => navigate("/register")} className="btn-primary" style={{
+              padding: "15px 38px", fontSize: 15, position: "relative",
+            }}>
+              {t.referBtn} →
+            </button>
+          </div>
+        </Reveal>
+      </section>
+
       <section className="section-hero" style={{ position: "relative", zIndex: 2, padding: "80px 28px 100px", maxWidth: 740, margin: "0 auto" }}>
         <Reveal>
           <div className="cta-glow glass-card" style={{

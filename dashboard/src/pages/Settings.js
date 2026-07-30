@@ -180,6 +180,7 @@ export default function Settings() {
                 [t("loginEmail"), user.email],
                 [t("poolFee"), "2.0%"],
                 [t("memberSince"), user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"],
+              [t("settingsUserId"), <span key="uid" className="num" style={{ fontSize: 12, wordBreak: "break-all" }}>{user.id}</span>],
               ].map(([label, val], i, arr) => (
                 <div key={label} style={i === arr.length - 1 ? { ...infoRow, ...lastRow } : infoRow}>
                   <span style={{ color:"var(--text2)", fontSize:13 }}>{label}</span>

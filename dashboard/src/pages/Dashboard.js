@@ -172,6 +172,17 @@ export default function Dashboard() {
     [rigs]
   );
 
+  /* flex-wrap filled the first row and left the remainder ragged — 40 rigs came
+     out 25/15, which reads as an accident rather than a pattern. Choosing a
+     column count that divides the fleet as evenly as possible gives equal rows
+     at any size: 40 -> 20+20, 37 -> 19+18, 100 -> 20x5. */
+  const stripCols = useMemo(() => {
+    const n = sortedRigs.length;
+    if (n <= 10) return Math.max(1, n);
+    const rows = Math.ceil(n / 20);
+    return Math.ceil(n / rows);
+  }, [sortedRigs.length]);
+
   const acceptedN = parseInt(hr.accepted || 0);
   const staleN    = parseInt(hr.stale || 0);
   const acceptPct = (acceptedN + staleN) > 0 ? (acceptedN / (acceptedN + staleN)) * 100 : null;
@@ -283,10 +294,19 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div style={{ flex: 1, minWidth: 240, height: 118 }}>
-            {chart.length === 0 ? (
-              <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text3)", fontSize: 12.5 }}>
-                {t("noHashrateData")}
+          {/* A one- or two-point line is not a chart, it is a dot — and reserving
+              118px for it leaves a void in the hero on a brand-new account. Below
+              three samples this collapses to a short, honest message instead. */}
+          <div style={{ flex: 1, minWidth: 240, height: chart.length < 3 ? 66 : 118 }}>
+            {chart.length < 3 ? (
+              <div style={{
+                height: "100%", display: "flex", flexDirection: "column", gap: 4,
+                alignItems: "center", justifyContent: "center", textAlign: "center",
+                border: "1px dashed var(--border)", borderRadius: 8, padding: "0 14px",
+              }}>
+                <span style={{ fontSize: 12.5, color: "var(--text2)" }}>
+                  {rigs.length === 0 ? t("noHashrateData") : t("chartCollecting")}
+                </span>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={118}>
@@ -380,7 +400,7 @@ export default function Dashboard() {
               {/* The skyline: colour = state, height = this rig against its own
                   1h average. A half-height amber block is findable without
                   colour vision and without counting. */}
-              <div className="rigs" style={{ marginTop: 18 }}>
+              <div className="rigs" style={{ marginTop: 18, "--rig-cols": stripCols }}>
                 {sortedRigs.map(r => (
                   <button
                     key={r.worker_name}

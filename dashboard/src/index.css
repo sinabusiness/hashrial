@@ -370,8 +370,14 @@ input, select, textarea { font-family: var(--font); }
 
 /* Rig skyline: narrow bars with air read as a pattern; 19px blocks read as a
    brick wall and hide the height encoding entirely. */
-.rigs           { display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-end; }
-.rig            { width: 11px; height: 34px; border-radius: 3px; border: 0; padding: 0;
+/* Grid, not flex-wrap. Wrapping filled row one and left the remainder ragged
+   (40 rigs came out 25/15), which reads as an accident. A column count that
+   divides the fleet evenly gives equal rows at any fleet size — the count is
+   set per-render via --rig-cols. Bars are capped so a 3-rig fleet does not
+   stretch into three fat slabs. */
+.rigs           { display: grid; grid-template-columns: repeat(var(--rig-cols, 20), minmax(6px, 13px));
+                  gap: 4px; align-items: end; justify-content: start; }
+.rig            { width: 100%; height: 34px; border-radius: 3px; border: 0; padding: 0;
                   background: transparent; cursor: pointer; display: flex; align-items: flex-end; }
 .rig > span     { width: 100%; border-radius: 3px; opacity: 0.9; }
 

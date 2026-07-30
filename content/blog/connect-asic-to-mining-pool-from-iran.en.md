@@ -7,7 +7,7 @@ date: "2026-07-30"
 primaryKeyword: "اتصال ماینر به استخر"
 keywords: ["اتصال ماینر به استخر", "چرا ماینر به استخر وصل نمیشه", "ریجکت ماینر چیست", "راه حل ریجکت ماینر", "علت ریجکت ماینر", "تنظیمات استخر ماینر", "کانفیگ ماینر", "ورکر ماینر", "استخر استخراج بیت کوین با نت ملی", "ماینر چقدر اینترنت مصرف میکند", "هش ریت ماینر", "کارمزد استخر", "stratum port 3333 blocked", "accepted vs stale shares", "braiins pool worker name"]
 dir: "ltr"
-status: "draft"
+status: "published"
 ---
 
 If the miner is powered, fans are spinning, and no worker appears in the pool dashboard, the cause is almost always one of three things: the address, the port, or the worker name. And if it is connected but showing a high reject rate, the cause is almost never "Iranian internet" — the arithmetic below shows why.

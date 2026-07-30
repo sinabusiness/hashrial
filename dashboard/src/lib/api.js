@@ -31,7 +31,7 @@ async function req(path, opts = {}) {
 
 export const api = {
   login:              (email, password) => req("/api/auth/login",    { method: "POST", body: { email, password } }),
-  register:           (username, email, password) => req("/api/auth/register", { method: "POST", body: { username, email, password } }),
+  register:           (username, email, password, ref) => req("/api/auth/register", { method: "POST", body: { username, email, password, ...(ref ? { ref } : {}) } }),
   logout:             () => req("/api/auth/logout", { method: "POST" }),
   me:                 () => req("/api/auth/me"),
   forgotPassword:     (email) => req("/api/auth/forgot-password", { method: "POST", body: { email } }),
@@ -54,4 +54,5 @@ export const api = {
   setPayoutAddress:   (bitcoin_address) => req("/api/settings/payout-address", { method: "PUT", body: { bitcoin_address } }),
   requestPayout:      () => req("/api/payout/request", { method: "POST" }),
   payoutHistory:      () => req("/api/payout/history"),
+  referralStats:      () => req("/api/referral/stats"),
 };

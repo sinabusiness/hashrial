@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useLang } from "../i18n";
 
@@ -20,6 +20,10 @@ import { useLang } from "../i18n";
 export default function Register() {
   const { t } = useLang();
   const navigate = useNavigate();
+  // Referral attribution rides on the signup call. An unknown or
+  // self-referential code is ignored server-side, never blocking signup.
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get("ref") || "";
   const [form, setForm] = useState({ username:"", email:"", password:"" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +55,7 @@ export default function Register() {
     if (form.password.length < 10) { setError(t("registerPasswordError")); return; }
     setLoading(true);
     try {
-      const res = await api.register(form.username, form.email, form.password);
+      const res = await api.register(form.username, form.email, form.password, refCode);
       localStorage.setItem("hashrial_token", res.token);
       setEmailSent(res.emailSent !== false);
       // Show a check-your-email step rather than redirecting silently —

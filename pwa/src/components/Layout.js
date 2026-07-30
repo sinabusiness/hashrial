@@ -182,6 +182,7 @@ export default function Layout() {
     { to:"/dashboard/earnings", key:"sidebarEarnings",      icon:"₿" },
     { to:"/dashboard/connect",  key:"sidebarConnect", icon:"⛓" },
     { to:"/dashboard/notifications", key:"sidebarNotifications", icon:"🔔", badge: notifCount },
+    { to:"/dashboard/referral", key:"sidebarReferral",      icon:"◈" },
     { to:"/dashboard/settings", key:"sidebarSettings",      icon:"◎" },
   ];
 

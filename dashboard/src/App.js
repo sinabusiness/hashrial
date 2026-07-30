@@ -11,6 +11,7 @@ import Workers      from "./pages/Workers";
 import WorkerDetail from "./pages/WorkerDetail";
 import Earnings     from "./pages/Earnings";
 import Connect      from "./pages/Connect";
+import Referral from "./pages/Referral";
 import Settings     from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import Terms        from "./pages/Terms";
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="earnings"          element={<Earnings />} />
             <Route path="connect"           element={<Connect />} />
             <Route path="notifications"     element={<Notifications />} />
+            <Route path="referral"          element={<Referral />} />
             <Route path="settings"          element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

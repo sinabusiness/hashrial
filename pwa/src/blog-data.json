@@ -1,4 +1,60 @@
 {
  "generatedAt": null,
- "posts": []
+ "posts": [],
+ "drafts": [
+  {
+   "slug": "bitcoin-mining-profitability-iran-toman",
+   "lang": "en",
+   "title": "Bitcoin mining profitability in Iran, worked out in toman",
+   "status": "draft",
+   "date": "2026-07-30",
+   "words": 1501,
+   "file": "bitcoin-mining-profitability-iran-toman.en.md"
+  },
+  {
+   "slug": "bitcoin-mining-profitability-iran-toman",
+   "lang": "fa",
+   "title": "آیا امشب ماینر را روشن کنم؟ حساب سود ماینینگ در ایران",
+   "status": "draft",
+   "date": "2026-07-30",
+   "words": 1569,
+   "file": "bitcoin-mining-profitability-iran-toman.fa.md"
+  },
+  {
+   "slug": "connect-asic-to-mining-pool-from-iran",
+   "lang": "en",
+   "title": "Connecting an ASIC to a pool from Iran: ports and stales",
+   "status": "draft",
+   "date": "2026-07-30",
+   "words": 1469,
+   "file": "connect-asic-to-mining-pool-from-iran.en.md"
+  },
+  {
+   "slug": "connect-asic-to-mining-pool-from-iran",
+   "lang": "fa",
+   "title": "اتصال ماینر به استخر از ایران: پورت، ورکر، ریجکت",
+   "status": "draft",
+   "date": "2026-07-30",
+   "words": 1495,
+   "file": "connect-asic-to-mining-pool-from-iran.fa.md"
+  },
+  {
+   "slug": "how-to-judge-a-mining-pool-pps-pplns-fees",
+   "lang": "en",
+   "title": "How to judge a mining pool: PPS, PPLNS and fees",
+   "status": "draft",
+   "date": "2026-07-30",
+   "words": 1894,
+   "file": "how-to-judge-a-mining-pool-pps-pplns-fees.en.md"
+  },
+  {
+   "slug": "how-to-judge-a-mining-pool-pps-pplns-fees",
+   "lang": "fa",
+   "title": "استخر ماینینگ را چطور بسنجیم: PPS، PPLNS و کارمزد",
+   "status": "draft",
+   "date": "2026-07-30",
+   "words": 1940,
+   "file": "how-to-judge-a-mining-pool-pps-pplns-fees.fa.md"
+  }
+ ]
 }

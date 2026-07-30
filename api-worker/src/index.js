@@ -540,6 +540,16 @@ async function refreshPriceCache(env, redis) {
 }
 
 
+
+/* Admin gate. ADMIN_USER_IDS is a comma-separated list of user UUIDs in
+   wrangler.toml [vars]. Deliberately an allow-list of IDs rather than a role
+   column: a role in the database can be escalated by anything that can write to
+   the database, whereas this requires a deploy. */
+function isAdmin(env, user) {
+  if (!user?.id) return false;
+  return (env.ADMIN_USER_IDS || "").split(",").map(s => s.trim()).filter(Boolean).includes(user.id);
+}
+
 /* ── Referral programme ──────────────────────────────────────────────────
    Hashrial keeps 2% of a user's gross. A referrer receives HALF of the fee
    taken from people they brought in — 1% of those users' gross. It is a split
@@ -1309,7 +1319,7 @@ export default {
             expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
           });
         }
-        return json({ ok: true }, 200, env, request);
+        return json({ isAdmin: isAdmin(env, user), ok: true }, 200, env, request);
       }
 
       if (path === "/auth/change-password" && method === "POST") {
@@ -1494,7 +1504,87 @@ export default {
         }, 200, env, request);
       }
 
-      if (path === "/admin/fee-shares" && method === "GET") {
+  
+    /* ── Admin ──────────────────────────────────────────────────────────
+       Every endpoint re-checks the gate rather than trusting a flag from the
+       client. The UI hiding a nav item is a convenience, never a control. */
+    if (path === "/admin/overview" && method === "GET") {
+      if (!isAdmin(env, user)) return err("Forbidden", 403, env, request);
+      try {
+        const [users, workers, payouts, refs, earn] = await Promise.all([
+          adminDb.from("users").select("id, username, email, email_verified, created_at, referred_by, bitcoin_address").order("created_at", { ascending: false }).limit(500),
+          adminDb.from("workers").select("user_id, worker_name, status, last_seen").limit(1000),
+          adminDb.from("payout_requests").select("id, user_id, amount_btc, address, status, requested_at, txid").order("requested_at", { ascending: false }).limit(200),
+          adminDb.from("referral_earnings").select("referrer_id, referred_id, reward_btc, settle_date").order("settle_date", { ascending: false }).limit(500),
+          adminDb.from("earnings_history").select("user_id, balance, earn_total, ts").order("ts", { ascending: false }).limit(1000),
+        ]);
+        const u = users.data || [], w = workers.data || [], p = payouts.data || [], r = refs.data || [];
+        const nameById = new Map(u.map(x => [x.id, x.username]));
+
+        // Latest earnings row per user — the list is already newest-first.
+        const latest = new Map();
+        for (const e of earn.data || []) if (!latest.has(e.user_id)) latest.set(e.user_id, e);
+
+        return json({
+          users: {
+            total: u.length,
+            verified: u.filter(x => x.email_verified).length,
+            withPayoutAddress: u.filter(x => x.bitcoin_address).length,
+            referred: u.filter(x => x.referred_by).length,
+          },
+          workers: {
+            total: w.length,
+            online: w.filter(x => x.status === "online").length,
+          },
+          payouts: {
+            pending: p.filter(x => x.status === "pending").length,
+            processing: p.filter(x => x.status === "processing").length,
+            completed: p.filter(x => x.status === "completed").length,
+            failed: p.filter(x => x.status === "failed").length,
+            pendingBtc: +p.filter(x => x.status === "pending")
+              .reduce((n, x) => n + parseFloat(x.amount_btc || 0), 0).toFixed(8),
+          },
+          referrals: {
+            credits: r.length,
+            totalPaidBtc: +r.reduce((n, x) => n + parseFloat(x.reward_btc || 0), 0).toFixed(8),
+          },
+          recentUsers: u.slice(0, 40).map(x => ({
+            id: x.id, username: x.username, email: x.email,
+            verified: !!x.email_verified, createdAt: x.created_at,
+            referredBy: x.referred_by ? (nameById.get(x.referred_by) || "—") : null,
+            balance: parseFloat(latest.get(x.id)?.balance || 0),
+          })),
+          recentPayouts: p.slice(0, 40).map(x => ({
+            id: x.id, username: nameById.get(x.user_id) || x.user_id,
+            amount: x.amount_btc, address: x.address, status: x.status,
+            requestedAt: x.requested_at, txid: x.txid,
+          })),
+        }, 200, env, request);
+      } catch (e) {
+        console.error("[admin/overview]", e.message);
+        return err("Failed", 500, env, request);
+      }
+    }
+
+    /* Advance a payout's state. Deliberately NOT a free-text update: only these
+       transitions exist, so a typo cannot invent a status the rest of the
+       system does not understand. */
+    if (path === "/admin/payout-status" && method === "PUT") {
+      if (!isAdmin(env, user)) return err("Forbidden", 403, env, request);
+      const { id, status, txid } = body || {};
+      const ALLOWED = ["pending", "processing", "completed", "failed"];
+      if (!id || !ALLOWED.includes(status)) return err("id and a valid status are required", 400, env, request);
+      try {
+        const patch = { status };
+        if (txid) patch.txid = String(txid).trim().slice(0, 128);
+        const { error } = await adminDb.from("payout_requests").update(patch).eq("id", id);
+        if (error) { console.error("[admin/payout-status]", error.message); return err("Failed", 500, env, request); }
+        console.log(`[admin] payout ${id} -> ${status} by ${user.username || user.id}`);
+        return json({ ok: true }, 200, env, request);
+      } catch (e) { return err("Failed", 500, env, request); }
+    }
+
+    if (path === "/admin/fee-shares" && method === "GET") {
         const aids = (env.ADMIN_USER_IDS || "").split(",").map(s => s.trim()).filter(Boolean);
         if (!aids.includes(user.id)) return err("Forbidden", 403, env, request);
         const { data: rows } = await adminDb.from("fee_shares").select("user_id,worker_name,session_id,count,last_updated").order("last_updated", { ascending: false }).limit(100);

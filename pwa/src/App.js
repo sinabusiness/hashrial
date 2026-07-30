@@ -12,6 +12,7 @@ import WorkerDetail from "./pages/WorkerDetail";
 import Earnings     from "./pages/Earnings";
 import Connect      from "./pages/Connect";
 import { BlogIndex, BlogPost } from "./pages/Blog";
+import Admin from "./pages/Admin";
 import Referral from "./pages/Referral";
 import Settings     from "./pages/Settings";
 import Notifications from "./pages/Notifications";
@@ -96,6 +97,7 @@ export default function App() {
             <Route path="connect"           element={<Connect />} />
             <Route path="notifications"     element={<Notifications />} />
             <Route path="referral"          element={<Referral />} />
+            <Route path="admin"             element={<Admin />} />
             <Route path="settings"          element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

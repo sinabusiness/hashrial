@@ -184,6 +184,7 @@ export default function Layout() {
     { to:"/dashboard/notifications", key:"sidebarNotifications", icon:"🔔", badge: notifCount },
     { to:"/dashboard/referral", key:"sidebarReferral",      icon:"◈" },
     { to:"/dashboard/settings", key:"sidebarSettings",      icon:"◎" },
+    ...(user?.isAdmin ? [{ to:"/dashboard/admin", key:"sidebarAdmin", icon:"⚑" }] : []),
   ];
 
   const priceUp = (btcPrice?.change || 0) >= 0;

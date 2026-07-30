@@ -55,6 +55,7 @@ function build() {
   if (!fs.existsSync(SRC)) { console.error("no content/blog directory"); process.exit(1); }
   const files = fs.readdirSync(SRC).filter(f => /\.(fa|en|zh|ru|es|pt)\.md$/.test(f));
   const posts = [];
+  const drafts = [];
 
   for (const file of files) {
     const raw = fs.readFileSync(path.join(SRC, file), "utf8");
@@ -67,6 +68,14 @@ function build() {
     // sitemap just because nothing links to it.
     if (meta.status && meta.status !== "published") {
       console.log(`  skip (${meta.status}): ${file}`);
+      // Metadata only — never the body. The admin panel needs to know a draft
+      // exists and what still has to be fact-checked; shipping unpublished
+      // prose to every visitor's browser would defeat the point of the gate.
+      drafts.push({
+        slug: meta.slug, lang: meta.lang, title: meta.title,
+        status: meta.status, date: meta.date, words: body.trim().split(/\s+/).length,
+        file,
+      });
       continue;
     }
     posts.push({
@@ -85,12 +94,13 @@ function build() {
   for (const p of posts) (langsBySlug[p.slug] ||= []).push(p.lang);
   for (const p of posts) p.translations = langsBySlug[p.slug];
 
-  const payload = { generatedAt: null, posts };
+  drafts.sort((a, b) => a.slug.localeCompare(b.slug) || a.lang.localeCompare(b.lang));
+  const payload = { generatedAt: null, posts, drafts };
   for (const app of APPS) {
     const out = path.join(ROOT, app, "src", "blog-data.json");
     if (!fs.existsSync(path.dirname(out))) continue;
     fs.writeFileSync(out, JSON.stringify(payload, null, 1));
-    console.log(`  ${app}/src/blog-data.json — ${posts.length} published post(s)`);
+    console.log(`  ${app}/src/blog-data.json — ${posts.length} published, ${drafts.length} draft(s)`);
   }
   if (!posts.length) {
     console.log("  (no published posts — every article is still status: draft)");

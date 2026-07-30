@@ -55,4 +55,6 @@ export const api = {
   requestPayout:      () => req("/api/payout/request", { method: "POST" }),
   payoutHistory:      () => req("/api/payout/history"),
   referralStats:      () => req("/api/referral/stats"),
+  adminOverview:      () => req("/api/admin/overview"),
+  adminSetPayoutStatus: (id, status, txid) => req("/api/admin/payout-status", { method: "PUT", body: { id, status, txid } }),
 };

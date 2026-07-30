@@ -36,8 +36,10 @@ export default function Login() {
     <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
       <div style={{ width:"100%", maxWidth:400 }}>
         <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div aria-hidden="true" style={{ width:48, height:48, borderRadius:"var(--r2)", background:"var(--accent)", display:"inline-flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:"#000", marginBottom:10 }}>H</div>
-          <div style={{ fontSize:22, fontWeight:700 }}>Hashrial</div>
+          <Link to="/" className="hr-brand" title={t("backToHome")}>
+            <div aria-hidden="true" style={{ width:48, height:48, borderRadius:"var(--r2)", background:"var(--accent)", display:"inline-flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:22, color:"#000", marginBottom:10 }}>H</div>
+            <div style={{ fontSize:22, fontWeight:700 }}>Hashrial</div>
+          </Link>
           <div className="meta" style={{ marginTop:3 }}>Bitcoin Mining Pool</div>
         </div>
 

@@ -1127,6 +1127,10 @@ export default {
         return json({
           earnings: { balance: availableBalance, grossBalance, earn24h: x.earn_24h, earnTotal: x.earn_total, paidOut: x.paid_out },
           hashrate: { hs_10m: y.hs_10m, hs_1h: y.hs_1h, hs_1d: y.hs_1d, active_workers: y.active_workers, accepted: y.accepted, stale: y.stale },
+          // The payout threshold was known only inside the payout handler, so the
+          // dashboard could not show progress toward it and the copy on the
+          // marketing page hardcoded "0.001 BTC" in three places. One source.
+          minPayout: parseFloat(env.MIN_PAYOUT_BTC || "0.001"),
         }, 200, env, request);
       }
 

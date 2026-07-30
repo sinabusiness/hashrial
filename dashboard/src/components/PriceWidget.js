@@ -118,57 +118,65 @@ export function PriceRail({ data, stale, denom, setDenom, localCurrency }) {
   const rateSource = data.rateMeta && data.rateMeta[localCurrency];
   const pinned = !!(data.rateOverrides && data.rateOverrides[localCurrency]);
 
+  /* Readability was regressed when this became a rail: the price dropped from
+     20px/--text to 11px/--text2 and the local figure to --text3, which is the
+     faintest token in the palette. Being one row does not require being
+     illegible — the price is a number people actually read, so it gets real
+     size and full contrast. Only the LABELS stay small. */
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 11 }}>
-      <span style={{ color: "var(--text3)" }}>{t("btcPrice")}</span>
-      <span className="num" style={{ color: "var(--text2)", fontWeight: 600 }}>
-        ${data.price.toLocaleString("en-US", { maximumFractionDigits: 0 })}
-      </span>
-      {change !== null && (
-        <span className="num" style={{ color: up ? "var(--green)" : "var(--red)", fontWeight: 600 }}>
-          {up ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
+    <div className="pricerail">
+      <div className="pricerail-read">
+        <span className="eyebrow pricerail-label">{t("btcPrice")}</span>
+
+        <span className="num pricerail-usd">
+          ${data.price.toLocaleString("en-US", { maximumFractionDigits: 0 })}
         </span>
-      )}
 
-      {localCurrency !== "USD" && localPer1 !== null && (
-        <span
-          className="num"
-          title={rateSource ? `${t("rateFromSarrafHint")} (${rateSource.source})` : undefined}
-          style={{ color: "var(--text3)" }}
-        >
-          · {fiatSymbol(localCurrency)} {formatFiat(localPer1, lang)}
-          {(rateSource || pinned) && <span style={{ marginInlineStart: 4 }}>({t("rateFromSarraf")})</span>}
-        </span>
-      )}
+        {change !== null && (
+          <span className="num pricerail-chg" style={{ color: up ? "var(--green)" : "var(--red)" }}>
+            {up ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
+          </span>
+        )}
 
-      {stale && (
-        <span title={t("priceDelayedHint")} style={{
-          fontSize: 9.5, fontWeight: 600, color: "var(--amber)",
-          border: "1px solid var(--border2)", borderRadius: 4, padding: "1px 5px",
-        }}>{t("priceDelayed")}</span>
-      )}
+        {localCurrency !== "USD" && localPer1 !== null && (
+          <>
+            <span className="pricerail-sep" aria-hidden="true" />
+            <span
+              className="num pricerail-local"
+              title={rateSource ? `${t("rateFromSarrafHint")} (${rateSource.source})` : undefined}
+            >
+              {formatFiat(localPer1, lang)}
+              <span className="pricerail-cur">{fiatSymbol(localCurrency)}</span>
+            </span>
+            {(rateSource || pinned) && (
+              <span className="pricerail-src">{t("rateFromSarraf")}</span>
+            )}
+          </>
+        )}
 
-      <label style={{ display: "inline-flex", alignItems: "center", gap: 5, marginInlineStart: "auto" }}>
-        <span style={{ color: "var(--text3)" }}>{t("showIn")}</span>
-        <select
-          value={denom}
-          onChange={(e) => setDenom(e.target.value)}
-          aria-label={t("showIn")}
-          className="num"
-          style={{
-            fontSize: 11, padding: "2px 5px", background: "var(--bg3)", color: "var(--text)",
-            border: "1px solid var(--border)", borderRadius: 5, cursor: "pointer",
-          }}
-        >
-          <option value="BTC">BTC</option>
-          {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-      </label>
+        {stale && (
+          <span className="pricerail-stale" title={t("priceDelayedHint")}>{t("priceDelayed")}</span>
+        )}
+      </div>
 
-      <a className="hr-link" href={SARRAF_URL} target="_blank" rel="noopener noreferrer"
-         style={{ color: "var(--accent-text)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
-        {t("exchangeAtSarraf")}
-      </a>
+      <div className="pricerail-ctl">
+        <label className="pricerail-denom">
+          <span className="eyebrow pricerail-label">{t("showIn")}</span>
+          <select
+            value={denom}
+            onChange={(e) => setDenom(e.target.value)}
+            aria-label={t("showIn")}
+            className="num"
+          >
+            <option value="BTC">BTC</option>
+            {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </label>
+
+        <a className="hr-link pricerail-link" href={SARRAF_URL} target="_blank" rel="noopener noreferrer">
+          {t("exchangeAtSarraf")}
+        </a>
+      </div>
     </div>
   );
 }

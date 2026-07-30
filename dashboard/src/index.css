@@ -27,7 +27,12 @@
 
   --text:       #e6edf3;
   --text2:      #8b949e;
-  --text3:      #484f58;
+  /* --text3 carries every .eyebrow label and all .meta small print. The
+     previous values measured 2.28:1 (dark) and 2.72:1 (light) against the
+     panel surface — a WCAG failure at any size, and the faintest text on
+     the page was the local-currency figure a Tehran user most needs to
+     read. These clear 4.5:1. */
+  --text3:      #7d8590;
   --text-bright:#ffffff;
 
   --accent:     #f7931a;
@@ -95,7 +100,7 @@
 
   --text:       #1a1e24;
   --text2:      #4a5568;
-  --text3:      #718096;
+  --text3:      #525b6b;
   --text-bright:#0d1117;
 
   --accent:     #c46a08;
@@ -369,3 +374,52 @@ input, select, textarea { font-family: var(--font); }
 .rig            { width: 11px; height: 34px; border-radius: 3px; border: 0; padding: 0;
                   background: transparent; cursor: pointer; display: flex; align-items: flex-end; }
 .rig > span     { width: 100%; border-radius: 3px; opacity: 0.9; }
+
+/* The brand mark is the ONLY way back to the marketing site from the auth
+   pages — it was a plain div, so the only exit was editing the URL bar. It has
+   to look and behave like the link it now is. */
+.hr-brand       { display: inline-block; text-decoration: none; color: inherit;
+                  transition: opacity .15s ease; }
+.hr-brand:hover { opacity: 0.82; }
+
+/* ── Price rail ─────────────────────────────────────────────────────── */
+/* This regressed badly when it stopped being a card: everything collapsed to
+   11px and the price sat in --text2 with the local figure in --text3, the
+   faintest token there is. Being one row does not require being illegible.
+   The numbers get real size and full contrast; only labels stay small. */
+.pricerail        { display: flex; align-items: center; justify-content: space-between;
+                    gap: 14px 20px; flex-wrap: wrap; }
+.pricerail-read   { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.pricerail-ctl    { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+                    margin-inline-start: auto; }
+.pricerail-label  { align-self: center; }
+
+/* The BTC spot price — full contrast, readable size. */
+.pricerail-usd    { font-size: 16px; font-weight: 650; color: var(--text); letter-spacing: -0.01em; }
+.pricerail-chg    { font-size: 12.5px; font-weight: 600; }
+.pricerail-sep    { width: 1px; height: 13px; background: var(--border2); align-self: center; }
+/* Local currency is the whole point for a Tehran user, so --text2 not --text3. */
+.pricerail-local  { font-size: 13.5px; font-weight: 600; color: var(--text2); }
+.pricerail-cur    { font-size: 11px; font-weight: 500; color: var(--text3);
+                    margin-inline-start: 5px; }
+.pricerail-src    { font-size: 10px; color: var(--text3); border: 1px solid var(--border);
+                    border-radius: 4px; padding: 1px 5px; align-self: center; }
+.pricerail-stale  { font-size: 10px; font-weight: 600; color: var(--amber);
+                    border: 1px solid var(--border2); border-radius: 4px; padding: 1px 5px;
+                    align-self: center; }
+
+.pricerail-denom  { display: inline-flex; align-items: center; gap: 7px; }
+.pricerail-denom select {
+  font-size: 12px; padding: 4px 7px; background: var(--bg3); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+}
+.pricerail-link   { font-size: 12.5px; font-weight: 600; color: var(--accent-text);
+                    text-decoration: none; white-space: nowrap; }
+.pricerail-link:hover { text-decoration: underline; }
+
+@media (max-width: 700px) {
+  /* Stack rather than cram: the controls drop under the reading. */
+  .pricerail      { flex-direction: column; align-items: stretch; gap: 12px; }
+  .pricerail-ctl  { margin-inline-start: 0; justify-content: space-between; }
+  .pricerail-usd  { font-size: 15px; }
+}

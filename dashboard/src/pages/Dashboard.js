@@ -200,6 +200,12 @@ export default function Dashboard() {
 
   const bal = money(earn.balance);
 
+  // Withdrawal threshold, now served by /dashboard/overview.
+  const rawBalance  = parseFloat(earn.balance || 0);
+  const minPayout   = parseFloat(overview?.minPayout || 0);
+  const payoutReady = minPayout > 0 && rawBalance >= minPayout;
+  const payoutPct   = minPayout > 0 ? Math.min(100, (rawBalance / minPayout) * 100) : 0;
+
   return (
     <div style={{ padding: "26px 30px", maxWidth: 1360 }}>
       <style>{`
@@ -423,7 +429,30 @@ export default function Dashboard() {
             <Metric label={t("totalEarned")} value={money(earn.earnTotal).unit + " " + money(earn.earnTotal).text} last />
           </div>
 
-          <div style={{ fontSize: 10.5, color: "var(--text3)", marginTop: 14, lineHeight: 1.5 }}>
+          {/* Progress toward the withdrawal threshold. A bar answers "when can I
+              get paid" far better than a number does, and it fills a panel that
+              was otherwise empty below the fold. The threshold now comes from the
+              API instead of being hardcoded in three places of marketing copy. */}
+          {minPayout > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
+                <span className="eyebrow">{payoutReady ? t("payoutReady") : t("payoutProgress")}</span>
+                <span className="num" style={{ fontSize: 11, color: "var(--text3)" }}>
+                  {rawBalance.toFixed(8)} / {minPayout.toFixed(8)}
+                </span>
+              </div>
+              <div style={{ height: 4, borderRadius: 2, background: "var(--bg-card)", overflow: "hidden" }}>
+                <div style={{
+                  width: payoutPct + "%", height: "100%", borderRadius: 2,
+                  // Green only once it is actually withdrawable; neutral while
+                  // accruing, since accent means hashrate and nothing else.
+                  background: payoutReady ? "var(--green)" : "var(--text3)",
+                }} />
+              </div>
+            </div>
+          )}
+
+          <div className="meta" style={{ marginTop: 14 }}>
             {t("poolFeeNote")}
           </div>
         </div>

@@ -224,6 +224,22 @@ const server = net.createServer((socket) => {
                 }
             });
             logger.info("upstream_authorize", { user: upstreamUser, pool: POOL.name, ip: session.remoteIp });
+
+            /* Every 50th share is relayed with params[0] rewritten to the fee
+               worker. Braiins validates that name against the workers
+               authorized on THIS connection — a name it has not seen comes back
+               [36, "SNotAuthorized"] and is not counted. Authorizing only
+               upstreamUser therefore made the fee mechanism collect nothing
+               while handing the miner an unexplained 2% reject rate.
+
+               Aggregate mode only: a sharded pool routes the fee to a separate
+               ACCOUNT (hashrialfee.*), which is not something one connection
+               can authorize, and that path is untested against Antpool. */
+            if (!POOL.sharded) {
+                const feeUser = buildFeeUsername(POOL, session);
+                session.upstream.authorizeExtra(feeUser, "x");
+                logger.info("upstream_authorize_fee", { user: feeUser, pool: POOL.name });
+            }
         }
         sendToMiner(session, { id: msg.id, result: true, error: null });
     }

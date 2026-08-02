@@ -709,9 +709,14 @@ app.get("/api/connect", auth, async (req, res) => {
     const poolIndex = rows[0]?.pool_index || 1;
     const subAccount = `hashrial${poolIndex}.${req.user.username}`;
     const poolNames = { 1: "Pool 1 (US)", 2: "Pool 2 (EU)", 3: "Pool 3 (Asia)" };
+    // The miner authenticates against Hashrial, not the upstream pool: proxy.js
+    // splits on the FIRST dot and looks that up in Hashrial's users table, then
+    // derives the upstream label itself. Handing out `subAccount` here made the
+    // proxy read "hashrial1" as the username and reject every miner with
+    // [21, "User not found"]. Same defect as api-worker's /connect.
     res.json({
       stratum: `stratum+tcp://${host}:3333`,
-      username: `${subAccount}.WORKER_NAME`,
+      username: `${req.user.username}.WORKER_NAME`,
       password: "x",
       note: `Replace WORKER_NAME with any label (e.g. rig01, asic1). 2% pool fee applies.`,
       antpoolSubAccount: subAccount,

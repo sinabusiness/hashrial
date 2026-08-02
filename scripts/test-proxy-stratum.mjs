@@ -18,7 +18,7 @@ const ok = (n, cond) => { if (cond) { pass++; console.log("  ok   " + n); } else
 /* A pool that answers subscribe/authorize, verdicts every submit, and can push
    set_extranonce — i.e. the parts a forwarding proxy must actually handle. */
 function fakePool({ authorizeOk = true } = {}) {
-  const state = { submits: [], sockets: [] };
+  const state = { submits: [], sockets: [], authorizes: [] };
   const server = net.createServer((sock) => {
     state.sockets.push(sock);
     let buf = "";
@@ -32,6 +32,7 @@ function fakePool({ authorizeOk = true } = {}) {
         if (m.method === "mining.subscribe") {
           sock.write(JSON.stringify({ id: m.id, result: [[["mining.notify", "sub1"]], "aabbccdd", 4], error: null }) + "\n");
         } else if (m.method === "mining.authorize") {
+          state.authorizes.push(m.params[0]);
           sock.write(JSON.stringify({ id: m.id, result: authorizeOk, error: authorizeOk ? null : [24, "Unauthorized worker", null] }) + "\n");
         } else if (m.method === "mining.submit") {
           state.submits.push(m);
@@ -112,6 +113,47 @@ async function run() {
   ok("the pool's rejection reason is passed through", Array.isArray(badErr));
   up2.destroy?.();
   badPool.server.close();
+
+  /* ── 4. the fee worker is authorized on the same connection ───────────
+     The fee share is relayed with params[0] rewritten to hashrial.fee-…
+     rather than the miner's own worker. Braiins validates that name against
+     the workers authorized on the connection: verified live on 2026-08-02,
+     an unauthorized name comes back [36, "SNotAuthorized"] and the share is
+     not counted, while a second mining.authorize on the same connection
+     returns true and makes the identical submit reach share validation.
+     So the fee name has to be authorized — and re-authorized after every
+     reconnect, because a fresh socket has authorized nothing. */
+  const pool3 = fakePool();
+  await new Promise(r => pool3.server.listen(0, "127.0.0.1", r));
+  const up3 = createUpstreamConnection({
+    host: "127.0.0.1", port: pool3.server.address().port, name: "fake3", sessionId: "t3",
+    onNotify: () => {}, onSetDifficulty: () => {}, onSubscribe: () => {}, onDisconnect: () => {},
+  });
+  up3.connect();
+  await wait(120);
+  up3.authorize("hashrial.alice_rig01", "x", () => {});
+  up3.authorizeExtra("hashrial.fee-alice_rig01", "x");
+  await wait(200);
+
+  const seen = (w) => pool3.authorizes.filter(a => a === w).length;
+  ok("the miner's own worker is authorized", seen("hashrial.alice_rig01") === 1);
+  ok("the fee worker is authorized too (else every fee share is SNotAuthorized)",
+     seen("hashrial.fee-alice_rig01") === 1);
+
+  up3.authorizeExtra("hashrial.fee-alice_rig01", "x");
+  ok("authorizeExtra does not re-send a name already authorized",
+     seen("hashrial.fee-alice_rig01") === 1);
+
+  // Drop the socket from the pool side and let the backoff reconnect fire.
+  pool3.sockets.forEach(s => s.destroy());
+  await wait(1800);
+  ok("the miner's worker is re-authorized after a reconnect",
+     seen("hashrial.alice_rig01") >= 2);
+  ok("the fee worker is re-authorized after a reconnect (fee stops silently otherwise)",
+     seen("hashrial.fee-alice_rig01") >= 2);
+
+  up3.destroy?.();
+  pool3.server.close();
 
   console.log(`\n  ${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

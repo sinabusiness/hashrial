@@ -750,6 +750,16 @@ export function toTeraHash(value, unit) {
   return n * f;
 }
 
+/* The shortest hashrate window a pool reports is not the same everywhere:
+   Antpool's is 10 minutes, Braiins' is 5. Both land in the `hs_10m` column,
+   because renaming it would orphan every row already written and the column is
+   really "shortest window" rather than a duration. The LABEL therefore has to
+   come from the active pool — a dashboard that says "10m" over a 5-minute
+   average is quietly wrong about the one number miners watch most. */
+export function hashrateWindowMin(env) {
+  return (env.ACTIVE_POOL || "").trim().toLowerCase() === "braiins" ? 5 : 10;
+}
+
 /* Polls Braiins and writes per-user rows derived from the aggregate account.
    Exactly TWO upstream requests per run: Braiins documents a limit of roughly
    one request per five seconds and warns that sustained overuse can get the
@@ -1358,6 +1368,7 @@ export default {
           // dashboard could not show progress toward it and the copy on the
           // marketing page hardcoded "0.001 BTC" in three places. One source.
           minPayout: parseFloat(env.MIN_PAYOUT_BTC || "0.001"),
+          hashrateWindowMin: hashrateWindowMin(env),
         }, 200, env, request);
       }
 
@@ -1394,7 +1405,10 @@ export default {
           if (!latestByWorker[row.worker_name]) latestByWorker[row.worker_name] = row;
         }
         const r = (w || []).map(w2 => ({ ...w2, ...(latestByWorker[w2.worker_name] || {}) }));
-        return json(r, 200, env, request);
+        // Wrapped so the table header can label its shortest-window column with
+        // the pool's actual window. Clients accept the bare array too — cached
+        // responses written before this change are still in Redis.
+        return json({ workers: r, hashrateWindowMin: hashrateWindowMin(env) }, 200, env, request);
       }
 
       if (path.startsWith("/dashboard/workers/") && method === "GET") {
@@ -1403,7 +1417,7 @@ export default {
         const { data: w } = await userSupabase.from("workers").select("*").eq("user_id", user.id).eq("worker_name", wName).single();
         const since = new Date(Date.now() - 86400000).toISOString();
         const { data: s } = await userSupabase.from("hashrate_history").select("ts,hs_10m,hs_1h,hs_1d,accepted,stale").eq("user_id", user.id).eq("worker_name", wName).gte("ts", since).order("ts", { ascending: true });
-        return json({ worker: w || null, snapshots: s || [] }, 200, env, request);
+        return json({ worker: w || null, snapshots: s || [], hashrateWindowMin: hashrateWindowMin(env) }, 200, env, request);
       }
 
       if (path === "/dashboard/earnings" && method === "GET") {
@@ -1493,9 +1507,17 @@ export default {
         const { data: uData } = await adminDb.from("users").select("pool_index").eq("id", user.id).single();
         const poolIndex = uData?.pool_index || 1;
         const subAccount = getPoolSubaccount(poolIndex, user.username);
+        /* The miner authenticates against HASHRIAL, not against the upstream
+           pool. proxy.js splits this on the FIRST dot and looks the left side up
+           in Hashrial's own users table, then builds the upstream label itself
+           (hashrial.alice_rig01 for Braiins, hashrial1.alice.rig01 for a sharded
+           Antpool account). Handing out the upstream name here meant the proxy
+           read "hashrial1" as the username, found no such user, and answered
+           [21, "User not found"] — no miner could connect at all. It went
+           unnoticed only because nobody is mining yet. */
         return json({
           stratum: `stratum+tcp://${host}:3333`,
-          username: `${subAccount}.WORKER_NAME`,
+          username: `${user.username}.WORKER_NAME`,
           password: "x",
           note: `Replace WORKER_NAME with any label (e.g. rig01, asic1). 2% pool fee applies.`,
           antpoolSubAccount: subAccount,

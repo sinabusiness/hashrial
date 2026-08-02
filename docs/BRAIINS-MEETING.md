@@ -27,8 +27,8 @@ Hashrial user inside the worker label:
 - Endpoint `stratum.braiins.com:3333` (alternates 443, 25)
 - Every 50th share is re-labelled to the `fee-` marker. In an aggregate account
   the fee is not a separate payee — it is simply the slice Hashrial does not
-  redistribute — so tagging keeps it out of the per-user split and leaves an
-  auditable trail in your own worker list.
+  redistribute — and tagging leaves an auditable trail in your own worker list.
+  (Both worker names are authorized on the connection; see §2.0.)
 - The backend polls `/accounts/profile/json/btc/` and
   `/accounts/workers/json/btc`, parses the labels back into users, and splits the
   account balance by each user's `shares_24h`.
@@ -43,6 +43,36 @@ downstream depends on those labels round-tripping.
 ## 2. Questions that decide whether users get paid correctly
 
 **These are the ones worth the meeting time.**
+
+### 2.0 Does Braiins read `params[0]` on `mining.submit`? — **ANSWERED, don't spend meeting time on it**
+
+This was the go/no-go question: the 2% fee works by rewriting `params[0]`, and
+most Stratum V1 pools ignore that field and attribute every share to the
+connection's authorized worker. Probed against the live pool on 2026-08-02
+(`node scripts/probe-braiins-stratum.mjs`, reproducible):
+
+| | submitted `params[0]` | answer |
+|---|---|---|
+| A | the worker this connection authorized | `[34, "SInvalidTime"]` |
+| B | a worker it never authorized | `[36, "SNotAuthorized"]` |
+| C | `mining.authorize` that second worker, same connection | `true` |
+| D | the same submit as B, after C | `[34, "SInvalidTime"]` |
+
+A and D reach *share* validation (the nonce was deliberately invalid); B is
+refused on identity before that. So **Braiins reads `params[0]` and validates it
+against the workers authorized on that connection**, and **one connection may
+authorize several workers**.
+
+The fee mechanism is therefore viable — but the fee label has to be authorized
+upstream, which the proxy was not doing. Fixed: `authorizeExtra()` in
+`proxy/src/upstream.js`, replayed on reconnect. Before that fix every 50th share
+came back `SNotAuthorized`, collecting no fee and showing the miner an
+unexplained 2% reject rate.
+
+*Still worth one sentence of confirmation from Lukáš:* an accepted share naming
+an authorized worker is credited **to that worker**, not to the connection's
+first-authorized one. The probe proves the name is checked per submit; only a
+genuinely accepted share proves where it lands.
 
 ### 2.1 Is `shares_24h` a raw count, or difficulty-weighted?
 The revenue split is `user_shares / total_shares`. If it is a **raw count** and

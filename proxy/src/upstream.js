@@ -10,6 +10,11 @@ function createUpstreamConnection({ host, port, name, sessionId, onNotify, onSet
     // Retained across reconnects so the re-authorize on a fresh socket reports
     // its verdict too, not just the first one.
     let authCb = null;
+    // Additional worker names authorized on this same connection. Stratum V1
+    // permits more than one mining.authorize per connection, and a submit may
+    // then name any of them in params[0]. Kept in a list because a reconnect
+    // starts from an unauthorized socket and every name has to be replayed.
+    const extraWorkers = [];
     let reconnectAttempts = 0;
     const MAX_RECONNECT_DELAY = 30000;
     const reconnectTimer = { current: null };
@@ -84,9 +89,28 @@ function createUpstreamConnection({ host, port, name, sessionId, onNotify, onSet
                 if (authCb) pending.set(authId, (reply) => authCb(reply && reply.result === true, reply && reply.error));
                 const authMsg = { id: authId, method: "mining.authorize", params: [authWorker, authPass] };
                 send(JSON.stringify(authMsg));
+                // A fresh socket knows nothing about the extra names, and the
+                // fee share is the one that names them. Replaying them here is
+                // what keeps the fee landing after a reconnect.
+                for (const e of extraWorkers) sendExtraAuthorize(e.worker, e.pass);
             }
         });
         send(JSON.stringify(msg));
+    }
+
+    function sendExtraAuthorize(worker, pass) {
+        const id = msgId++;
+        pending.set(id, (reply) => {
+            if (reply && reply.result === true) return;
+            // Worth shouting about: the shares that name this worker will come
+            // back [36, "SNotAuthorized"] and count for nothing, and the only
+            // other symptom is a reject rate nobody can account for.
+            logger.error("upstream_extra_authorize_failed", {
+                sessionId, worker,
+                err: reply && reply.error ? (Array.isArray(reply.error) ? reply.error[1] : reply.error) : "no reply",
+            });
+        });
+        send(JSON.stringify({ id, method: "mining.authorize", params: [worker, pass] }));
     }
 
     function send(data) { if (socket && !socket.destroyed) socket.write(data + "\n"); }
@@ -137,6 +161,21 @@ function createUpstreamConnection({ host, port, name, sessionId, onNotify, onSet
                 if (authCb) pending.set(id, (reply) => authCb(reply && reply.result === true, reply && reply.error));
                 send(JSON.stringify({ id, method: "mining.authorize", params: [worker, pass] }));
             }
+        },
+        /* Authorize an ADDITIONAL worker name on this same connection, so a
+           submit is allowed to name it in params[0].
+
+           Verified against stratum.braiins.com:3333 on 2026-08-02: a submit
+           naming a worker the connection never authorized is answered
+           [36, "SNotAuthorized"] and the share is not counted, while the same
+           submit naming an authorized worker reaches share validation. A second
+           mining.authorize on the same connection returns true and flips that
+           answer. This is what makes the fee share — which names
+           hashrial.fee-… rather than the miner's own worker — land at all. */
+        authorizeExtra: (worker, pass) => {
+            if (!worker || extraWorkers.some(e => e.worker === worker)) return;
+            extraWorkers.push({ worker, pass });
+            if (connected) sendExtraAuthorize(worker, pass);
         },
         destroy: () => {
             destroyed = true;

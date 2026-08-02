@@ -99,17 +99,25 @@ export function BlogPost() {
   const { slug, lang: urlLang } = useParams();
   const { t, lang } = useLang();
 
+  /* THE URL DECIDES THE EDITION — never the interface language.
+     
+     Letting the UI language pick produced a page whose tab said one thing and
+     whose body said another: the prerendered HTML at /blog/<slug> is the
+     Persian edition, then React hydrated and swapped the body to English while
+     the prerendered <title> stayed Persian. Beyond looking broken, a url whose
+     content depends on a viewer setting cannot be shared or indexed — the
+     crawler and the reader would see different articles at the same address.
+     
+     So: /blog/<slug> is always the primary (Persian) edition, /blog/<slug>/<lang>
+     is always that language. The interface language styles the chrome around
+     the article; it does not choose the article. */
   const post = useMemo(() => {
     const versions = POSTS.filter(p => p.slug === slug);
     if (!versions.length) return null;
-    // An explicit language in the url wins — that url is what gets indexed and
-    // shared, so it must always render the edition it names, regardless of
-    // whatever interface language the visitor happens to have set.
     if (urlLang) return versions.find(p => p.lang === urlLang) || null;
-    return versions.find(p => p.lang === lang)
-        || versions.find(p => p.lang === "fa")
-        || versions[0];
-  }, [slug, lang, urlLang]);
+    const primary = versions.find(p => p.lang === "fa") || versions[0];
+    return primary;
+  }, [slug, urlLang]);
 
   if (!post) return <Navigate to="/blog" replace />;
 

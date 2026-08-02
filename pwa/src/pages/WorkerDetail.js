@@ -85,6 +85,9 @@ export default function WorkerDetail() {
   );
 
   const { worker, snapshots } = data;
+  // Antpool reports a 10-minute window here, Braiins a 5-minute one, and both
+  // are stored in hs_10m. The API says which, so the label cannot drift.
+  const shortWindowKey = data.hashrateWindowMin === 5 ? "hashrate5m" : "hashrate10m";
   const latest = snapshots?.length > 0 ? snapshots[snapshots.length - 1] : {};
   const chartData = snapshots.map(s => ({
     time: new Date(s.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -120,13 +123,13 @@ export default function WorkerDetail() {
         </div>
       </div>
 
-      {/* ── Vital sign: this rig's 10m hashrate, everything else supporting ── */}
+      {/* ── Vital sign: this rig's shortest-window hashrate, rest supporting ── */}
       <section className="panel-hero" style={{ padding: "22px 26px 18px", marginBottom: 16 }}>
         {/* Colour here is worker state and nothing else. */}
         <div style={{ position: "absolute", insetInlineStart: 0, top: 0, bottom: 0, width: 2,
                       background: `linear-gradient(180deg, ${health}, transparent)` }} />
 
-        <div className="eyebrow">{t("hashrate10m")}</div>
+        <div className="eyebrow">{t(shortWindowKey)}</div>
         <div style={{ marginTop: 10 }}>
           <span className="num" style={{ fontSize: 50, fontWeight: 700, lineHeight: 0.95, color: "var(--accent)" }}>
             {hero.v.toFixed(2)}

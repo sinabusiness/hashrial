@@ -23,9 +23,13 @@ export default function Workers() {
   const [lastRefresh, setLastRefresh] = useState(null);
   const { t } = useLang();
 
+  // Antpool's shortest window is 10 minutes, Braiins' is 5, and both land in
+  // the same column — so the column header follows what the API reports.
+  const [winMin, setWinMin] = useState(10);
+
   const load = useCallback(() => {
     return api.workers()
-      .then(ws => { setWorkers(Array.isArray(ws) ? ws : []); setLastRefresh(new Date()); })
+      .then(r => { setWorkers(r.workers); setWinMin(r.hashrateWindowMin); setLastRefresh(new Date()); })
       .catch(e => { console.error(e); setWorkers([]); });
   }, []);
 
@@ -40,7 +44,7 @@ export default function Workers() {
   const online   = workers.filter(w => w.status === "online").length;
   const offline  = workers.length - online;
 
-  const COLS = ["colWorker","colStatus","col10m","col1h","col24h","colAccepted","colStale","colLastSeen"];
+  const COLS = ["colWorker","colStatus", winMin === 5 ? "col5m" : "col10m", "col1h","col24h","colAccepted","colStale","colLastSeen"];
 
   return (
     <div className="page">

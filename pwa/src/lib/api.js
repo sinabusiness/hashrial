@@ -41,7 +41,13 @@ export const api = {
   changePassword:     (currentPassword, newPassword) => req("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
   overview:           () => req("/api/dashboard/overview"),
   hashrate:           (period, worker) => req(`/api/dashboard/hashrate?period=${period}${worker ? `&worker=${worker}` : ""}`),
-  workers:            () => req("/api/dashboard/workers"),
+  /* Normalised to one shape. The endpoint returned a bare array before it
+     started reporting the pool's shortest hashrate window, and a cached
+     response can still be the old shape. 10 is the pre-Braiins default. */
+  workers:            () => req("/api/dashboard/workers").then(r =>
+                        Array.isArray(r)
+                          ? { workers: r, hashrateWindowMin: 10 }
+                          : { workers: r?.workers || [], hashrateWindowMin: r?.hashrateWindowMin || 10 }),
   workerDetail:       (name) => req(`/api/dashboard/workers/${encodeURIComponent(name)}`),
   earnings:           (page = 1) => req(`/api/dashboard/earnings?page=${page}`),
   notifications:      () => req("/api/notifications"),

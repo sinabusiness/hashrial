@@ -104,9 +104,16 @@ export default function Dashboard() {
 
   const { denom, setDenom, localCurrency } = useDenomination();
 
+  /* Whichever pool is upstream, its shortest hashrate window lands in the
+     hs_10m column — Antpool reports 10 minutes, Braiins 5. The API says which,
+     so the label tracks the data instead of the column name. */
+  const [winMin, setWinMin] = useState(10);
+  const shortWindowKey = winMin === 5 ? "hashrate5m" : "hashrate10m";
+  const shortAvgKey    = winMin === 5 ? "fiveMinAverage" : "tenMinAverage";
+
   const loadOverview = useCallback(() => {
     return Promise.all([api.overview(), api.workers()])
-      .then(([ov, ws]) => { setOverview(ov); setWorkers(ws || []); setError(null); setUpdatedAt(Date.now()); })
+      .then(([ov, ws]) => { setOverview(ov); setWorkers(ws.workers); setWinMin(ws.hashrateWindowMin); setError(null); setUpdatedAt(Date.now()); })
       .catch(e => setError(e.message));
   }, []);
 
@@ -281,7 +288,7 @@ export default function Dashboard() {
             {/* The highest-leverage microcopy on the page: every pool surveyed
                 gets asked "why is this lower than my miner?" and none answer
                 it in the UI. */}
-            <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 6 }}>{t("tenMinAverage")}</div>
+            <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 6 }}>{t(shortAvgKey)}</div>
 
             {acceptPct !== null && (
               <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 12 }}>
@@ -497,7 +504,7 @@ export default function Dashboard() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  {[t("sidebarWorkers"), t("status"), t("hashrate10m"), "1h " + t("average"), t("accepted"), t("stale")].map((h, i) => (
+                  {[t("sidebarWorkers"), t("status"), t(shortWindowKey), "1h " + t("average"), t("accepted"), t("stale")].map((h, i) => (
                     <th key={i} style={{ ...EYEBROW, textAlign: "start", padding: "9px 22px", background: "var(--bg-card)" }}
                         className={i >= 3 ? "hr-hide-sm" : undefined}>{h}</th>
                   ))}

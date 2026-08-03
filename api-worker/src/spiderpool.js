@@ -9,10 +9,20 @@
  * rewriting of params[0] in this model and no dependence on whether a pool
  * honours the worker name in a submit.
  *
- * ⚠ Field names below come from SpiderPool's published docs, NOT from a real
- * response. Do not trust them until scripts/verify-spiderpool.js has been run
- * against a live account. Believing the docs over an actual response is exactly
- * what made the Antpool poller write zero worker rows for months.
+ * Everything below is mapped from LIVE responses captured on 2026-08-03, not
+ * from the documentation. The documentation was wrong in five separate places
+ * and each one would have failed silently:
+ *
+ *   coin must be "btc"        "BTC" returns HTTP 500 / "Unsupported coin"
+ *   success is inconsistent   subaccount/* answer code:"SUCCESS" (a string),
+ *                             sp/* answer code:200 (a number) + success:true
+ *   duplicate is a code       SUBACCOUNT_EXIST / "Account has been in
+ *                             existence" — no form of the word "already"
+ *   dayEstimateProfit         there is no todayProfit
+ *   worker/list paginates     {total,pageNum,pageSize:10,pages,records} — a
+ *                             naive read sees only the first 10 workers
+ *
+ * Captured envelopes live in scripts/test-spiderpool-client.mjs as fixtures.
  */
 import { spiderpoolSignedBody } from "./spiderpoolSign.js";
 
@@ -50,13 +60,17 @@ export async function spiderpoolCall(env, path, data = {}, { timestamp } = {}) {
   }
 }
 
-/* SpiderPool wraps results in a status envelope. The exact success code is one
-   of the things verify-spiderpool.js must confirm; treating an unrecognised
-   envelope as success would mean writing zeros over real balances. */
+/* Two different success shapes, depending on which half of the API answered:
+     /v2/subaccount/*     {"code":"SUCCESS","msg":"Operation is successful"}
+     /v2/sp/*             {"code":200,"msg":"Success","success":true,...}
+   Note code is a NUMBER on the sp/* success path and a STRING everywhere else,
+   including on every error ("INVALID_PARAM", "500"). Compare accordingly —
+   `code == 200` would also match the string "200" from some other path, and
+   treating an unrecognised envelope as success writes zeros over real
+   balances. */
 export function spiderpoolOk(res) {
   if (!res || typeof res !== "object") return false;
-  const code = res.code ?? res.status ?? res.errno;
-  return code === 0 || code === 200 || code === "0" || res.success === true;
+  return res.code === "SUCCESS" || res.code === 200 || res.success === true;
 }
 
 /* A sub-account that already exists is SUCCESS for our purposes — it is the
@@ -64,16 +78,15 @@ export function spiderpoolOk(res) {
    result we failed to record. Since the name is derived from the user id, the
    retry asks for the same name and we simply adopt it.
 
-   The exact duplicate signal is unknown until seen against the live API, so
-   this matches loosely and logs the raw envelope. Tighten it once known:
-   matching too loosely could swallow a real failure and mark a user
-   provisioned when they are not, and they would silently never mine. */
+   Confirmed live: {"code":"SUBACCOUNT_EXIST","msg":"Account has been in
+   existence"}. Worth noting the message contains no form of the word
+   "already" — a loose text match would miss it, mark the user unprovisioned
+   forever, and retry the same creation on every cron run. */
 export function isAlreadyExists(res) {
-  const blob = JSON.stringify(res || {}).toLowerCase();
-  return /already\s*exist|duplicate|has\s*been\s*used|exists/.test(blob);
+  return res?.code === "SUBACCOUNT_EXIST";
 }
 
-export async function createSubaccount(env, subaccount, { coin = "BTC", walletAddress } = {}) {
+export async function createSubaccount(env, subaccount, { coin = "btc", walletAddress } = {}) {
   const data = { coin, subaccount };
   // Deliberately omitted unless explicitly given. In this model payouts go to
   // Hashrial's own wallet, and putting a user's address here would hand the
@@ -82,14 +95,53 @@ export async function createSubaccount(env, subaccount, { coin = "BTC", walletAd
   return spiderpoolCall(env, "/v2/subaccount/createSubaccount", data);
 }
 
-export const getSubaccountProfit = (env, subaccount, coin = "BTC") =>
+/* Live shape: data {unpaidProfit, totalProfit, yesterdayProfit, dayEstimateProfit}.
+   Numbers, in BTC. There is no todayProfit despite what the docs list. */
+export const getSubaccountProfit = (env, subaccount, coin = "btc") =>
   spiderpoolCall(env, "/v2/subaccount/getSubaccountProfitInfo", { coin, subaccount });
 
-export const getSubaccountHashrate = (env, subaccount, coin = "BTC") =>
+/* Live shape: data {subaccount, hashRate, staleRate, rejectRate,
+   secondTimestamp, lastShareTime}. The rates arrive as STRINGS and there is no
+   unit field on this endpoint at all — see HASHRATE_UNIT below. */
+export const getSubaccountHashrate = (env, subaccount, coin = "btc") =>
   spiderpoolCall(env, "/v2/sp/hashrate/subaccount/realHashRate", { coin, subaccount });
 
-export const getWorkerList = (env, subaccount, coin = "BTC") =>
-  spiderpoolCall(env, "/v2/sp/hashrate/worker/list", { coin, subaccount });
+export const listSubaccounts = (env, coin = "btc") =>
+  spiderpoolCall(env, "/v2/sp/subaccount/list", { coin });
+
+/* Every worker, not just the first page.
+   worker/list is paginated and defaults to pageSize 10 — reading data.records
+   once would silently attribute nothing to everyone past the tenth rig, which
+   is the same failure the Antpool poller had for months. Pages until it has
+   `total`, with a hard stop so a bad `pages` value cannot spin forever. */
+export async function getAllWorkers(env, subaccount, coin = "btc", pageSize = 100) {
+  const out = [];
+  let pageNum = 1, pages = 1, total = null;
+  while (pageNum <= pages && pageNum <= 200) {
+    const res = await spiderpoolCall(env, "/v2/sp/hashrate/worker/list", { coin, subaccount, pageNum, pageSize });
+    if (!spiderpoolOk(res)) {
+      console.error(`[spiderpool] worker/list page ${pageNum} for ${subaccount}: ${JSON.stringify(res)}`);
+      return null; // partial pages would understate a user's rigs
+    }
+    const d = res.data || {};
+    if (total === null) { total = Number(d.total || 0); pages = Number(d.pages || 1); }
+    out.push(...(d.records || []));
+    if (!d.records?.length) break;
+    pageNum++;
+  }
+  if (total !== null && out.length !== total) {
+    console.error(`[spiderpool] ${subaccount}: read ${out.length} workers but total says ${total}`);
+  }
+  return out;
+}
+
+/* SpiderPool states no unit on the hashrate endpoints. Until a rig is actually
+   mining and the number can be compared against a known machine, this is an
+   assumption — and a wrong one is a 1000x error in what a user appears to have
+   contributed, which is exactly how the Antpool poller mispriced payouts.
+   Deliberately a named constant rather than an inline guess. */
+export const HASHRATE_UNIT_ASSUMED = "H/s";
+export const HASHRATE_TO_TH = 1e-12;
 
 /* ── Provisioning ─────────────────────────────────────────────────────
    Idempotent in both directions, which is the entire design constraint:

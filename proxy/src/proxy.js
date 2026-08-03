@@ -46,7 +46,7 @@ const redis = new Redis({
 
 // ── Upstream pool selection ───────────────────────────────────
 // Which pool this proxy forwards to. Set ACTIVE_POOL in .env
-// (braiins | antpool | custom). See proxy/src/poolConfig.js.
+// (spiderpool | braiins | antpool | custom). See proxy/src/poolConfig.js.
 let POOL;
 try {
     POOL = loadPoolConfig();
@@ -54,6 +54,15 @@ try {
     console.error("FATAL:", e.message);
     process.exit(1);
 }
+
+/* Only ask for the sub-account columns on a pool that uses them. They arrive
+   with db/migrations/005_pool_subaccount.sql, and selecting a column that does
+   not exist yet fails the whole lookup — which here means every miner is
+   rejected. This way the proxy can be redeployed before or after the migration
+   in either order without a window where nobody can mine. */
+const USER_COLUMNS = POOL.perUserSubaccount
+    ? "id, username, pool_index, pool_subaccount, pool_subaccount_provisioned_at"
+    : "id, username, pool_index";
 
 const server = net.createServer((socket) => {
     if (totalConnections >= MAX_TOTAL_CONNS) {
@@ -162,10 +171,14 @@ const server = net.createServer((socket) => {
         session.username = dotIdx >= 0 ? workerString.slice(0, dotIdx) : workerString;
         session.workerName = dotIdx >= 0 ? workerString.slice(dotIdx + 1) : "default";
         try {
-            const r = await pg.query("SELECT id, username, pool_index FROM users WHERE username = $1", [session.username]);
+            const r = await pg.query(`SELECT ${USER_COLUMNS} FROM users WHERE username = $1`, [session.username]);
             if (r.rows.length > 0) {
                 session.userId = r.rows[0].id;
                 session.poolIndex = r.rows[0].pool_index || 1;
+                // Only a CONFIRMED sub-account counts. A reserved-but-unprovisioned
+                // name does not exist at the pool yet, and mining to it would be
+                // rejected upstream while the local share counter kept crediting.
+                session.poolSubaccount = r.rows[0].pool_subaccount_provisioned_at ? r.rows[0].pool_subaccount : null;
                 session.authorized = true;
                 // Cache in Redis for DB outage resilience (1 hour TTL)
                 try { await redis.set(`auth:${session.username}`, JSON.stringify({ userId: session.userId, poolIndex: session.poolIndex }), "EX", 3600); } catch {}
@@ -207,6 +220,14 @@ const server = net.createServer((socket) => {
             // vs a single aggregate account (the Braiins model). See
             // poolConfig.js for the full explanation of both.
             const upstreamUser = buildUpstreamUsername(POOL, session);
+            /* Per-user-sub-account pools return null when the user has no
+               confirmed sub-account. Say so plainly instead of accepting
+               hashrate that has nowhere to be credited — the cron provisions
+               within five minutes, so this is a retry, not a dead end. */
+            if (!upstreamUser) {
+                logger.error("no_pool_subaccount", { user: session.username, pool: POOL.name });
+                return sendToMiner(session, { id: msg.id, result: false, error: [24, "Pool account not ready yet — retry shortly", null] });
+            }
             /* The miner is authorized against Hashrial's own DB, which is the
                right gate for letting it connect — but the UPSTREAM verdict was
                being thrown away. A typo'd or suspended pool account looked
@@ -235,7 +256,7 @@ const server = net.createServer((socket) => {
                Aggregate mode only: a sharded pool routes the fee to a separate
                ACCOUNT (hashrialfee.*), which is not something one connection
                can authorize, and that path is untested against Antpool. */
-            if (!POOL.sharded) {
+            if (!POOL.sharded && POOL.feeViaShareTagging !== false) {
                 const feeUser = buildFeeUsername(POOL, session);
                 session.upstream.authorizeExtra(feeUser, "x");
                 logger.info("upstream_authorize_fee", { user: feeUser, pool: POOL.name });
@@ -254,8 +275,29 @@ const server = net.createServer((socket) => {
         const feePercent = parseInt(process.env.FEE_PERCENT || "2");
         const interval = Math.round(100 / feePercent);
 
-        // Use Redis cumulative counter per user+worker (survives reconnects)
+        /* On a per-user-sub-account pool the fee is arithmetic — 2% of the
+           earnings the pool reports for that sub-account — so nothing is
+           tagged here. Rewriting params[0] against a pool that VALIDATES it
+           does not reattribute the share, it gets it rejected: Braiins answers
+           [36, "SNotAuthorized"] and the work counts for nobody. Relay
+           untouched. */
         let isFee = false;
+        if (POOL.feeViaShareTagging === false) {
+            return session.upstream.relay({ ...msg, params: msg.params ? [...msg.params] : [] }, (reply) => {
+                if (!reply) return;
+                sendToMiner(session, { id: msg.id, result: reply.result === true, error: reply.error || null });
+                if (reply.result === true) session.acceptedShares = (session.acceptedShares || 0) + 1;
+                else {
+                    session.rejectedShares = (session.rejectedShares || 0) + 1;
+                    logger.warn("share_rejected", {
+                        user: session.username, worker: session.workerName,
+                        err: Array.isArray(reply.error) ? reply.error[1] : reply.error,
+                    });
+                }
+            });
+        }
+
+        // Use Redis cumulative counter per user+worker (survives reconnects)
         if (session.userId) {
             const shareKey = `shares:${session.userId}:${session.workerName || "default"}`;
             try {
@@ -322,6 +364,7 @@ const server = net.createServer((socket) => {
 });
 
 logger.info("active_pool", { pool: POOL.name, host: POOL.host, port: POOL.port, sharded: POOL.sharded, account: POOL.accountName });
+if (POOL.perUserSubaccount) logger.info("per_user_subaccounts", { pool: POOL.name, note: "requires db/migrations/005_pool_subaccount.sql" });
 server.listen(PROXY_PORT, () => logger.info(`Hashrial proxy v3.1 on :${PROXY_PORT}`));
 
 // ── Health check endpoint ────────────────────────────────────

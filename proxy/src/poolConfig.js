@@ -33,7 +33,44 @@
 //                     DB (fee_shares, hashrate_history, the Redis share
 //                     counters) remains the authoritative per-user record.
 
+//   perUserSubaccount: true
+//                     → {pool_subaccount}.{worker}
+//                       e.g. hrrrr1m4anj61r.rig01
+//                       One real pool sub-account per Hashrial user, created
+//                       through the pool's API and stored on the user row. The
+//                       POOL does the per-user accounting, so Hashrial never
+//                       divides one balance by share counts — which is where
+//                       the aggregate model's arithmetic goes wrong.
+//                       The name is opaque: it is derived from the user's UUID,
+//                       so the pool learns nothing about who is mining.
+//
+// ── How the 2% is taken ──
+// feeViaShareTagging: true   every 50th share is relayed with params[0]
+//                            rewritten to a fee label, so the POOL attributes
+//                            it away from the user. Requires the pool to both
+//                            read params[0] and accept a second authorized
+//                            worker on the connection.
+// feeViaShareTagging: false  the fee is arithmetic, applied to the per-user
+//                            earnings the pool reports. Nothing is rewritten.
+//                            Rewriting params[0] against a pool that validates
+//                            it gets the share REJECTED, not reattributed.
+
 const PRESETS = {
+  // SpiderPool — per-user sub-accounts created via their API.
+  // Sub-account names are 5-20 lowercase alphanumeric and can never be
+  // deleted, which is why the name is derived and stored rather than built
+  // from the username here.
+  spiderpool: {
+    name: "spiderpool",
+    host: "btc-as.spiderpool.com",   // Asia; -eu/-us/-af also exist
+    port: 2309,                      // alternates 3333, 1800, 443 (all plain TCP)
+    sharded: false,
+    perUserSubaccount: true,
+    feeViaShareTagging: false,
+    accountName:   process.env.SPIDERPOOL_ACCOUNT || "hashrial",
+    feeSubaccount: null,
+  },
+
   // Braiins Pool — single global endpoint, geo-routed automatically.
   // Their docs are explicit that the old region-specific URLs
   // (eu./us./sg. etc) are deprecated; use the one hostname.
@@ -108,6 +145,15 @@ function loadPoolConfig() {
 
 // Builds the username this proxy authorizes with upstream, for a miner.
 function buildUpstreamUsername(pool, session) {
+  if (pool.perUserSubaccount) {
+    /* Refuse rather than guess. If the user's sub-account has not been
+       provisioned yet there is no correct name to mine under, and inventing
+       one — or falling back to the aggregate account — would credit their work
+       to somebody else's balance. The caller turns this into a real error for
+       the miner. */
+    if (!session.poolSubaccount) return null;
+    return `${session.poolSubaccount}.${session.workerName || "default"}`;
+  }
   if (pool.sharded) {
     return `${pool.accountName}${session.poolIndex || 1}.${session.username}.${session.workerName}`;
   }

@@ -3,6 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Redis } from "@upstash/redis/cloudflare";
 import jwt from "@tsndr/cloudflare-worker-jwt";
+import { ensureSubaccount, provisionPendingSubaccounts } from "./spiderpool.js";
 
 const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
@@ -750,6 +751,46 @@ export function toTeraHash(value, unit) {
   return n * f;
 }
 
+/* ── Pool sub-account naming ──────────────────────────────────────────
+   The name Hashrial asks the pool to create for a user.
+
+   DERIVED, not random, and that is the whole point. Sub-account creation is
+   not idempotent and at SpiderPool a sub-account can never be deleted, so a
+   provisioning call that succeeds at the pool but fails before we record it
+   must be retryable. A derived name means the retry asks for the same name and
+   converges; a random name would leave an orphan behind that nobody can remove.
+
+   Derived from the user's UUID rather than their username for two reasons.
+   The pool learns nothing about who the user is — which matters given where
+   Hashrial's users are, and that the large pools screen against OFAC. And
+   usernames are ^[a-z0-9_]{3,20}$, so squeezing them into the pools' allowed
+   charset would have to drop the underscore: "bob_1" and "bob1" would collide,
+   permanently merging two users' earnings.
+
+   The format satisfies both candidate pools so switching does not mean
+   re-provisioning everyone:
+     SpiderPool  5-20 chars, lowercase alphanumeric
+     F2Pool      2-15 chars, lowercase alphanumeric, must begin with a letter
+   "hr" + 12 base36 chars = 14, leading letter. 36^12 is ~4.7e18 values, and
+   the UNIQUE index on the column is what actually guarantees no collision. */
+const SUBACCOUNT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
+export const SUBACCOUNT_RE = /^[a-z][a-z0-9]{4,14}$/;
+
+export async function poolSubaccountName(userId) {
+  if (!userId || typeof userId !== "string") throw new Error("poolSubaccountName: userId required");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId));
+  let n = 0n;
+  for (const b of new Uint8Array(digest)) n = (n << 8n) | BigInt(b);
+  let s = "";
+  for (let i = 0; i < 12; i++) { s = SUBACCOUNT_ALPHABET[Number(n % 36n)] + s; n /= 36n; }
+  const name = "hr" + s;
+  // Belt and braces: the DB CHECK enforces this too, but a name that fails the
+  // pool's own validation is rejected at provisioning and the user just never
+  // mines, with nothing anywhere saying why.
+  if (!SUBACCOUNT_RE.test(name)) throw new Error(`poolSubaccountName produced an invalid name: ${name}`);
+  return name;
+}
+
 /* The shortest hashrate window a pool reports is not the same everywhere:
    Antpool's is 10 minutes, Braiins' is 5. Both land in the `hs_10m` column,
    because renaming it would orphan every row already written and the column is
@@ -938,6 +979,11 @@ export default {
       const rs = await Promise.allSettled([
         redis ? refreshPriceCache(env, redis) : Promise.resolve(),
         pollBraiins(env, adminDb),
+        // Catches anyone whose sub-account was not created at signup — a
+        // registration that raced a SpiderPool outage, and the existing users
+        // who predate sub-accounts entirely. No-ops unless ACTIVE_POOL is
+        // spiderpool. Bounded per run; creation is a write to a rate-limited API.
+        provisionPendingSubaccounts(env, adminDb, poolSubaccountName),
       ]);
       rs.forEach(r => r.status === "rejected" && console.error("[cron]", r.reason?.message || r.reason));
       await creditReferrals(env, adminDb).catch(e => console.error("[cron] referral:", e.message));
@@ -1088,6 +1134,18 @@ export default {
             }
           }
         })().catch(e => console.error("[referral] signup hook:", e.message)));
+
+        /* Create the user's pool sub-account. Non-fatal by design: the miner
+           cannot connect before verifying their email anyway, and the cron
+           backfills anyone this misses. Failing registration because a third
+           party was briefly unreachable would be the wrong trade.
+           ctx.waitUntil because a Worker will otherwise kill this the moment
+           the response returns. */
+        ctx.waitUntil(
+          ensureSubaccount(env, adminDb, { id: u.id }, poolSubaccountName)
+            .catch(e => console.error("[spiderpool] signup provisioning:", e.message))
+        );
+
         const verifyUrl = `${env.SITE_URL}/verify-email?token=${vToken}`;
         // ctx.waitUntil keeps this alive past the response — without it a
         // Worker can freeze the execution context the instant json()

@@ -1,15 +1,26 @@
-/* Runs a migration against Supabase over a direct Postgres connection.
+/* Runs a migration against Supabase, by whichever credential is available.
  *
- *   SUPABASE_DB_URL="postgresql://…" node scripts/run-migration.mjs db/migrations/005_pool_subaccount.sql
+ *   node scripts/run-migration.mjs db/migrations/005_pool_subaccount.sql
  *
- * Reads SUPABASE_DB_URL from the environment or from a SUPABASE_DB_URL= line in
- * the repo's .env (which is gitignored). Get it from
- * Supabase → Project Settings → Database → Connection string → URI.
+ * Reads either of these from the environment or from the repo's .env
+ * (gitignored — put credentials there, never in a chat message):
  *
- * The migrations here are written to be idempotent, so re-running one is safe.
- * Each file is still sent inside a single transaction: a migration that fails
- * halfway and leaves some columns added but a constraint missing is worse than
- * one that fails cleanly and can simply be run again.
+ *   SUPABASE_ACCESS_TOKEN   a personal access token from
+ *                           supabase.com/dashboard/account/tokens
+ *                           Easiest to find and revoke, and it needs no
+ *                           database password. Runs the SQL through the
+ *                           Management API. Add SUPABASE_PROJECT_REF too if
+ *                           the account has more than one project.
+ *
+ *   SUPABASE_DB_URL         postgresql://… from the green "Connect" button at
+ *                           the top of the project dashboard. Prefer the
+ *                           SESSION POOLER string: the direct db.*.supabase.co
+ *                           host is IPv6-only on newer projects and simply
+ *                           times out from most home connections.
+ *
+ * The migrations here are idempotent, so re-running one is safe. Each file is
+ * still sent as a single transaction: failing halfway and leaving some columns
+ * added but a constraint missing is worse than failing cleanly.
  */
 import fs from "node:fs";
 import { createRequire } from "node:module";
@@ -17,14 +28,56 @@ import { createRequire } from "node:module";
 const file = process.argv[2];
 if (!file) { console.error("usage: node scripts/run-migration.mjs <path-to.sql>"); process.exit(1); }
 
-let url = process.env.SUPABASE_DB_URL;
-if (!url && fs.existsSync(".env")) {
-  const m = fs.readFileSync(".env", "utf8").match(/^SUPABASE_DB_URL\s*=\s*(.+)$/m);
-  if (m) url = m[1].trim().replace(/^["']|["']$/g, "");
+const fromEnvFile = (key) => {
+  if (!fs.existsSync(".env")) return null;
+  const m = fs.readFileSync(".env", "utf8").match(new RegExp(`^${key}\\s*=\\s*(.+)$`, "m"));
+  return m ? m[1].trim().replace(/^["']|["']$/g, "") : null;
+};
+const cfg = (key) => process.env[key] || fromEnvFile(key);
+
+const token = cfg("SUPABASE_ACCESS_TOKEN");
+let url = cfg("SUPABASE_DB_URL");
+
+/* ── Management API path — no database password needed ───────────────── */
+if (token) {
+  const sqlText = fs.readFileSync(file, "utf8");
+  const api = async (path, init = {}) => {
+    const r = await fetch(`https://api.supabase.com${path}`, {
+      ...init,
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json", ...(init.headers || {}) },
+    });
+    const body = await r.text();
+    if (!r.ok) throw new Error(`${path} -> HTTP ${r.status}: ${body.slice(0, 300)}`);
+    return body ? JSON.parse(body) : null;
+  };
+
+  let ref = cfg("SUPABASE_PROJECT_REF");
+  if (!ref) {
+    const projects = await api("/v1/projects");
+    if (!projects?.length) throw new Error("the token can see no projects");
+    if (projects.length > 1) {
+      console.error("Several projects visible — set SUPABASE_PROJECT_REF to one of:");
+      for (const p of projects) console.error(`  ${p.id}  ${p.name}  (${p.region})`);
+      process.exit(1);
+    }
+    ref = projects[0].id;
+    console.log(`project ${projects[0].name} (${ref})`);
+  }
+
+  console.log(`running ${file} via the Management API`);
+  // Wrapped so a partial application cannot survive, same as the psql path.
+  await api(`/v1/projects/${ref}/database/query`, {
+    method: "POST",
+    body: JSON.stringify({ query: `BEGIN;\n${sqlText}\nCOMMIT;` }),
+  });
+  console.log("✓ committed");
+  process.exit(0);
 }
+
 if (!url) {
-  console.error("No SUPABASE_DB_URL. Add a line to .env (gitignored):");
-  console.error('  SUPABASE_DB_URL=postgresql://postgres:PASSWORD@db.PROJECT.supabase.co:5432/postgres');
+  console.error("No credential found. Add ONE of these to .env (gitignored):");
+  console.error("  SUPABASE_ACCESS_TOKEN=sbp_…            supabase.com/dashboard/account/tokens");
+  console.error("  SUPABASE_DB_URL=postgresql://…         Connect button → Session pooler");
   process.exit(1);
 }
 
